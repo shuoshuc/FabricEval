@@ -80,7 +80,7 @@ class Path:
     src_aggr_block: source aggregation block of the path
     dst_aggr_block: destination aggregation block of the path
     '''
-    def __init__(self, name, src_aggr_block=None, src_aggr_block=None):
+    def __init__(self, name, src_aggr_block=None, dst_aggr_block=None):
         self.name = name
         self.src_aggr_block = src_aggr_block
         self.dst_aggr_block = dst_aggr_block
