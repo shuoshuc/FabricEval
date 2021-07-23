@@ -1,3 +1,15 @@
+import proto.topology_pb2 as topo
+from google.protobuf import text_format
+
+def loadTopo(filepath):
+    if not filepath:
+        return None
+    with open(filepath, 'r') as f:
+        network = topo.Network()
+        text_format.Parse(f.read(), network)
+    return network
+
+
 class Port:
     '''
     A port represents a physical network port on a switch node, also one end
@@ -18,6 +30,16 @@ class Port:
         # parent node this port belongs to.
         self._parent_node = None
 
+    def setParent(node):
+        self._parent_node = node
+
+    def setOrigLink(orig_link):
+        self.orig_link = orig_link
+
+    def setTermLink(term_link):
+        self.term_link = term_link
+
+
 class Link:
     '''
     A link represents a physical network (unidi) link that connects 2 ports.
@@ -34,6 +56,7 @@ class Link:
         self.link_speed = speed
         # remaining available capacity on the link.
         self._residual_capacity = speed
+
 
 class Node:
     '''
@@ -58,6 +81,13 @@ class Node:
         # parent aggregation block this node belongs to.
         self._parent_aggr_block = None
 
+    def setParent(aggr_block):
+        self._parent_aggr_block = aggr_block
+
+    def addMember(port):
+        self._member_ports.append(port)
+
+
 class AggregationBlock:
     '''
     An aggregation block represents a collection of nodes interconnected to
@@ -70,6 +100,13 @@ class AggregationBlock:
         self._member_nodes = []
         # parent cluster this aggregation block belongs to.
         self._parent_cluster = None
+
+    def setParent(cluster):
+        self._parent_cluster = cluster
+
+    def addMember(node):
+        self._member_nodes.append(node)
+
 
 class Path:
     '''
@@ -89,6 +126,7 @@ class Path:
         # remaining available capacity on the link.
         self._available_capacity = 0
 
+
 class Cluster:
     '''
     A cluster represents a collection of aggregation blocks managed by the
@@ -100,3 +138,60 @@ class Cluster:
         self.name = name
         # member aggregation blocks contained in this cluster.
         self._member_aggr_blocks = []
+
+    def addMember(self, aggr_block):
+        self._member_aggr_blocks.append(aggr_block)
+
+
+class Topology:
+    '''
+    Topology class that represents a network. It contains physical network
+    entities and abstract entities.
+    '''
+    def __init__(self, input_proto):
+        self._clusters = {}
+        self._aggr_blocks = {}
+        self._nodes = {}
+        self._ports = {}
+        self._paths = {}
+        self._links = {}
+        # parse input topology and populate this topology.
+        proto_net = loadTopo(input_proto)
+        for cluster in proto_net.clusters:
+            cluster_obj = Cluster(cluster.name)
+            self._clusters[cluster.name] = cluster_obj
+            for ag_block in cluster.aggr_blocks:
+                ag_block_obj = AggregationBlock(ag_block.name)
+                self._aggr_blocks[ag_block.name] = ag_block_obj
+                cluster_obj.addMember(ag_block_obj)
+                ag_block_obj.setParent(cluster_obj)
+                for node in ag_block.nodes:
+                    node_obj = Node(node.name, node.stage, node.index,
+                                    node.flow_limit, node.ecmp_limit,
+                                    node.group_limit)
+                    self._nodes[node.name] = node_obj
+                    ag_block_obj.addMember(node_obj)
+                    node_obj.setParent(ag_block_obj)
+                    for port in node.ports:
+                        port_obj = Port(port.name, speed=port.port_speed,
+                                        dcn_facing=port.dcn_facing)
+                        self._ports[port.name] = port_obj
+                        node_obj.addMember(port_obj)
+                        port_obj.setParent(node.obj)
+        for link in proto_net.links:
+            if (link.src_port_id not in self._ports or
+                link.dst_port_id not in self._ports):
+                print('[ERROR] link {} has at least one port not found! '
+                      'src: {}, dst: {}'.format(link.name, link.src_port_id,
+                                                link.dst_port_id))
+                return
+            src_port_obj = self._ports[link.src_port_id]
+            dst_port_obj = self._ports[link.dst_port_id]
+            link_obj = Link(link.name, src_port_obj, dst_port_obj,
+                            link.link_speed)
+            self._links[link.name] = link_obj
+            src_port_obj.setOrigLink(link_obj)
+            dst_port_obj.setTermLink(link_obj)
+        for path in proto_net.paths:
+            # TODO: path is incomplete
+            self._paths[path.name] = Path(path.name)

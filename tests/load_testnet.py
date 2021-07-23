@@ -1,5 +1,4 @@
-import proto.topology_pb2 as topo
-from google.protobuf import text_format
+from topology.topology import loadTopo
 import unittest
 
 P1 = 'testnet-c1-ab1-s2i1-p1'
@@ -11,14 +10,6 @@ P6 = 'testnet-c1-ab1-s3i1-p2'
 P7 = 'testnet-c1-ab1-s3i2-p1'
 P8 = 'testnet-c1-ab1-s3i2-p2'
 TESTNET_PATH = 'tests/data/testnet_topo.textproto'
-
-def loadTopo(filepath):
-    if not filepath:
-        return None
-    with open(filepath, 'r') as f:
-        network = topo.Network()
-        text_format.Parse(f.read(), network)
-    return network
 
 class TestLoadTestnet(unittest.TestCase):
     def test_load_invalid_topo(self):
