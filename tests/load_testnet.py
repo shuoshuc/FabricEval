@@ -9,6 +9,7 @@ P5 = 'testnet-c1-ab1-s3i1-p1'
 P6 = 'testnet-c1-ab1-s3i1-p2'
 P7 = 'testnet-c1-ab1-s3i2-p1'
 P8 = 'testnet-c1-ab1-s3i2-p2'
+# Links in testnet: P1-P5, P2-P7, P3-P6, P4-P8.
 TESTNET_PATH = 'tests/data/testnet_topo.textproto'
 
 class TestLoadTestnet(unittest.TestCase):
