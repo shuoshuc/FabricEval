@@ -193,5 +193,14 @@ class Topology:
             src_port_obj.setOrigLink(link_obj)
             dst_port_obj.setTermLink(link_obj)
         for path in proto_net.paths:
-            # TODO: path is incomplete
-            self._paths[path.name] = Path(path.name)
+            if (path.src_aggr_block not in self._aggr_blocks or
+                path.dst_aggr_block not in self._aggr_blocks):
+                print('[ERROR] path {} has at least one aggr_block not found! '
+                      'src: {}, dst: {}'.format(path.name, path.src_aggr_block,
+                                                path.dst_aggr_block))
+                return
+            src_ag_block_obj = self._aggr_blocks[path.src_aggr_block]
+            dst_ag_block_obj = self._aggr_blocks[path.dst_aggr_block]
+            path_obj = Path(path.name, src_ag_block_obj, dst_ag_block_obj)
+            self._paths[path.name] = path_obj
+            # TODO: add member links to path

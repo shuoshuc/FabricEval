@@ -49,6 +49,10 @@ message AggregationBlock {
 message Path {
     // Unique name identifier.
     optional string name = 1;
+    // Unique name identifier of the source aggregation block.
+    optional string src_aggr_block = 2;
+    // Unique name identifier of the destination aggregation block.
+    optional string dst_aggr_block = 3;
 }
 
 message Cluster {
