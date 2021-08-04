@@ -2,9 +2,9 @@
 A data center network simulator designed for studying traffic engineering schemes.
 
 ## Structure
-* **proto**: protobuf definitions for topological entities, traffic demands and other inputs.
-* **topology**: the topology class that represents a network in memory.
-* **tests**: unit tests.
+* **proto/**: protobuf definitions for topological entities, traffic demands and other inputs.
+* **topology/**: the topology class that represents a network in memory.
+* **tests/**: unit tests.
 
 ## Prerequisites
 FabricSim is a Python project, it uses Bazel as its build system.
