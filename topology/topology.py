@@ -80,9 +80,12 @@ class Node:
         self._member_ports = []
         # parent aggregation block this node belongs to.
         self._parent_aggr_block = None
+        # parent cluster this node belongs to.
+        self._parent_cluster = None
 
-    def setParent(aggr_block):
+    def setParent(aggr_block, cluster):
         self._parent_aggr_block = aggr_block
+        self._parent_cluster = cluster
 
     def addMember(port):
         self._member_ports.append(port)
@@ -138,9 +141,14 @@ class Cluster:
         self.name = name
         # member aggregation blocks contained in this cluster.
         self._member_aggr_blocks = []
+        # member ToRs contained in this cluster.
+        self._member_tors = []
 
     def addMember(self, aggr_block):
         self._member_aggr_blocks.append(aggr_block)
+
+    def addMemberToR(self, tor):
+        self._member_tors.append(tor)
 
 
 class Topology:
@@ -171,13 +179,25 @@ class Topology:
                                     node.group_limit)
                     self._nodes[node.name] = node_obj
                     ag_block_obj.addMember(node_obj)
-                    node_obj.setParent(ag_block_obj)
+                    node_obj.setParent(ag_block_obj, cluster_obj)
                     for port in node.ports:
                         port_obj = Port(port.name, speed=port.port_speed,
                                         dcn_facing=port.dcn_facing)
                         self._ports[port.name] = port_obj
                         node_obj.addMember(port_obj)
-                        port_obj.setParent(node.obj)
+                        port_obj.setParent(node_obj)
+            for tor in cluster.nodes:
+                tor_obj = Node(tor.name, tor.stage, tor.index, tor.flow_limit,
+                               tor.ecmp_limit, tor.group_limit)
+                self._nodes[tor.name] = tor_obj
+                tor_obj.setParent(None, cluster_obj)
+                cluster_obj.addMemberToR(tor_obj)
+                for port in tor.ports:
+                    port_obj = Port(port.name, speed=port.port_speed,
+                                    dcn_facing=port.dcn_facing)
+                    self._ports[port.name] = port_obj
+                    tor_obj.addMember(port_obj)
+                    port_obj.setParent(tor_obj)
         for link in proto_net.links:
             if (link.src_port_id not in self._ports or
                 link.dst_port_id not in self._ports):
