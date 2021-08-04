@@ -59,3 +59,6 @@ class TestLoadTestnet(unittest.TestCase):
         self.assertEqual(P1, link.src_port_id)
         self.assertEqual(P5, link.dst_port_id)
         self.assertEqual(100 * 1000 * 1000 * 1000, link.link_speed)
+
+if __name__ == "__main__":
+    unittest.main()
