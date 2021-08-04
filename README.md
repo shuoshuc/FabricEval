@@ -14,5 +14,5 @@ Everything is implemented and tested under [Python 3](https://www.python.org/dow
 ## Usage
 Run the following command to unit test loading a test network topology and verify its properties:
 ```bash
-bazel test //tests:load_testnet
+bazel test //tests:load_toy
 ```
