@@ -30,13 +30,13 @@ class Port:
         # parent node this port belongs to.
         self._parent_node = None
 
-    def setParent(node):
+    def setParent(self, node):
         self._parent_node = node
 
-    def setOrigLink(orig_link):
+    def setOrigLink(self, orig_link):
         self.orig_link = orig_link
 
-    def setTermLink(term_link):
+    def setTermLink(self, term_link):
         self.term_link = term_link
 
 
@@ -83,11 +83,11 @@ class Node:
         # parent cluster this node belongs to.
         self._parent_cluster = None
 
-    def setParent(aggr_block, cluster):
+    def setParent(self, aggr_block, cluster):
         self._parent_aggr_block = aggr_block
         self._parent_cluster = cluster
 
-    def addMember(port):
+    def addMember(self, port):
         self._member_ports.append(port)
 
 
@@ -104,10 +104,10 @@ class AggregationBlock:
         # parent cluster this aggregation block belongs to.
         self._parent_cluster = None
 
-    def setParent(cluster):
+    def setParent(self, cluster):
         self._parent_cluster = cluster
 
-    def addMember(node):
+    def addMember(self, node):
         self._member_nodes.append(node)
 
 
@@ -201,26 +201,67 @@ class Topology:
         for link in proto_net.links:
             if (link.src_port_id not in self._ports or
                 link.dst_port_id not in self._ports):
-                print('[ERROR] link {} has at least one port not found! '
-                      'src: {}, dst: {}'.format(link.name, link.src_port_id,
-                                                link.dst_port_id))
+                print('[ERROR] Topology parsing: link {} has at least one '
+                      'port not found! src: {}, dst: {}'.format(link.name,
+                          link.src_port_id, link.dst_port_id))
                 return
             src_port_obj = self._ports[link.src_port_id]
             dst_port_obj = self._ports[link.dst_port_id]
             link_obj = Link(link.name, src_port_obj, dst_port_obj,
-                            link.link_speed)
+                            min(link.link_speed, src_port_obj.port_speed,
+                                dst_port_obj.port_speed))
             self._links[link.name] = link_obj
             src_port_obj.setOrigLink(link_obj)
             dst_port_obj.setTermLink(link_obj)
         for path in proto_net.paths:
             if (path.src_aggr_block not in self._aggr_blocks or
                 path.dst_aggr_block not in self._aggr_blocks):
-                print('[ERROR] path {} has at least one aggr_block not found! '
-                      'src: {}, dst: {}'.format(path.name, path.src_aggr_block,
-                                                path.dst_aggr_block))
+                print('[ERROR] Topology parsing: path {} has at least one '
+                      'aggr_block not found! src: {}, dst: {}'.format(path.name,
+                          path.src_aggr_block, path.dst_aggr_block))
                 return
             src_ag_block_obj = self._aggr_blocks[path.src_aggr_block]
             dst_ag_block_obj = self._aggr_blocks[path.dst_aggr_block]
             path_obj = Path(path.name, src_ag_block_obj, dst_ag_block_obj)
             self._paths[path.name] = path_obj
             # TODO: add member links to path
+
+    def numClusters(self):
+        '''
+        Returns number of clusters in this topology.
+        '''
+        return len(self._clusters)
+
+    def numNodes(self):
+        '''
+        Returns number of nodes in this topology.
+        '''
+        return len(self._nodes)
+
+    def numPorts(self):
+        '''
+        Returns number of ports in this topology.
+        '''
+        return len(self._ports)
+
+    def numLinks(self):
+        '''
+        Returns number of links in this topology.
+        '''
+        return len(self._links)
+
+    def findPeerPortOfPort(self, port_name):
+        '''
+        Looks up the peer port of the given port, returns the port object.
+        '''
+        if port_name not in self._ports:
+            print('[ERROR] {}: Input port {} does not exist in this topology!'
+                  .format('Find peer port', port_name))
+            return None
+        port_obj = self._ports[port_name]
+        if not port_obj.orig_link or not port_obj.term_link:
+            print('[ERROR] {}: Input port {} is missing orig_link or term_link.'
+                  .format('Find peer port', port_name))
+            return None
+        assert port_obj.orig_link.dst_port == port_obj.term_link.src_port
+        return port_obj.orig_link.dst_port

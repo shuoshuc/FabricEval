@@ -1,4 +1,4 @@
-from topology.topology import loadTopo
+from topology.topology import loadTopo, Topology
 import unittest
 
 P1 = 'toy1-c1-ab1-s2i1-p1'
@@ -11,6 +11,11 @@ P7 = 'toy1-c1-ab1-s3i2-p1'
 P8 = 'toy1-c1-ab1-s3i2-p2'
 # Links in toy1: P1-P5, P2-P7, P3-P6, P4-P8.
 TOY1_PATH = 'tests/data/toy1.textproto'
+P9 = 'toy2-c3-ab1-s1i1-p1'
+P10 = 'toy2-c3-ab1-s2i1-p1'
+P11 = 'toy2-c1-ab1-s3i2-p4'
+P12 = 'toy2-c3-ab1-s3i2-p3'
+TOY2_PATH = 'tests/data/toy2.textproto'
 
 class TestLoadToyNet(unittest.TestCase):
     def test_load_invalid_topo(self):
@@ -59,6 +64,17 @@ class TestLoadToyNet(unittest.TestCase):
         self.assertEqual(P1, link.src_port_id)
         self.assertEqual(P5, link.dst_port_id)
         self.assertEqual(100 * 1000 * 1000 * 1000, link.link_speed)
+
+    def test_toy2_topology_construction(self):
+        toy2 = Topology(TOY2_PATH)
+        self.assertEqual(3, toy2.numClusters())
+        self.assertEqual(20, toy2.numNodes())
+        self.assertEqual(56, toy2.numPorts())
+        self.assertEqual(52, toy2.numLinks())
+        self.assertEqual(P10, toy2.findPeerPortOfPort(P9).name)
+        self.assertFalse(toy2.findPeerPortOfPort(P9).dcn_facing)
+        self.assertEqual(P12, toy2.findPeerPortOfPort(P11).name)
+        self.assertTrue(toy2.findPeerPortOfPort(P11).dcn_facing)
 
 if __name__ == "__main__":
     unittest.main()

@@ -60,6 +60,8 @@ message Cluster {
     optional string name = 1;
     // Member aggregation blocks in the cluster.
     repeated AggregationBlock aggr_blocks = 2;
+    // Member nodes directly belonging to the cluster (e.g., ToRs).
+    repeated Node nodes = 3;
 }
 
 message Network {
