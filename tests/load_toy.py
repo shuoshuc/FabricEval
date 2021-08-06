@@ -76,6 +76,7 @@ class TestLoadToyNet(unittest.TestCase):
         self.assertEqual(P10, toy2.findPeerPortOfPort(P9).name)
         self.assertFalse(toy2.findPeerPortOfPort(P9).dcn_facing)
         self.assertEqual(P12, toy2.findPeerPortOfPort(P11).name)
+        self.assertTrue(toy2.findPeerPortOfPort(P11).dcn_facing)
         self.assertEqual(-1, toy2.findCapacityOfPath('non-existent-path'))
         self.assertEqual(toy2.findCapacityOfPath(PATH1),
                          toy2.findCapacityOfPath(PATH2))
