@@ -809,3 +809,33 @@ links {
   dst_port_id: "toy2-c2-ab1-s3i2-p4"
   link_speed: 100000000000
 }
+paths {
+  name: "toy2-c1-ab1:toy2-c2-ab1"
+  src_aggr_block: "toy2-c1-ab1"
+  dst_aggr_block: "toy2-c2-ab1"
+}
+paths {
+  name: "toy2-c2-ab1:toy2-c1-ab1"
+  src_aggr_block: "toy2-c2-ab1"
+  dst_aggr_block: "toy2-c1-ab1"
+}
+paths {
+  name: "toy2-c1-ab1:toy2-c3-ab1"
+  src_aggr_block: "toy2-c1-ab1"
+  dst_aggr_block: "toy2-c3-ab1"
+}
+paths {
+  name: "toy2-c3-ab1:toy2-c1-ab1"
+  src_aggr_block: "toy2-c3-ab1"
+  dst_aggr_block: "toy2-c1-ab1"
+}
+paths {
+  name: "toy2-c2-ab1:toy2-c3-ab1"
+  src_aggr_block: "toy2-c2-ab1"
+  dst_aggr_block: "toy2-c3-ab1"
+}
+paths {
+  name: "toy2-c3-ab1:toy2-c2-ab1"
+  src_aggr_block: "toy2-c3-ab1"
+  dst_aggr_block: "toy2-c2-ab1"
+}

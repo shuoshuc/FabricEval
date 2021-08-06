@@ -39,6 +39,8 @@ class Port:
     def setTermLink(self, term_link):
         self.term_link = term_link
 
+    def getParent(self):
+        return self._parent_node
 
 class Link:
     '''
@@ -48,14 +50,21 @@ class Link:
     dst_port: destination port of the link.
     link_speed: speed the link is running at (in bps). Speed will be
                 auto-negotiated.
+    dcn_facing: true iff both ends of the link are dcn facing ports.
     '''
-    def __init__(self, name, src_port=None, dst_port=None, speed=None):
+    def __init__(self, name, src_port=None, dst_port=None, speed=None,
+                 dcn_facing=None):
         self.name = name
         self.src_port = src_port
         self.dst_port = dst_port
         self.link_speed = speed
+        self.dcn_facing = dcn_facing
         # remaining available capacity on the link.
         self._residual_capacity = speed
+        self._parent_path = None
+
+    def setParent(self, path):
+        self._parent_path = path
 
 
 class Node:
@@ -90,6 +99,12 @@ class Node:
     def addMember(self, port):
         self._member_ports.append(port)
 
+    def getParentAggrBlock(self):
+        return self._parent_aggr_block
+
+    def getParentCluster(self):
+        return self._parent_cluster
+
 
 class AggregationBlock:
     '''
@@ -119,15 +134,19 @@ class Path:
     name: path name
     src_aggr_block: source aggregation block of the path
     dst_aggr_block: destination aggregation block of the path
+    available_capacity: available capacity on the path, initialized to the sum
+                        of all member link capacity.
     '''
     def __init__(self, name, src_aggr_block=None, dst_aggr_block=None):
         self.name = name
         self.src_aggr_block = src_aggr_block
         self.dst_aggr_block = dst_aggr_block
+        self.available_capacity = 0
         # physical member links contained in this path.
         self._member_links = []
-        # remaining available capacity on the link.
-        self._available_capacity = 0
+
+    def addMember(self, link):
+        self._member_links.append(link)
 
 
 class Cluster:
@@ -163,6 +182,8 @@ class Topology:
         self._ports = {}
         self._paths = {}
         self._links = {}
+        # A map from (src_ag_block, dst_ag_block) pair to link.
+        ag_block_link_map = {}
         # parse input topology and populate this topology.
         proto_net = loadTopo(input_proto)
         for cluster in proto_net.clusters:
@@ -209,10 +230,17 @@ class Topology:
             dst_port_obj = self._ports[link.dst_port_id]
             link_obj = Link(link.name, src_port_obj, dst_port_obj,
                             min(link.link_speed, src_port_obj.port_speed,
-                                dst_port_obj.port_speed))
+                                dst_port_obj.port_speed),
+                            src_port_obj.dcn_facing and dst_port_obj.dcn_facing)
             self._links[link.name] = link_obj
             src_port_obj.setOrigLink(link_obj)
             dst_port_obj.setTermLink(link_obj)
+            src_ag_block = self.findAggrBlockOfPort(link.src_port_id)
+            dst_ag_block = self.findAggrBlockOfPort(link.dst_port_id)
+            # Non-DCN links cannot belong to a path.
+            if link_obj.dcn_facing and src_ag_block and dst_ag_block:
+                ag_block_link_map.setdefault((src_ag_block, dst_ag_block),
+                                             []).append(link_obj)
         for path in proto_net.paths:
             if (path.src_aggr_block not in self._aggr_blocks or
                 path.dst_aggr_block not in self._aggr_blocks):
@@ -224,7 +252,14 @@ class Topology:
             dst_ag_block_obj = self._aggr_blocks[path.dst_aggr_block]
             path_obj = Path(path.name, src_ag_block_obj, dst_ag_block_obj)
             self._paths[path.name] = path_obj
-            # TODO: add member links to path
+            # If src-dst is not found in the link map, there is no DCN link
+            # between the pair, so just skip.
+            if (src_ag_block_obj, dst_ag_block_obj) not in ag_block_link_map:
+                continue
+            for l in ag_block_link_map[(src_ag_block_obj, dst_ag_block_obj)]:
+                path_obj.addMember(l)
+                l.setParent(path_obj)
+                path_obj.available_capacity += l.link_speed
 
     def numClusters(self):
         '''
@@ -265,3 +300,26 @@ class Topology:
             return None
         assert port_obj.orig_link.dst_port == port_obj.term_link.src_port
         return port_obj.orig_link.dst_port
+
+    def findAggrBlockOfPort(self, port_name):
+        '''
+        Looks up the parent aggregation block of the given port. Returns the
+        aggr_block topology.
+        '''
+        if port_name not in self._ports:
+            print('[ERROR] {}: Input port {} does not exist in this topology!'
+                  .format('Find aggr block', port_name))
+            return None
+        port_obj = self._ports[port_name]
+        return port_obj.getParent().getParentAggrBlock()
+
+    def findCapacityOfPath(self, path_name):
+        '''
+        Looks up the available capacity of the given path, returns an integer
+        in bps. Note that paths are uni-directional.
+        '''
+        if path_name not in self._paths:
+            print('[ERROR] {}: Path {} does not exist in this topology!'
+                  .format('Find path capacity', path_name))
+            return -1
+        return self._paths[path_name].available_capacity

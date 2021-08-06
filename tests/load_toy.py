@@ -15,6 +15,8 @@ P9 = 'toy2-c3-ab1-s1i1-p1'
 P10 = 'toy2-c3-ab1-s2i1-p1'
 P11 = 'toy2-c1-ab1-s3i2-p4'
 P12 = 'toy2-c3-ab1-s3i2-p3'
+PATH1 = 'toy2-c1-ab1:toy2-c2-ab1'
+PATH2 = 'toy2-c2-ab1:toy2-c1-ab1'
 TOY2_PATH = 'tests/data/toy2.textproto'
 
 class TestLoadToyNet(unittest.TestCase):
@@ -74,7 +76,10 @@ class TestLoadToyNet(unittest.TestCase):
         self.assertEqual(P10, toy2.findPeerPortOfPort(P9).name)
         self.assertFalse(toy2.findPeerPortOfPort(P9).dcn_facing)
         self.assertEqual(P12, toy2.findPeerPortOfPort(P11).name)
-        self.assertTrue(toy2.findPeerPortOfPort(P11).dcn_facing)
+        self.assertEqual(-1, toy2.findCapacityOfPath('non-existent-path'))
+        self.assertEqual(toy2.findCapacityOfPath(PATH1),
+                         toy2.findCapacityOfPath(PATH2))
+        self.assertEqual(200000000000, toy2.findCapacityOfPath(PATH1))
 
 if __name__ == "__main__":
     unittest.main()
