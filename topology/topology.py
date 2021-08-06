@@ -4,7 +4,7 @@ from google.protobuf import text_format
 def loadTopo(filepath):
     if not filepath:
         return None
-    with open(filepath, 'r') as f:
+    with open(filepath, 'r', encoding='utf-8') as f:
         network = topo.Network()
         text_format.Parse(f.read(), network)
     return network
