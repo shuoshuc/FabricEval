@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+package te_solution;
+
+message PrefixIntent {
+    message NexthopEntry {
+        // Unique name identifier for nexthop (physical) port.
+        string nexthop_port = 1;
+        // Weight fraction of traffic to be distributed on this port.
+        double weight = 2;
+    }
+
+    // An ipv4 prefix of the destination.
+    fixed32 dst_prefix = 1;
+    // Nexthop entries used to reach the destination prefix.
+    // Note: all weights must normalize and sum to 1.
+    repeated NexthopEntry nexthop_entries = 2;
+}
+
+message TEIntent {
+    // Unique name identifier for abstract node (aggregation block + ToRs).
+    string target_node = 1;
+    // TE traffic distribution intents for each destination prefix.
+    repeated PrefixIntent prefix_intents = 2;
+}
+
+message TESolution {
+    // Traffic engineering intents grouped by target nodes.
+    repeated TEIntent te_intents = 1;
+}

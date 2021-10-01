@@ -8,3 +8,9 @@ py_proto_library(
     srcs = ["topology.proto"],
     deps = ["@com_google_protobuf//:protobuf_python"],
 )
+
+py_proto_library(
+    name = "te_solution_proto",
+    srcs = ["te_solution.proto"],
+    deps = ["@com_google_protobuf//:protobuf_python"],
+)
