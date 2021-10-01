@@ -4,60 +4,60 @@ package topo;
 
 message Port {
     // Unique name identifier.
-    optional string name = 1;
+    string name = 1;
     // Port speed in bits/sec.
-    optional int64 port_speed = 2;
+    int64 port_speed = 2;
     // True if this port is facing the data-center network (DCN).
-    optional bool dcn_facing = 3;
+    bool dcn_facing = 3;
 }
 
 message Link {
     // Unique name identifier.
-    optional string name = 1;
+    string name = 1;
     // Unique name identifier of the source port.
-    optional string src_port_id = 2;
+    string src_port_id = 2;
     // Unique name identifier of the destination port.
-    optional string dst_port_id = 3;
+    string dst_port_id = 3;
     // Link speed in bits/sec.
-    optional int64 link_speed = 4;
+    int64 link_speed = 4;
 }
 
 message Node {
     // Unique name identifier.
-    optional string name = 1;
+    string name = 1;
     // Stage of the node, 1 for ToR, 2/3 for AggregationBlock.
-    optional int32 stage = 2;
+    int32 stage = 2;
     // Unique index among the nodes of the same stage.
-    optional int32 index = 3;
+    int32 index = 3;
     // Number of LPM entries the flow table can hold.
-    optional int32 flow_limit = 4;
+    int32 flow_limit = 4;
     // Number of ECMP entries the ECMP table can hold.
-    optional int32 ecmp_limit = 5;
+    int32 ecmp_limit = 5;
     // Max number of ECMP entries each group can use.
-    optional int32 group_limit = 6;
+    int32 group_limit = 6;
     // Member ports on the node.
     repeated Port ports = 7;
 }
 
 message AggregationBlock {
     // Unique name identifier.
-    optional string name = 1;
+    string name = 1;
     // Member nodes in the aggregation block.
     repeated Node nodes = 2;
 }
 
 message Path {
     // Unique name identifier.
-    optional string name = 1;
+    string name = 1;
     // Unique name identifier of the source aggregation block.
-    optional string src_aggr_block = 2;
+    string src_aggr_block = 2;
     // Unique name identifier of the destination aggregation block.
-    optional string dst_aggr_block = 3;
+    string dst_aggr_block = 3;
 }
 
 message Cluster {
     // Unique name identifier.
-    optional string name = 1;
+    string name = 1;
     // Member aggregation blocks in the cluster.
     repeated AggregationBlock aggr_blocks = 2;
     // Member nodes directly belonging to the cluster (e.g., ToRs).
@@ -66,7 +66,7 @@ message Cluster {
 
 message Network {
     // Unique name identifier.
-    optional string name = 1;
+    string name = 1;
     // Member clusters in the network.
     repeated Cluster clusters = 2;
     // Member paths in the network.
