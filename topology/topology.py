@@ -4,8 +4,8 @@ from google.protobuf import text_format
 def loadTopo(filepath):
     if not filepath:
         return None
+    network = topo.Network()
     with open(filepath, 'r', encoding='utf-8') as f:
-        network = topo.Network()
         text_format.Parse(f.read(), network)
     return network
 
@@ -41,6 +41,7 @@ class Port:
 
     def getParent(self):
         return self._parent_node
+
 
 class Link:
     '''
@@ -323,3 +324,9 @@ class Topology:
                   .format('Find path capacity', path_name))
             return -1
         return self._paths[path_name].available_capacity
+
+    def hasAggrBlock(self, aggr_block_name):
+        '''
+        Returns true if the given aggr_block can be found in the topology.
+        '''
+        return (aggr_block_name in self._aggr_blocks)

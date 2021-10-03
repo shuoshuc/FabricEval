@@ -19,7 +19,7 @@ message PrefixIntent {
 
 message TEIntent {
     // Unique name identifier for abstract node (aggregation block + ToRs).
-    string target_node = 1;
+    string target_block = 1;
     // TE traffic distribution intents for each destination prefix.
     repeated PrefixIntent prefix_intents = 2;
 }
