@@ -1,0 +1,15 @@
+TEIntent {
+  target_block: "toy2-c1-ab1"
+  PrefixIntent {
+	  dst_prefix: ""
+    mask: 24
+	  NexthopEntry {
+		  nexthop_port: ""
+		  weight: 1.0
+		}
+	  NexthopEntry {
+		  nexthop_port: ""
+		  weight: 1.0
+		}
+	}
+}

@@ -11,10 +11,12 @@ message PrefixIntent {
     }
 
     // An ipv4 prefix of the destination.
-    fixed32 dst_prefix = 1;
+    string dst_prefix = 1;
+    // Net mask in slash notation.
+    uint32 mask = 2;
     // Nexthop entries used to reach the destination prefix.
     // Note: all weights must normalize and sum to 1.
-    repeated NexthopEntry nexthop_entries = 2;
+    repeated NexthopEntry nexthop_entries = 3;
 }
 
 message TEIntent {
