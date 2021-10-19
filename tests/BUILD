@@ -14,6 +14,7 @@ py_test(
     name = 'wcmp_alloc_test',
     srcs = ['wcmp_alloc_test.py'],
     deps = [
+        '//topology:topology',
         '//wcmp_alloc:wcmp_alloc',
     ],
     data = glob(['data/*.textproto']),

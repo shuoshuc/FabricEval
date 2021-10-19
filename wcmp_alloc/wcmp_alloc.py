@@ -1,5 +1,6 @@
 import proto.te_solution_pb2 as te_sol
 from google.protobuf import text_format
+import concurrent.futures
 
 def loadTESolution(filepath):
     if not filepath:
@@ -19,13 +20,15 @@ class WCMPWorker:
         self._target_block = te_intent.target_block
         self._topo = topo_obj
         self._te_intent = te_sol.TEIntent()
+        # Persists a local copy of the slice.
         self._te_intent.CopyFrom(te_intent)
 
     def run(self):
         '''
         Translates the high level TE intents to programmed flows and groups.
         '''
-        pass
+        print('[WCMPWorker] target_block:', self._target_block)
+        print(self._te_intent)
 
 
 class WCMPAllocation:
@@ -54,5 +57,11 @@ class WCMPAllocation:
             self._worker_map[aggr_block] = WCMPWorker(topo_obj, te_intent)
 
     def run(self):
-        for worker in self._worker_map.values():
-            worker.run()
+        '''
+        Launches all WCMP workers in parallel to speed up the computation.
+        '''
+        worker_runner = lambda worker : worker.run()
+        with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
+            # futures contain execution results if the worker returns a value.
+            futures = {executor.submit(worker_runner, worker)
+                       for worker in self._worker_map.values()}

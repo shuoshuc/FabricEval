@@ -1,7 +1,9 @@
+from topology.topology import loadTopo, Topology
 from wcmp_alloc.wcmp_alloc import loadTESolution, WCMPAllocation
 import unittest
 import ipaddress
 
+TOY2_TOPO_PATH = 'tests/data/toy2.textproto'
 TOY2_SOL_PATH = 'tests/data/te_sol_toy2.textproto'
 C1AB1 = 'toy2-c1-ab1'
 C3AB1 = 'toy2-c3-ab1'
@@ -37,6 +39,11 @@ class TestWCMPAlloc(unittest.TestCase):
                 # nexthop weight should be positive.
                 for nexthop in prefix_intent.nexthop_entries:
                     self.assertGreater(nexthop.weight, 0.0)
+
+    def test_wcmp_alloc_intent_distribution(self):
+        toy2_topo = Topology(TOY2_TOPO_PATH)
+        wcmp_alloc = WCMPAllocation(toy2_topo, TOY2_SOL_PATH)
+        wcmp_alloc.run()
 
 if __name__ == "__main__":
     unittest.main()
