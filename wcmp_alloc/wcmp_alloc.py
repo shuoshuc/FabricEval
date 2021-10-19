@@ -1,6 +1,7 @@
 import proto.te_solution_pb2 as te_sol
 from google.protobuf import text_format
-import concurrent.futures
+from concurrent.futures import ThreadPoolExecutor
+import os
 
 def loadTESolution(filepath):
     if not filepath:
@@ -61,7 +62,7 @@ class WCMPAllocation:
         Launches all WCMP workers in parallel to speed up the computation.
         '''
         worker_runner = lambda worker : worker.run()
-        with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
+        with ThreadPoolExecutor(max_workers=os.cpu_count()) as executor:
             # futures contain execution results if the worker returns a value.
             futures = {executor.submit(worker_runner, worker)
                        for worker in self._worker_map.values()}
