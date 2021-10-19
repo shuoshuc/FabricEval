@@ -1,5 +1,6 @@
 import proto.topology_pb2 as topo
 from google.protobuf import text_format
+import ipaddress
 
 def loadTopo(filepath):
     if not filepath:
@@ -77,15 +78,23 @@ class Node:
     flow_limit: number of flows the flow table can hold.
     ecmp_limit: number of ECMP entries the ECMP table can hold.
     group_limit: number of ECMP entries allowed to be used by each group.
+    host_prefix: aggregated IPv4 prefix for hosts under the node (must be ToR).
+    mgmt_prefix: aggregated IPv4 prefix for management interfaces on the node
+                 (must be ToR).
     '''
     def __init__(self, name, stage=None, index=None, flow_limit=12288,
-                 ecmp_limit=16384, group_limit=128):
+                 ecmp_limit=16384, group_limit=128, host_prefix=None,
+                 mgmt_prefix=None):
         self.name = name
         self.stage = stage
         self.index = index
         self.flow_limit = flow_limit
         self.ecmp_limit = ecmp_limit
         self.group_limit = group_limit
+        # Host prefix in ipaddress module format.
+        self.host_prefix = host_prefix
+        # Management prefix in ipaddress module format.
+        self.mgmt_prefix = mgmt_prefix
         # physical member ports on this node.
         self._member_ports = []
         # parent aggregation block this node belongs to.
@@ -209,8 +218,22 @@ class Topology:
                         node_obj.addMember(port_obj)
                         port_obj.setParent(node_obj)
             for tor in cluster.nodes:
+                if tor.stage != 1:
+                    print('[ERROR] Topology parsing: ToR {} cannot be stage '
+                          '{}!'.format(tor.name, tor.stage))
+                    return
+                host_prefix, mgmt_prefix = None, None
+                if (tor.host_prefix and tor.host_mask != 0 and
+                    tor.host_mask < 32):
+                    host_prefix = ipaddress.ip_network(tor.host_prefix + '/' +
+                                                       str(tor.host_mask))
+                if (tor.mgmt_prefix and tor.mgmt_mask != 0 and
+                    tor.mgmt_mask < 32):
+                    mgmt_prefix = ipaddress.ip_network(tor.mgmt_prefix + '/' +
+                                                       str(tor.mgmt_mask))
                 tor_obj = Node(tor.name, tor.stage, tor.index, tor.flow_limit,
-                               tor.ecmp_limit, tor.group_limit)
+                               tor.ecmp_limit, tor.group_limit, host_prefix,
+                               mgmt_prefix)
                 self._nodes[tor.name] = tor_obj
                 tor_obj.setParent(None, cluster_obj)
                 cluster_obj.addMemberToR(tor_obj)
@@ -330,3 +353,18 @@ class Topology:
         Returns true if the given aggr_block can be found in the topology.
         '''
         return (aggr_block_name in self._aggr_blocks)
+
+    def findHostPrefixOfToR(self, tor_name):
+        '''
+        Returns the IP prefix of given ToR.
+        '''
+        if tor_name not in self._nodes:
+            print('[ERROR] {}: Node {} does not exist in this topology!'
+                  .format('Find host prefix', tor_name))
+            return None
+        tor = self._nodes[tor_name]
+        if tor.stage != 1:
+            print('[ERROR] {}: Node {} stage={} is not a ToR!'
+                  .format('Find host prefix', tor_name, tor.stage))
+            return None
+        return tor.host_prefix

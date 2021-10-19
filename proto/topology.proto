@@ -37,6 +37,16 @@ message Node {
     int32 group_limit = 6;
     // Member ports on the node.
     repeated Port ports = 7;
+    // Aggregated IPv4 prefix of all hosts in the rack (only a ToR can have the
+    // prefix fields set).
+    string host_prefix = 8;
+    // Netmask of the host_prefix in slash notation.
+    uint32 host_mask = 9;
+    // Assigned IPv4 management prefix for a ToR (used for out-of-band
+    // management connection in an SDN network).
+    string mgmt_prefix = 10;
+    // Netmask of the mgmt_prefix in slash notation.
+    uint32 mgmt_mask = 11;
 }
 
 message AggregationBlock {

@@ -1,5 +1,6 @@
 from topology.topology import loadTopo, Topology
 import unittest
+import ipaddress
 
 P1 = 'toy1-c1-ab1-s2i1-p1'
 P2 = 'toy1-c1-ab1-s2i1-p2'
@@ -18,6 +19,8 @@ P12 = 'toy2-c3-ab1-s3i2-p3'
 PATH1 = 'toy2-c1-ab1:toy2-c2-ab1'
 PATH2 = 'toy2-c2-ab1:toy2-c1-ab1'
 TOY2_PATH = 'tests/data/toy2.textproto'
+TOR1 = 'toy2-c1-ab1-s1i1'
+TOR2 = 'toy2-c3-ab1-s1i4'
 
 class TestLoadToyNet(unittest.TestCase):
     def test_load_invalid_topo(self):
@@ -81,6 +84,15 @@ class TestLoadToyNet(unittest.TestCase):
         self.assertEqual(toy2.findCapacityOfPath(PATH1),
                          toy2.findCapacityOfPath(PATH2))
         self.assertEqual(200000000000, toy2.findCapacityOfPath(PATH1))
+        # verify IP prefix assignment
+        ip_aggregate_1 = ipaddress.ip_network('172.16.0.0/24')
+        ip_aggregate_2 = ipaddress.ip_network('172.16.1.0/24')
+        ip_prefix1 = toy2.findHostPrefixOfToR(TOR1)
+        self.assertTrue(ip_prefix1.subnet_of(ip_aggregate_1))
+        self.assertFalse(ip_prefix1.subnet_of(ip_aggregate_2))
+        ip_prefix2 = toy2.findHostPrefixOfToR(TOR2)
+        self.assertTrue(ip_prefix2.subnet_of(ip_aggregate_2))
+        self.assertFalse(ip_prefix2.subnet_of(ip_aggregate_1))
 
 if __name__ == "__main__":
     unittest.main()

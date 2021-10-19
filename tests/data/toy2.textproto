@@ -164,6 +164,8 @@ clusters {
       port_speed: 100000000000
       dcn_facing: false
     }
+    host_prefix: "172.16.0.0"
+    host_mask: 27
   }
   nodes {
     name: "toy2-c1-ab1-s1i2"
@@ -177,6 +179,8 @@ clusters {
       port_speed: 100000000000
       dcn_facing: false
     }
+    host_prefix: "172.16.0.32"
+    host_mask: 27
   }
   nodes {
     name: "toy2-c1-ab1-s1i3"
@@ -190,6 +194,8 @@ clusters {
       port_speed: 100000000000
       dcn_facing: false
     }
+    host_prefix: "172.16.0.64"
+    host_mask: 27
   }
   nodes {
     name: "toy2-c1-ab1-s1i4"
@@ -203,6 +209,8 @@ clusters {
       port_speed: 100000000000
       dcn_facing: false
     }
+    host_prefix: "172.16.0.96"
+    host_mask: 27
   }
 }
 clusters {
@@ -452,6 +460,8 @@ clusters {
       port_speed: 100000000000
       dcn_facing: false
     }
+    host_prefix: "172.16.1.0"
+    host_mask: 27
   }
   nodes {
     name: "toy2-c3-ab1-s1i2"
@@ -465,6 +475,8 @@ clusters {
       port_speed: 100000000000
       dcn_facing: false
     }
+    host_prefix: "172.16.1.32"
+    host_mask: 27
   }
   nodes {
     name: "toy2-c3-ab1-s1i3"
@@ -478,6 +490,8 @@ clusters {
       port_speed: 100000000000
       dcn_facing: false
     }
+    host_prefix: "172.16.1.64"
+    host_mask: 27
   }
   nodes {
     name: "toy2-c3-ab1-s1i4"
@@ -491,6 +505,8 @@ clusters {
       port_speed: 100000000000
       dcn_facing: false
     }
+    host_prefix: "172.16.1.96"
+    host_mask: 27
   }
 }
 # Cluster 1 internal links
