@@ -14,3 +14,9 @@ py_proto_library(
     srcs = ["te_solution.proto"],
     deps = ["@com_google_protobuf//:protobuf_python"],
 )
+
+py_proto_library(
+    name = "traffic_proto",
+    srcs = ["traffic.proto"],
+    deps = ["@com_google_protobuf//:protobuf_python"],
+)
