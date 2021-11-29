@@ -11,10 +11,12 @@ try:
 
     # Create variables: w_f is intended (fractional) weight, w_i is actual
     # (integral) weight.
-    w_f, w_i = [100.5, 200.1, 301.0, 399.7], []
+    w_f, w_i, ws_i = [100.5, 200.1, 301.0, 399.7], [], []
     for n in range(len(w_f)):
         w_i.append(m.addVar(vtype=GRB.INTEGER, name="w_i_" + str(n+1)))
-    z = m.addVar(vtype=GRB.INTEGER, name="z")
+        ws_i.append(m.addVar(vtype=GRB.INTEGER, name="ws_i_" + str(n+1)))
+    z = m.addVar(vtype=GRB.CONTINUOUS, name="z")
+    zs = m.addVar(vtype=GRB.CONTINUOUS, name="zs")
 
     # Objective is quadratic.
     obj = gp.QuadExpr();
@@ -29,17 +31,18 @@ try:
     # Add constraint: sum(w_i) > 0 (constraint needs to be binding, vars cannot
     # be 0, so this is a workaround)
     m.addConstr(gp.quicksum(w_i) >= 0.01, "c1")
-    # Add constraint: z^2 * sum(w_f^2) * sum(w_i^2) == 1
-    '''
+    # Add constraint: zs * sum(w_f^2) * sum(ws_i) == 1
     sum_of_sq = 0
     for v in w_f:
         sum_of_sq += v * v
     c2 = gp.QuadExpr()
-    c2.addTerms([1] * len(w_i), w_i, w_i)
-    m.addConstr(z * z * sum_of_sq * c2 == 1, "c2")
-    # Add constraint: w_i >= 0
-    m.addConstr(w_i >= [0] * len(w_i), "c3")
-    '''
+    c2.addTerms([sum_of_sq] * len(w_i), [zs] * len(w_i), ws_i)
+    m.addConstr(c2 == 1, "c2")
+    # Add constraint: zs = z * z
+    m.addConstr(zs == z * z, "c3")
+    # Add constraint: ws_i = w_i * w_i
+    for i in range(len(w_i)):
+        m.addConstr(ws_i[i] == w_i[i] * w_i[i], "c" + str(4 + i))
 
     # Optimize model
     m.optimize()
