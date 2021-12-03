@@ -16,6 +16,7 @@ py_test(
     deps = [
         '//topology:topology',
         '//wcmp_alloc:wcmp_alloc',
+        '//wcmp_alloc:group_reduction',
     ],
     data = glob(['data/*.textproto']),
     python_version = 'PY3',

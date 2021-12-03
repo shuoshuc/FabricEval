@@ -7,3 +7,10 @@ py_library(
         "//proto:te_solution_proto",
     ],
 )
+
+py_library(
+    name = 'group_reduction',
+    srcs = ['group_reduction.py'],
+    deps = [
+    ],
+)

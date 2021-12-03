@@ -1,5 +1,6 @@
 from topology.topology import loadTopo, Topology
 from wcmp_alloc.wcmp_alloc import loadTESolution, WCMPAllocation
+from wcmp_alloc.group_reduction import GroupReduction
 import unittest
 import ipaddress
 
@@ -44,6 +45,19 @@ class TestWCMPAlloc(unittest.TestCase):
         toy2_topo = Topology(TOY2_TOPO_PATH)
         wcmp_alloc = WCMPAllocation(toy2_topo, TOY2_SOL_PATH)
         wcmp_alloc.run()
+
+class TestGroupReduction(unittest.TestCase):
+    def test_single_switch_single_group_1(self):
+        group_reduction = GroupReduction([[1.1, 2.1, 3.1, 4.1]], 16*1024)
+        self.assertEqual([[1, 2, 3, 4]], group_reduction.solve_sssg())
+
+    def test_single_switch_single_group_2(self):
+        group_reduction = GroupReduction([[1.1, 2.1, 3.1, 3.9]], 16*1024)
+        self.assertEqual([[1, 2, 3, 4]], group_reduction.solve_sssg())
+
+    def test_single_switch_single_group_3(self):
+        group_reduction = GroupReduction([[10.5, 20.1, 31.0, 39.7]], 16*1024)
+        self.assertEqual([[1, 2, 3, 4]], group_reduction.solve_sssg())
 
 if __name__ == "__main__":
     unittest.main()
