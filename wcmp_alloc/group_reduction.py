@@ -1,9 +1,26 @@
 import gurobipy as gp
 from gurobipy import GRB
-import math
+from math import gcd
+from functools import reduce
 
 # Broadcom Tomahawk 2 ECMP table limit.
 TABLE_LIMIT = 16 * 1024
+
+def gcd_reduce(vector):
+    '''
+    Reduces a vector by its gcd.
+    vector: input vector must be integers.
+    '''
+    return list(map(lambda x: x // reduce(gcd, vector), vector))
+
+def frac2int_lossless(frac_list):
+    '''
+    Converts list of fractions to list of integers without loss. Essentially
+    scaling up by multiplying 10s and then divide by gcd.
+    '''
+    while any(list(map(lambda x: x % 1, frac_list))):
+        frac_list = list(map(lambda x: x * 10, frac_list))
+    return gcd_reduce(list(map(int, frac_list)))
 
 class GroupReduction:
     '''
@@ -13,11 +30,13 @@ class GroupReduction:
     '''
     def __init__(self, groups, table_limit=TABLE_LIMIT):
         '''
-        groups: a list of lists, where each element list is a set of weights for
-                the corresponding group.
+        orig_groups: a list of lists, where each element list is a set of
+                     weights for the corresponding group.
+        int_groups: original groups after lossless scaleup to integers.
         table_limit: upper bound of the group entries on the switch.
         '''
-        self._groups = groups
+        self._orig_groups = groups
+        self._int_groups = list(map(frac2int_lossless, groups))
         self._table_limit = table_limit
 
     def solve_sssg(self):
@@ -26,22 +45,30 @@ class GroupReduction:
         group (SSSG) optimization problem.
         '''
         final_groups = []
-        if len(self._groups) != 1:
+        if len(self._int_groups) != 1:
             print('[ERROR] %s: unexpected number of input groups %s' %
-                  solve_sssg.__name__, len(self._groups))
+                  solve_sssg.__name__, len(self._int_groups))
             return []
 
         try:
             # Create a new model
             m = gp.Model("single_switch_single_group")
-            m.params.NonConvex = 2
+            m.setParam("NonConvex", 2)
+            m.setParam("FeasibilityTol", 1e-9)
+            m.setParam("IntFeasTol", 1e-5)
+            m.setParam("LogToConsole", 1)
+            m.setParam("LogFile", "gurobi.log")
 
             # Create variables: wf[i] is intended (fractional) weight, wi[i] is
             # actual (integral) weight. wis[i] is the square of wi[i].
-            wf, wi, wis = self._groups[0], [], []
+            wf, wi, wis = self._int_groups[0], [], []
             for n in range(len(wf)):
-                wi.append(m.addVar(vtype=GRB.INTEGER, name="wi_" + str(n+1)))
-                wis.append(m.addVar(vtype=GRB.INTEGER, name="wis_" + str(n+1)))
+                wi.append(m.addVar(vtype=GRB.INTEGER, lb=0,
+                                   ub=self._table_limit,
+                                   name="wi_" + str(n+1)))
+                wis.append(m.addVar(vtype=GRB.CONTINUOUS, lb=0,
+                                   ub=self._table_limit * self._table_limit,
+                                    name="wis_" + str(n+1)))
             z = m.addVar(vtype=GRB.CONTINUOUS, name="z")
             zs = m.addVar(vtype=GRB.CONTINUOUS, name="zs")
 
@@ -53,23 +80,24 @@ class GroupReduction:
             # Set objective
             m.setObjective(obj, GRB.MAXIMIZE)
 
-            # Add constraint: sum(wi) <= table_limit
-            m.addConstr(gp.quicksum(wi) <= self._table_limit, "table_limit")
-            # Add constraint: sum(wi) > 0 (constraint needs to be binding, vars
-            # cannot be 0, so this is a workaround)
-            m.addConstr(gp.quicksum(wi) >= 0.000001, "non_empty_group")
+            # Add constraint: sum(wi) <= min(table_limit, sum(wf))
+            m.addConstr(gp.quicksum(wi) <= min(self._table_limit, sum(wf)),
+                        "group_size_ub")
+            # Add constraint: sum(wi) >= 1 (group cannot be empty)
+            m.addConstr(gp.quicksum(wi) >= 1, "group_size_lb")
             # Add constraint: zs * sum(wf^2) * sum(wis) == 1
-            c2 = gp.QuadExpr()
-            c2.addTerms([sum(v*v for v in wf)] * len(wis), [zs] * len(wis), wis)
-            m.addConstr(c2 == 1, "linearization_zs")
+            c = gp.QuadExpr()
+            c.addTerms([sum(v*v for v in wf)] * len(wis), [zs] * len(wis), wis)
+            m.addConstr(c == 1, "linearization_zs")
             # Add constraint: zs = z * z
             m.addConstr(zs == z * z, "linearization_z")
             for i in range(len(wi)):
                 # Add constraint: wis = wi * wi
                 m.addConstr(wis[i] == wi[i] * wi[i],
                             "linearization_wis_" + str(1 + i))
-                # Add constraint: wi[i] <= ceil(wf[i])
-                m.addConstr(wi[i] <= int(math.ceil(wf[i])), "no_scaling_up")
+            # Add constraint: 0 <= obj <= 1
+            m.addConstr(obj <= 1, "cosine_similarity")
+            m.addConstr(obj >= 0, "cosine_similarity")
 
             # Optimize model
             m.optimize()
@@ -77,10 +105,11 @@ class GroupReduction:
             group = []
             for v in m.getVars():
                 if 'wi_' in v.VarName:
-                    group.append(v.X)
-                    print('%s %g' % (v.VarName, v.X))
-            print('Obj: %g' % m.ObjVal)
-            final_groups.append(group)
+                    group.append(round(v.X))
+                    print('%s %s' % (v.VarName, v.X))
+            print('Obj: %s' % m.ObjVal)
+            # Applies a final GCD reduction just in case.
+            final_groups.append(frac2int_lossless(group))
 
             return final_groups
 
