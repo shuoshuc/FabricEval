@@ -3,6 +3,9 @@ from gurobipy import GRB
 from math import gcd
 from functools import reduce
 
+# If True, feeds solver with scaled up integer groups.
+FLAG_USE_INT_INPUT_GROUPS = False
+
 # Broadcom Tomahawk 2 ECMP table limit.
 TABLE_LIMIT = 16 * 1024
 
@@ -37,7 +40,8 @@ class GroupReduction:
         '''
         self._orig_groups = groups
         self._int_groups = list(map(frac2int_lossless, groups))
-        self._groups = self._int_groups
+        self._groups = self._int_groups if FLAG_USE_INT_INPUT_GROUPS else \
+                                           self._orig_groups
         self._table_limit = table_limit
 
     def solve_sssg(self):
@@ -57,6 +61,7 @@ class GroupReduction:
             m.setParam("NonConvex", 2)
             m.setParam("FeasibilityTol", 1e-9)
             m.setParam("IntFeasTol", 1e-5)
+            m.setParam("MIPGap", 1e-9)
             m.setParam("LogToConsole", 1)
             m.setParam("LogFile", "gurobi.log")
 
@@ -81,9 +86,8 @@ class GroupReduction:
             # Set objective
             m.setObjective(obj, GRB.MAXIMIZE)
 
-            # Add constraint: sum(wi) <= min(table_limit, sum(wf))
-            m.addConstr(gp.quicksum(wi) <= min(self._table_limit, sum(wf)),
-                        "group_size_ub")
+            # Add constraint: sum(wi) <= table_limit
+            m.addConstr(gp.quicksum(wi) <= self._table_limit, "group_size_ub")
             # Add constraint: sum(wi) >= 1 (group cannot be empty)
             m.addConstr(gp.quicksum(wi) >= 1, "group_size_lb")
             # Add constraint: zs * sum(wf^2) * sum(wis) == 1
