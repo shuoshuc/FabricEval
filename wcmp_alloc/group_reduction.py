@@ -124,3 +124,11 @@ class GroupReduction:
         except AttributeError:
             print('Encountered an attribute error')
             return []
+
+
+if __name__ == "__main__":
+    input_groups = [[10.5, 20.1, 31.0, 39.7]]
+    group_reduction = GroupReduction(input_groups, 16*1024)
+    output_groups = group_reduction.solve_sssg()
+    print('Input: %s' % input_groups)
+    print('Output: %s' % output_groups)
