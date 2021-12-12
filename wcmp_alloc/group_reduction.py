@@ -60,7 +60,7 @@ class GroupReduction:
             m = gp.Model("single_switch_single_group")
             m.setParam("NonConvex", 2)
             m.setParam("FeasibilityTol", 1e-9)
-            m.setParam("IntFeasTol", 1e-5)
+            m.setParam("IntFeasTol", 1e-9)
             m.setParam("MIPGap", 1e-9)
             m.setParam("LogToConsole", 1)
             m.setParam("LogFile", "gurobi.log")
@@ -108,11 +108,22 @@ class GroupReduction:
             m.optimize()
 
             group = []
+            sol_wi, sol_wis, sol_z, sol_zs = dict(), dict(), -1, -1
             for v in m.getVars():
                 if 'wi_' in v.VarName:
                     group.append(round(v.X))
-                    print('%s %s' % (v.VarName, v.X))
+                    sol_wi[v.VarName] = v.X
+                if 'wis_' in v.VarName:
+                    sol_wis[v.VarName] = v.X
+                if 'z' == v.VarName:
+                    sol_z = v.X
+                if 'zs' == v.VarName:
+                    sol_zs = v.X
             print('Obj: %s' % m.ObjVal)
+            print(*sol_wi.items(), sep='\n')
+            print(*sol_wis.items(), sep='\n')
+            print('z: %s' % sol_z)
+            print('zs: %s' % sol_zs)
             # Applies a final GCD reduction just in case.
             final_groups.append(frac2int_lossless(group))
 
