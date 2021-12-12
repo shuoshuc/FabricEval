@@ -37,6 +37,7 @@ class GroupReduction:
         '''
         self._orig_groups = groups
         self._int_groups = list(map(frac2int_lossless, groups))
+        self._groups = self._int_groups
         self._table_limit = table_limit
 
     def solve_sssg(self):
@@ -45,9 +46,9 @@ class GroupReduction:
         group (SSSG) optimization problem.
         '''
         final_groups = []
-        if len(self._int_groups) != 1:
+        if len(self._groups) != 1:
             print('[ERROR] %s: unexpected number of input groups %s' %
-                  solve_sssg.__name__, len(self._int_groups))
+                  solve_sssg.__name__, len(self._groups))
             return []
 
         try:
@@ -61,13 +62,13 @@ class GroupReduction:
 
             # Create variables: wf[i] is intended (fractional) weight, wi[i] is
             # actual (integral) weight. wis[i] is the square of wi[i].
-            wf, wi, wis = self._int_groups[0], [], []
+            wf, wi, wis = self._groups[0], [], []
             for n in range(len(wf)):
                 wi.append(m.addVar(vtype=GRB.INTEGER, lb=0,
                                    ub=self._table_limit,
                                    name="wi_" + str(n+1)))
                 wis.append(m.addVar(vtype=GRB.CONTINUOUS, lb=0,
-                                   ub=self._table_limit * self._table_limit,
+                                    ub=self._table_limit * self._table_limit,
                                     name="wis_" + str(n+1)))
             z = m.addVar(vtype=GRB.CONTINUOUS, name="z")
             zs = m.addVar(vtype=GRB.CONTINUOUS, name="zs")
