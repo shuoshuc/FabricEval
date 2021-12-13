@@ -4,7 +4,7 @@ from math import gcd, sqrt
 from functools import reduce
 
 # If True, feeds solver with scaled up integer groups.
-FLAG_USE_INT_INPUT_GROUPS = False
+FLAG_USE_INT_INPUT_GROUPS = True
 
 # Broadcom Tomahawk 2 ECMP table limit.
 TABLE_LIMIT = 16 * 1024
@@ -61,7 +61,8 @@ class GroupReduction:
     def solve_sssg(self):
         '''
         Given the input groups and table limit, solve the single switch single
-        group (SSSG) optimization problem.
+        group (SSSG) optimization problem. This uses a non-convex MINLP (QP+QC)
+        formulation.
         '''
         final_groups = []
         if len(self._groups) != 1:
@@ -152,12 +153,93 @@ class GroupReduction:
             print('Encountered an attribute error')
             return []
 
+    def solve_sssg2(self):
+        '''
+        Given the input groups and table limit, solve the single switch single
+        group (SSSG) optimization problem. This uses a non-convex MIQCP
+        formulation.
+        '''
+        final_groups = []
+        if len(self._groups) != 1:
+            print('[ERROR] %s: unexpected number of input groups %s' %
+                  solve_sssg.__name__, len(self._groups))
+            return []
+
+        # Create a new model
+        m = gp.Model("single_switch_single_group")
+        m.setParam("NonConvex", 2)
+        m.setParam("FeasibilityTol", 1e-9)
+        m.setParam("IntFeasTol", 1e-9)
+        m.setParam("MIPGap", 1e-9)
+        m.setParam("LogToConsole", 1)
+        #m.setParam("LogFile", "gurobi.log")
+
+        # Create variables: wf[i] is intended (fractional) weight, w[i] is
+        # actual (integral) weight.
+        wf, w, z, ws, zs = self._groups[0], [], [], [], []
+        for n in range(len(wf)):
+            w.append(m.addVar(vtype=GRB.INTEGER, lb=0, ub=self._table_limit,
+                              name="w_" + str(n+1)))
+            ws.append(m.addVar(vtype=GRB.CONTINUOUS, lb=0,
+                               ub=self._table_limit * self._table_limit,
+                               name="ws_" + str(n+1)))
+            z.append(m.addVar(vtype=GRB.CONTINUOUS, lb=0, ub=1,
+                              name="z_" + str(n+1)))
+            zs.append(m.addVar(vtype=GRB.CONTINUOUS, lb=0, ub=1,
+                               name="zs_" + str(n+1)))
+
+        # Objective is linear.
+        obj = gp.LinExpr(wf, z);
+        # Set objective
+        m.setObjective(1/sqrt(sum(v*v for v in wf)) * obj, GRB.MAXIMIZE)
+
+        # Add constraint: sum(wi) <= table_limit
+        m.addConstr(gp.quicksum(w) <= self._table_limit, "group_size_ub")
+        # Add constraint: sum(wi) >= 1 (group cannot be empty)
+        m.addConstr(gp.quicksum(w) >= 1, "group_size_lb")
+
+        for i in range(len(w)):
+            # Add constraint: zs[i] * sum(ws) == ws[i]
+            c = gp.QuadExpr()
+            c.addTerms([1] * len(ws), [zs[i]] * len(ws), ws)
+            m.addConstr(c == ws[i], "binding_w_z_" + str(1+i))
+            # Add constraint: zs[i] = z[i] * z[i]
+            m.addConstr(zs[i] == z[i] * z[i], "linearization_z_" + str(1+i))
+            # Add constraint: ws[i] = w[i] * w[i]
+            m.addConstr(ws[i] == w[i] * w[i], "linearization_w_" + str(1+i))
+            # Add constraint only if inputs are already scaled up to integers:
+            # w[i] <= wf[i]
+            if FLAG_USE_INT_INPUT_GROUPS:
+                m.addConstr(w[i] <= wf[i], "no_scale_up_" + str(1+i))
+
+        # Optimize model
+        m.optimize()
+
+        group = []
+        sol_w, sol_z = dict(), dict()
+        for v in m.getVars():
+            if 'w_' in v.VarName:
+                group.append(round(v.X))
+                sol_w[v.VarName] = v.X
+            if 'z_' in v.VarName:
+                sol_z[v.VarName] = v.X
+        print('Obj: %s' % m.ObjVal)
+        print('Cosine similarity: %s' % \
+              cosine_similarity(wf, list(sol_w.values())))
+        print(*sol_w.items(), sep='\n')
+        print(*sol_z.items(), sep='\n')
+        print('wf: %s' % wf)
+        # Applies a final GCD reduction just in case.
+        final_groups.append(frac2int_lossless(group))
+
+        return final_groups
 
 if __name__ == "__main__":
     #input_groups = [[10.5, 20.1, 31.0, 39.7]]
-    input_groups = [[1.0, 2.0, 3.0, 4.0]]
+    #input_groups = [[1.0, 2.0, 3.0, 4.0, 5.0, 6.0]]
+    input_groups = [[1.1, 2.1, 3.1, 4.1]]
     group_reduction = GroupReduction(input_groups, 16*1024)
-    output_groups = group_reduction.solve_sssg()
+    output_groups = group_reduction.solve_sssg2()
     print('Input: %s' % input_groups)
     print('Output: %s' % output_groups)
     res = cosine_similarity(input_groups[0], output_groups[0])
