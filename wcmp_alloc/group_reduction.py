@@ -77,6 +77,9 @@ class GroupReduction:
             m.setParam("IntFeasTol", 1e-9)
             m.setParam("MIPGap", 1e-9)
             m.setParam("LogToConsole", 1)
+            m.setParam("NodefileStart", 10)
+            m.setParam("NodefileDir", "/tmp")
+            m.setParam("Threads", 0)
             #m.setParam("LogFile", "gurobi.log")
 
             # Construct model
