@@ -61,8 +61,7 @@ class GroupReduction:
     def solve_sssg(self):
         '''
         Given the input groups and table limit, solve the single switch single
-        group (SSSG) optimization problem. This uses a non-convex MINLP (QP+QC)
-        formulation.
+        group (SSSG) optimization problem.
         '''
         final_groups = []
         if len(self._groups) != 1:
@@ -71,13 +70,14 @@ class GroupReduction:
             return []
 
         try:
-            # Create a new model
+            # Initialize a new model
             m = gp.Model("single_switch_single_group")
             m.setParam("NonConvex", 2)
             m.setParam("FeasibilityTol", 1e-9)
             m.setParam("IntFeasTol", 1e-9)
             m.setParam("MIPGap", 1e-9)
             m.setParam("LogToConsole", 1)
+<<<<<<< HEAD
             m.setParam("LogFile", "gurobi.log")
 
             # Create variables: wf[i] is intended (fractional) weight, wi[i] is
@@ -122,29 +122,32 @@ class GroupReduction:
             # Add constraint: 0 <= obj <= 1
             m.addConstr(obj <= 1, "cosine_similarity")
             m.addConstr(obj >= 0, "cosine_similarity")
+=======
+            m.setParam("NodefileStart", 10)
+            m.setParam("NodefileDir", "/tmp")
+            m.setParam("Threads", 0)
+            #m.setParam("LogFile", "gurobi.log")
+>>>>>>> bf175dd82e7a495803939bb3f674792f7032d97c
 
+            # Construct model
+            m = self._sssg_cosine_similarity_2(m)
             # Optimize model
             m.optimize()
 
             group = []
-            sol_wi, sol_wis, sol_z, sol_zs = dict(), dict(), -1, -1
+            sol_w, sol_z = dict(), dict()
             for v in m.getVars():
-                if 'wi_' in v.VarName:
+                if 'w_' in v.VarName:
                     group.append(round(v.X))
-                    sol_wi[v.VarName] = v.X
-                if 'wis_' in v.VarName:
-                    sol_wis[v.VarName] = v.X
-                if 'z' == v.VarName:
-                    sol_z = v.X
-                if 'zs' == v.VarName:
-                    sol_zs = v.X
+                    sol_w[v.VarName] = v.X
+                if 'z_' in v.VarName:
+                    sol_z[v.VarName] = v.X
             print('Obj: %s' % m.ObjVal)
             print('Cosine similarity: %s' % \
-                  cosine_similarity(wf, list(sol_wi.values())))
-            print(*sol_wi.items(), sep='\n')
-            print(*sol_wis.items(), sep='\n')
-            print('z: %s' % sol_z)
-            print('zs: %s' % sol_zs)
+                  cosine_similarity(self._groups[0], list(sol_w.values())))
+            print(*sol_w.items(), sep='\n')
+            print(*sol_z.items(), sep='\n')
+            print('wf: %s' % self._groups[0])
             # Applies a final GCD reduction just in case.
             final_groups.append(frac2int_lossless(group))
 
@@ -157,27 +160,85 @@ class GroupReduction:
             print('Encountered an attribute error')
             return []
 
-    def solve_sssg2(self):
+    def _sssg_cosine_similarity_1(self, m):
         '''
-        Given the input groups and table limit, solve the single switch single
-        group (SSSG) optimization problem. This uses a non-convex MIQCP
-        formulation.
+        Build a non-convex MINLP (QP+QC) formulation using cosine similarity as
+        objective for the single switch single group (SSSG) optimization.
+
+        m: pre-built empty model, needs decision vars and constraints.
         '''
-        final_groups = []
-        if len(self._groups) != 1:
-            print('[ERROR] %s: unexpected number of input groups %s' %
-                  solve_sssg.__name__, len(self._groups))
-            return []
+        # Create variables: wf[i] is intended (fractional) weight, wi[i] is
+        # actual (integral) weight. wis[i] is the square of wi[i].
+        wf, wi, wis = self._groups[0], [], []
+        for n in range(len(wf)):
+            wi.append(m.addVar(vtype=GRB.INTEGER, lb=0,
+                               ub=self._table_limit,
+                               name="wi_" + str(n+1)))
+            wis.append(m.addVar(vtype=GRB.CONTINUOUS, lb=0,
+                                ub=self._table_limit * self._table_limit,
+                                name="wis_" + str(n+1)))
+        z = m.addVar(vtype=GRB.CONTINUOUS, name="z")
+        zs = m.addVar(vtype=GRB.CONTINUOUS, name="zs")
 
-        # Create a new model
-        m = gp.Model("single_switch_single_group")
-        m.setParam("NonConvex", 2)
-        m.setParam("FeasibilityTol", 1e-9)
-        m.setParam("IntFeasTol", 1e-9)
-        m.setParam("MIPGap", 1e-9)
-        m.setParam("LogToConsole", 1)
-        #m.setParam("LogFile", "gurobi.log")
+        # Objective is quadratic.
+        obj = gp.QuadExpr();
+        # fastest way to construct a large objective.
+        # Params are: coeffs, var1s, var2s (must be of same size).
+        obj.addTerms(wf, wi, [z] * len(wf))
+        # Set objective
+        m.setObjective(obj, GRB.MAXIMIZE)
 
+        # Add constraint: sum(wi) <= table_limit
+        m.addConstr(gp.quicksum(wi) <= self._table_limit, "group_size_ub")
+        # Add constraint: sum(wi) >= 1 (group cannot be empty)
+        m.addConstr(gp.quicksum(wi) >= 1, "group_size_lb")
+        # Add constraint: zs * sum(wf^2) * sum(wis) == 1
+        c = gp.QuadExpr()
+        c.addTerms([sum(v*v for v in wf)] * len(wis), [zs] * len(wis), wis)
+        m.addConstr(c == 1, "linearization_zs")
+        # Add constraint: zs = z * z
+        m.addConstr(zs == z * z, "linearization_z")
+        for i in range(len(wi)):
+            # Add constraint: wis = wi * wi
+            m.addConstr(wis[i] == wi[i] * wi[i],
+                        "linearization_wis_" + str(1 + i))
+        # Add constraint: 0 <= obj <= 1
+        m.addConstr(obj <= 1, "cosine_similarity")
+        m.addConstr(obj >= 0, "cosine_similarity")
+
+        '''
+        group = []
+        sol_wi, sol_wis, sol_z, sol_zs = dict(), dict(), -1, -1
+        for v in m.getVars():
+            if 'wi_' in v.VarName:
+                group.append(round(v.X))
+                sol_wi[v.VarName] = v.X
+            if 'wis_' in v.VarName:
+                sol_wis[v.VarName] = v.X
+            if 'z' == v.VarName:
+                sol_z = v.X
+            if 'zs' == v.VarName:
+                sol_zs = v.X
+        print('Obj: %s' % m.ObjVal)
+        print('Cosine similarity: %s' % \
+              cosine_similarity(wf, list(sol_wi.values())))
+        print(*sol_wi.items(), sep='\n')
+        print(*sol_wis.items(), sep='\n')
+        print('z: %s' % sol_z)
+        print('zs: %s' % sol_zs)
+        # Applies a final GCD reduction just in case.
+        final_groups.append(frac2int_lossless(group))
+        '''
+
+        return m
+
+    def _sssg_cosine_similarity_2(self, m):
+        '''
+        Build a non-convex MIQCP formulation using cosine similarity as
+        objective for the single switch single group (SSSG) optimization.
+
+        m: pre-built empty model, needs decision vars and constraints.
+        '''
         # Create variables: wf[i] is intended (fractional) weight, w[i] is
         # actual (integral) weight.
         wf, w, z, ws, zs = self._groups[0], [], [], [], []
@@ -203,7 +264,6 @@ class GroupReduction:
         m.addConstr(gp.quicksum(w) <= self._table_limit, "group_size_ub")
         # Add constraint: sum(wi) >= 1 (group cannot be empty)
         m.addConstr(gp.quicksum(w) >= 1, "group_size_lb")
-
         for i in range(len(w)):
             # Add constraint: zs[i] * sum(ws) == ws[i]
             c = gp.QuadExpr()
@@ -218,27 +278,7 @@ class GroupReduction:
             if FLAG_USE_INT_INPUT_GROUPS:
                 m.addConstr(w[i] <= wf[i], "no_scale_up_" + str(1+i))
 
-        # Optimize model
-        m.optimize()
-
-        group = []
-        sol_w, sol_z = dict(), dict()
-        for v in m.getVars():
-            if 'w_' in v.VarName:
-                group.append(round(v.X))
-                sol_w[v.VarName] = v.X
-            if 'z_' in v.VarName:
-                sol_z[v.VarName] = v.X
-        print('Obj: %s' % m.ObjVal)
-        print('Cosine similarity: %s' % \
-              cosine_similarity(wf, list(sol_w.values())))
-        print(*sol_w.items(), sep='\n')
-        print(*sol_z.items(), sep='\n')
-        print('wf: %s' % wf)
-        # Applies a final GCD reduction just in case.
-        final_groups.append(frac2int_lossless(group))
-
-        return final_groups
+        return m
 
 if __name__ == "__main__":
     #input_groups = [[10.5, 20.1, 31.0, 39.7]]
