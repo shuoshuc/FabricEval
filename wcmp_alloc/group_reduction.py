@@ -115,6 +115,10 @@ class GroupReduction:
                 # Add constraint: wis = wi * wi
                 m.addConstr(wis[i] == wi[i] * wi[i],
                             "linearization_wis_" + str(1 + i))
+                # Add constraint only if inputs are already scaled up to
+                # integers: wi[i] <= wf[i]
+                if FLAG_USE_INT_INPUT_GROUPS:
+                    m.addConstr(wi[i] <= wf[i], "no_scale_up_" + str(1+i))
             # Add constraint: 0 <= obj <= 1
             m.addConstr(obj <= 1, "cosine_similarity")
             m.addConstr(obj >= 0, "cosine_similarity")
@@ -180,9 +184,11 @@ class GroupReduction:
         for n in range(len(wf)):
             w.append(m.addVar(vtype=GRB.INTEGER, lb=0, ub=self._table_limit,
                               name="w_" + str(n+1)))
+            w[n].start = self._int_groups[0][n]
             ws.append(m.addVar(vtype=GRB.CONTINUOUS, lb=0,
                                ub=self._table_limit * self._table_limit,
                                name="ws_" + str(n+1)))
+            ws[n].start = self._int_groups[0][n] * self._int_groups[0][n]
             z.append(m.addVar(vtype=GRB.CONTINUOUS, lb=0, ub=1,
                               name="z_" + str(n+1)))
             zs.append(m.addVar(vtype=GRB.CONTINUOUS, lb=0, ub=1,
@@ -238,8 +244,9 @@ if __name__ == "__main__":
     #input_groups = [[10.5, 20.1, 31.0, 39.7]]
     #input_groups = [[1.0, 2.0, 3.0, 4.0, 5.0, 6.0]]
     input_groups = [[1.1, 2.1, 3.1, 4.1]]
+    #input_groups = [[i for i in range(1, 17)]]
     group_reduction = GroupReduction(input_groups, 16*1024)
-    output_groups = group_reduction.solve_sssg2()
+    output_groups = group_reduction.solve_sssg()
     print('Input: %s' % input_groups)
     print('Output: %s' % output_groups)
     res = cosine_similarity(input_groups[0], output_groups[0])
