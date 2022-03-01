@@ -7,7 +7,7 @@ from functools import reduce
 FLAG_USE_INT_INPUT_GROUPS = True
 
 # Broadcom Tomahawk 2 ECMP table limit.
-TABLE_LIMIT = 16 * 1024
+TABLE_LIMIT = 4 * 1024
 
 def gcd_reduce(vector):
     '''
@@ -58,7 +58,7 @@ class GroupReduction:
                                            self._orig_groups
         self._table_limit = table_limit
 
-    def solve_sssg(self):
+    def solve_sssg(self, formulation):
         '''
         Given the input groups and table limit, solve the single switch single
         group (SSSG) optimization problem.
@@ -83,7 +83,13 @@ class GroupReduction:
             #m.setParam("LogFile", "gurobi.log")
 
             # Construct model
-            m = self._sssg_cosine_similarity_2(m)
+            if formulation == "MIP1":
+                m = self._sssg_cosine_similarity_1(m)
+            elif formulation == "MIP2":
+                m = self._sssg_cosine_similarity_2(m)
+            else:
+                print("Formulation not recognized!")
+                return []
             # Optimize model
             m.optimize()
 
@@ -120,16 +126,16 @@ class GroupReduction:
 
         m: pre-built empty model, needs decision vars and constraints.
         '''
-        # Create variables: wf[i] is intended (fractional) weight, wi[i] is
-        # actual (integral) weight. wis[i] is the square of wi[i].
-        wf, wi, wis = self._groups[0], [], []
+        # Create variables: wf[i] is intended (fractional) weight, w[i] is
+        # actual (integral) weight. ws[i] is the square of w[i].
+        wf, w, ws = self._groups[0], [], []
         for n in range(len(wf)):
-            wi.append(m.addVar(vtype=GRB.INTEGER, lb=0,
+            w.append(m.addVar(vtype=GRB.INTEGER, lb=0,
                                ub=self._table_limit,
-                               name="wi_" + str(n+1)))
-            wis.append(m.addVar(vtype=GRB.CONTINUOUS, lb=0,
+                               name="w_" + str(n+1)))
+            ws.append(m.addVar(vtype=GRB.CONTINUOUS, lb=0,
                                 ub=self._table_limit * self._table_limit,
-                                name="wis_" + str(n+1)))
+                                name="ws_" + str(n+1)))
         z = m.addVar(vtype=GRB.CONTINUOUS, name="z")
         zs = m.addVar(vtype=GRB.CONTINUOUS, name="zs")
 
@@ -137,27 +143,28 @@ class GroupReduction:
         obj = gp.QuadExpr();
         # fastest way to construct a large objective.
         # Params are: coeffs, var1s, var2s (must be of same size).
-        obj.addTerms(wf, wi, [z] * len(wf))
+        obj.addTerms(wf, w, [z] * len(wf))
         # Set objective
         m.setObjective(obj, GRB.MAXIMIZE)
 
-        # Add constraint: sum(wi) <= table_limit
-        m.addConstr(gp.quicksum(wi) <= self._table_limit, "group_size_ub")
-        # Add constraint: sum(wi) >= 1 (group cannot be empty)
-        m.addConstr(gp.quicksum(wi) >= 1, "group_size_lb")
+        # Add constraint: sum(w) <= table_limit
+        m.addConstr(gp.quicksum(w) <= self._table_limit, "group_size_ub")
+        # Add constraint: sum(w) >= 1 (group cannot be empty)
+        m.addConstr(gp.quicksum(w) >= 1, "group_size_lb")
         # Add constraint: zs * sum(wf^2) * sum(wis) == 1
         c = gp.QuadExpr()
-        c.addTerms([sum(v*v for v in wf)] * len(wis), [zs] * len(wis), wis)
+        c.addTerms([sum(v*v for v in wf)] * len(ws), [zs] * len(ws), ws)
         m.addConstr(c == 1, "linearization_zs")
         # Add constraint: zs = z * z
         m.addConstr(zs == z * z, "linearization_z")
-        for i in range(len(wi)):
-            # Add constraint: wis = wi * wi
-            m.addConstr(wis[i] == wi[i] * wi[i],
-                        "linearization_wis_" + str(1 + i))
-        # Add constraint: 0 <= obj <= 1
-        m.addConstr(obj <= 1, "cosine_similarity")
-        m.addConstr(obj >= 0, "cosine_similarity")
+        for i in range(len(w)):
+            # Add constraint: ws = w * w
+            m.addConstr(ws[i] == w[i] * w[i],
+                        "linearization_ws_" + str(1 + i))
+            # Add constraint only if inputs are already scaled up to integers:
+            # w[i] <= wf[i]
+            if FLAG_USE_INT_INPUT_GROUPS:
+                m.addConstr(w[i] <= wf[i], "no_scale_up_" + str(1+i))
 
         return m
 
@@ -215,7 +222,7 @@ if __name__ == "__main__":
     input_groups = [[1.1, 2.1, 3.1, 4.1]]
     #input_groups = [[i for i in range(1, 17)]]
     group_reduction = GroupReduction(input_groups, 16*1024)
-    output_groups = group_reduction.solve_sssg()
+    output_groups = group_reduction.solve_sssg('MIP2')
     print('Input: %s' % input_groups)
     print('Output: %s' % output_groups)
     res = cosine_similarity(input_groups[0], output_groups[0])
