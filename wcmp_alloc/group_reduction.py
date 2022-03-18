@@ -1,7 +1,8 @@
 import gurobipy as gp
 import numpy as np
+import time
 from gurobipy import GRB
-from math import gcd, sqrt
+from math import gcd, sqrt, isclose
 from functools import reduce
 
 # If True, feeds solver with scaled up integer groups.
@@ -22,7 +23,7 @@ def frac2int_lossless(frac_list):
     Converts list of fractions to list of integers without loss. Essentially
     scaling up by multiplying 10s and then divide by gcd.
     '''
-    while any(list(map(lambda x: x % 1, frac_list))):
+    while any(list(map(lambda x: not isclose(x % 1, 0), frac_list))):
         frac_list = list(map(lambda x: x * 10, frac_list))
     return gcd_reduce(list(map(int, frac_list)))
 
@@ -120,8 +121,6 @@ class GroupReduction:
                 if 'z_' in v.VarName:
                     sol_z[v.VarName] = v.X
             print('Obj: %s' % m.ObjVal)
-            print('Cosine similarity: %s' % \
-                  cosine_similarity(self._groups[0], list(sol_w.values())))
             print(*sol_w.items(), sep='\n')
             print(*sol_z.items(), sep='\n')
             print('wf: %s' % self._groups[0])
@@ -271,16 +270,26 @@ class GroupReduction:
 
 if __name__ == "__main__":
     table_limit = 16*1024
+    # num ports
+    p = 4
+    # fraction precision
+    frac_digits = 3
+
     #input_groups = [[1.1, 2.1, 3.1]]
     #input_groups = [[10.5, 20.1, 31.0, 39.7]]
     #input_groups = [[1.0, 2.0, 3.0, 4.0, 5.0, 6.0]]
     #input_groups = [[1.1, 2.1, 3.1, 4.1]]
-    input_groups = [[i + 0.1 for i in range(1, 17)]]
+    #input_groups = [[i + 0.1 for i in range(1, 17)]]
+    input_groups = list(map(lambda x: [round(v, frac_digits) for v in x],
+                            np.random.uniform(1, 100, size=(1, p)).tolist()))
+    start = time.time_ns()
     group_reduction = GroupReduction(input_groups, table_limit)
-    output_groups = group_reduction.solve_sssg('MIP3')
+    output_groups = group_reduction.solve_sssg('MIP2')
+    end = time.time_ns()
     print('Input: %s' % input_groups)
     print('Output: %s' % output_groups)
     res = l1_norm_diff(input_groups[0], output_groups[0])
     print('Input/Output L1 norm diff: %s' % res)
     res = cosine_similarity(input_groups[0], output_groups[0])
     print('Input/Output cosine similarity: %s' % res)
+    print('Solving time (usec):', (end - start)/10**6)
