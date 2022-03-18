@@ -8,10 +8,12 @@ A data center network simulator built for studying traffic engineering schemes.
 * **wcmp\_alloc/**: the WCMPAlloc class that processes input TE solutions.
 
 ## Prerequisites
-FabricSim is a Python project, it uses Bazel as its build system.
+* FabricSim is a Python project, it uses Bazel as its build system.
 To start, make sure you have [Bazel](https://docs.bazel.build/install.html) installed.
-Everything is implemented and tested under [Python 3](https://www.python.org/downloads/), so make sure this is also installed.
-FabricSim uses Gurobi in the WCMPAlloc component to solve group reduction optimization. Everything is only tested on Gurobi 9.5.0+.
+* Everything is implemented and tested under [Python 3](https://www.python.org/downloads/),
+so make sure this is also installed.
+* FabricSim uses [Gurobi](https://www.gurobi.com/) in the WCMPAlloc component
+to solve group reduction optimization. Everything is only tested on Gurobi 9.5.0+.
 
 ## Usage
 Run the following command to unit test loading a test network topology and verify its properties:
