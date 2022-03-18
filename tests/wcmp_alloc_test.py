@@ -56,16 +56,14 @@ class TestGroupReduction(unittest.TestCase):
         self.assertEqual([[1, 2, 3, 4]], group_reduction.solve_sssg())
 
     def test_single_switch_single_group_3(self):
-        group_reduction = GroupReduction([[1.1, 2.1, 3.1, 4.1]], 16*1024)
+        group_reduction = GroupReduction([[10.5, 20.1, 31.0, 39.7]], 10)
         self.assertEqual([[1, 2, 3, 4]], group_reduction.solve_sssg())
 
     def test_single_switch_single_group_4(self):
-        group_reduction = GroupReduction([[1.1, 2.1, 3.1, 3.9]], 16*1024)
-        self.assertEqual([[4, 9, 13, 17]], group_reduction.solve_sssg())
-
-    def test_single_switch_single_group_5(self):
-        group_reduction = GroupReduction([[10.5, 20.1, 31.0, 39.7]], 16*1024)
-        self.assertEqual([[1, 2, 3, 4]], group_reduction.solve_sssg())
+        group_reduction = GroupReduction([[i + 0.1 for i in range(1, 17)]],
+                                         16*1024)
+        self.assertEqual([[(i + 0.1) * 10 for i in range(1, 17)]],
+                         group_reduction.solve_sssg())
 
 if __name__ == "__main__":
     unittest.main()

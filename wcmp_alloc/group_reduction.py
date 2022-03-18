@@ -1,4 +1,5 @@
 import gurobipy as gp
+import numpy as np
 from gurobipy import GRB
 from math import gcd, sqrt
 from functools import reduce
@@ -7,7 +8,7 @@ from functools import reduce
 FLAG_USE_INT_INPUT_GROUPS = True
 
 # Broadcom Tomahawk 2 ECMP table limit.
-TABLE_LIMIT = 4 * 1024
+TABLE_LIMIT = 16 * 1024
 
 def gcd_reduce(vector):
     '''
@@ -39,6 +40,16 @@ def cosine_similarity(G1, G2):
         g2_l2_norm_sq += G2[i] * G2[i]
     return dot_sum / (sqrt(g1_l2_norm_sq) * sqrt(g2_l2_norm_sq))
 
+def l1_norm_diff(G1, G2):
+    '''
+    Computes the L1 norm of difference between group G1 and G2. They must be of
+    the same size.
+    '''
+    assert len(G1) == len(G2) and G1 and G2, 'G1 and G2 must be non-empty ' \
+                                             'equal size.'
+    G1, G2 = np.array(G1), np.array(G2)
+    return np.linalg.norm((G2 / sum(G2) - G1 / sum(G1)), ord=1)
+
 class GroupReduction:
     '''
     GroupReduction runs various solvers to reduce input groups to acceptable
@@ -58,7 +69,7 @@ class GroupReduction:
                                            self._orig_groups
         self._table_limit = table_limit
 
-    def solve_sssg(self, formulation):
+    def solve_sssg(self, formulation='MIP3'):
         '''
         Given the input groups and table limit, solve the single switch single
         group (SSSG) optimization problem.
@@ -72,24 +83,31 @@ class GroupReduction:
         try:
             # Initialize a new model
             m = gp.Model("single_switch_single_group")
-            m.setParam("NonConvex", 2)
-            m.setParam("FeasibilityTol", 1e-9)
-            m.setParam("IntFeasTol", 1e-9)
-            m.setParam("MIPGap", 1e-9)
+            m.setParam("FeasibilityTol", 1e-7)
+            m.setParam("IntFeasTol", 1e-8)
+            m.setParam("MIPGap", 1e-4)
             m.setParam("LogToConsole", 1)
-            m.setParam("NodefileStart", 10)
+            #m.setParam("NodefileStart", 0.5)
             m.setParam("NodefileDir", "/tmp")
             m.setParam("Threads", 0)
+            #m.setParam("TimeLimit", 100)
             #m.setParam("LogFile", "gurobi.log")
 
             # Construct model
             if formulation == "MIP1":
+                m.setParam("NonConvex", 2)
+                m.setParam("MIPFocus", 2)
                 m = self._sssg_cosine_similarity_1(m)
             elif formulation == "MIP2":
+                m.setParam("NonConvex", 2)
+                m.setParam("MIPFocus", 2)
                 m = self._sssg_cosine_similarity_2(m)
+            elif formulation == "MIP3":
+                m = self._sssg_l1_norm(m)
             else:
                 print("Formulation not recognized!")
                 return []
+
             # Optimize model
             m.optimize()
 
@@ -190,6 +208,7 @@ class GroupReduction:
                               name="z_" + str(n+1)))
             zs.append(m.addVar(vtype=GRB.CONTINUOUS, lb=0, ub=1,
                                name="zs_" + str(n+1)))
+        m.update()
 
         # Objective is linear.
         obj = gp.LinExpr(wf, z);
@@ -216,14 +235,52 @@ class GroupReduction:
 
         return m
 
+    def _sssg_l1_norm(self, m):
+        '''
+        Build an ILP formulation using L1 norm as the objective for the single
+        switch single group (SSSG) optimization.
+
+        m: pre-built empty model, needs decision vars and constraints.
+        '''
+        # Create variables: wf[i] is the intended (fractional) weight after
+        # normalization, w[i] is the actual (integral) weight.
+        wf, wf_sum, w, u = self._groups[0], sum(self._groups[0]), [], []
+        for n in range(len(wf)):
+            w.append(m.addVar(vtype=GRB.INTEGER, lb=0, ub=self._table_limit,
+                              name="w_" + str(n+1)))
+            u.append(m.addVar(vtype=GRB.CONTINUOUS, name="u_" + str(n+1)))
+        l1_norm = m.addVar(vtype=GRB.CONTINUOUS, name="l1_norm")
+
+        # Set objective
+        m.setObjective(l1_norm, GRB.MINIMIZE)
+
+        # Force l1_norm to be sum(u), which is the sum of all absolute values.
+        m.addConstr(l1_norm == gp.quicksum(u))
+        # Add constraint: sum(w) <= table_limit
+        m.addConstr(gp.quicksum(w) <= self._table_limit, "group_size_ub")
+        for i in range(len(w)):
+            # Add constraint: u[i] == abs(w[i] / table_limit - wf[i]).
+            m.addConstr(w[i] / self._table_limit - wf[i] / wf_sum <= u[i])
+            m.addConstr(wf[i] / wf_sum - w[i] / self._table_limit <= u[i])
+            # Add constraint only if inputs are already scaled up to integers:
+            # w[i] <= wf[i]
+            if FLAG_USE_INT_INPUT_GROUPS:
+                m.addConstr(w[i] <= wf[i], "no_scale_up_" + str(1+i))
+
+        return m
+
 if __name__ == "__main__":
+    table_limit = 16*1024
+    #input_groups = [[1.1, 2.1, 3.1]]
     #input_groups = [[10.5, 20.1, 31.0, 39.7]]
     #input_groups = [[1.0, 2.0, 3.0, 4.0, 5.0, 6.0]]
-    input_groups = [[1.1, 2.1, 3.1, 4.1]]
-    #input_groups = [[i for i in range(1, 17)]]
-    group_reduction = GroupReduction(input_groups, 16*1024)
-    output_groups = group_reduction.solve_sssg('MIP2')
+    #input_groups = [[1.1, 2.1, 3.1, 4.1]]
+    input_groups = [[i + 0.1 for i in range(1, 17)]]
+    group_reduction = GroupReduction(input_groups, table_limit)
+    output_groups = group_reduction.solve_sssg('MIP3')
     print('Input: %s' % input_groups)
     print('Output: %s' % output_groups)
+    res = l1_norm_diff(input_groups[0], output_groups[0])
+    print('Input/Output L1 norm diff: %s' % res)
     res = cosine_similarity(input_groups[0], output_groups[0])
     print('Input/Output cosine similarity: %s' % res)
