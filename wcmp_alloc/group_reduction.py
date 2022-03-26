@@ -4,6 +4,7 @@ import time
 from gurobipy import GRB
 from math import gcd, sqrt, isclose
 from functools import reduce
+from itertools import chain
 
 # If True, feeds solver with scaled up integer groups.
 FLAG_USE_INT_INPUT_GROUPS = True
@@ -51,14 +52,29 @@ def l1_norm_diff(G1, G2):
     G1, G2 = np.array(G1), np.array(G2)
     return np.linalg.norm((G2 / sum(G2) - G1 / sum(G1)), ord=1)
 
+def input_groups_gen(g, p, lb, ub, frac_digits):
+    '''
+    Generate `g` input groups, each with `p` ports. The weight for each port is
+    generated randomly from a uniform distribution between `lb` and `ub`. Each
+    weight will be preserved with `frac_digits` in precision.
+
+    Returns a list of lists.
+    '''
+    input_groups = np.random.uniform(lb, ub, size=(g, p)).tolist()
+    return [[round(w, frac_digits) for w in g] for g in input_groups]
+
 class GroupReduction:
     '''
     GroupReduction runs various solvers to reduce input groups to acceptable
     integer groups that can be directly implemented on switch hardware, based on
     defined problem formulation and constraints.
     '''
-    def __init__(self, groups, table_limit=TABLE_LIMIT):
+    def __init__(self, groups, traffic, table_limit=TABLE_LIMIT):
         '''
+        groups: input groups of intended weights reflecting desired traffic
+                distribution.
+        traffic: input per group traffic volume in Gbps.
+
         orig_groups: a list of lists, where each element list is a set of
                      weights for the corresponding group.
         int_groups: original groups after lossless scaleup to integers.
@@ -68,9 +84,10 @@ class GroupReduction:
         self._int_groups = list(map(frac2int_lossless, groups))
         self._groups = self._int_groups if FLAG_USE_INT_INPUT_GROUPS else \
                                            self._orig_groups
+        self._traffic = traffic
         self._table_limit = table_limit
 
-    def solve_sssg(self, formulation='MIP3'):
+    def solve_sssg(self, formulation='L1NORM2'):
         '''
         Given the input groups and table limit, solve the single switch single
         group (SSSG) optimization problem.
@@ -95,16 +112,20 @@ class GroupReduction:
             #m.setParam("LogFile", "gurobi.log")
 
             # Construct model
-            if formulation == "MIP1":
+            if formulation == "COSSIM1":
                 m.setParam("NonConvex", 2)
                 m.setParam("MIPFocus", 2)
                 m = self._sssg_cosine_similarity_1(m)
-            elif formulation == "MIP2":
+            elif formulation == "COSSIM2":
                 m.setParam("NonConvex", 2)
                 m.setParam("MIPFocus", 2)
                 m = self._sssg_cosine_similarity_2(m)
-            elif formulation == "MIP3":
-                m = self._sssg_l1_norm(m)
+            elif formulation == "L1NORM1":
+                m = self._sssg_l1_norm_1(m)
+            elif formulation == "L1NORM2":
+                m.setParam("NonConvex", 2)
+                m.setParam("MIPFocus", 2)
+                m = self._sssg_l1_norm_2(m)
             else:
                 print("Formulation not recognized!")
                 return []
@@ -187,7 +208,7 @@ class GroupReduction:
 
     def _sssg_cosine_similarity_2(self, m):
         '''
-        Build a non-convex MIQCP formulation using cosine similarity as
+        Build a non-convex MINLP formulation using cosine similarity as
         objective for the single switch single group (SSSG) optimization.
 
         m: pre-built empty model, needs decision vars and constraints.
@@ -234,10 +255,11 @@ class GroupReduction:
 
         return m
 
-    def _sssg_l1_norm(self, m):
+    def _sssg_l1_norm_1(self, m):
         '''
-        Build an ILP formulation using L1 norm as the objective for the single
-        switch single group (SSSG) optimization.
+        Build an MILP formulation using L1 norm as the objective for the single
+        switch single group (SSSG) optimization. In L1 norm, actual weights to
+        be solved are normalized against the swtich table limit.
 
         m: pre-built empty model, needs decision vars and constraints.
         '''
@@ -268,28 +290,173 @@ class GroupReduction:
 
         return m
 
+    def _sssg_l1_norm_2(self, m):
+        '''
+        Build an MIQCP formulation using L1 norm as the objective for the single
+        switch single group (SSSG) optimization. In L1 norm, actual weights to
+        be solved are normalized against the sum of actual weights.
+
+        m: pre-built empty model, needs decision vars and constraints.
+        '''
+        # Create variables: wf[i] is the intended (fractional) weight after
+        # normalization, w[i] is the actual (integral) weight.
+        wf, wf_sum, w, u = self._groups[0], sum(self._groups[0]), [], []
+        for n in range(len(wf)):
+            w.append(m.addVar(vtype=GRB.INTEGER, lb=0, ub=self._table_limit,
+                              name="w_" + str(n+1)))
+            u.append(m.addVar(vtype=GRB.CONTINUOUS, name="u_" + str(n+1)))
+        z = m.addVar(vtype=GRB.CONTINUOUS, name="z")
+        l1_norm = m.addVar(vtype=GRB.CONTINUOUS, name="l1_norm")
+
+        # Set objective
+        m.setObjective(l1_norm, GRB.MINIMIZE)
+
+        # Force l1_norm to be sum(u), which is the sum of all absolute values.
+        m.addConstr(l1_norm == gp.quicksum(u))
+        # Add constraint: sum(w) <= table_limit.
+        m.addConstr(gp.quicksum(w) <= self._table_limit, "group_size_ub")
+        # Add constraint: z == 1/sum(w).
+        m.addConstr(z * gp.quicksum(w) == 1, "z_limitation")
+        for i in range(len(w)):
+            # Add constraint: u[i] == abs(w[i] / table_limit - wf[i]).
+            m.addConstr(w[i] * z - wf[i] / wf_sum <= u[i])
+            m.addConstr(wf[i] / wf_sum - w[i] * z <= u[i])
+            # Add constraint only if inputs are already scaled up to integers:
+            # w[i] <= wf[i]
+            if FLAG_USE_INT_INPUT_GROUPS:
+                m.addConstr(w[i] <= wf[i], "no_scale_up_" + str(1+i))
+
+        return m
+
+    def solve_ssmg(self, formulation='L1NORM'):
+        '''
+        Given the input groups and table limit, solve the single switch multi 
+        group (SSMG) optimization problem.
+        '''
+        if len(self._groups) <= 0:
+            print('[ERROR] %s: unexpected number of input groups %s' %
+                  solve_ssmg.__name__, len(self._groups))
+            return []
+        if len(self._groups) != len(self._traffic):
+            print('[ERROR] %s: group size %s and traffic size %s mismatch' %
+                  solve_sssg.__name__, len(self._groups), len(self._traffic))
+            return []
+        final_groups = self._groups.copy()
+
+        try:
+            # Initialize a new model
+            m = gp.Model("single_switch_multi_group")
+            m.setParam("FeasibilityTol", 1e-7)
+            m.setParam("IntFeasTol", 1e-8)
+            m.setParam("MIPGap", 1e-4)
+            m.setParam("LogToConsole", 1)
+            #m.setParam("NodefileStart", 0.5)
+            m.setParam("NodefileDir", "/tmp")
+            m.setParam("Threads", 0)
+            #m.setParam("TimeLimit", 100)
+            #m.setParam("LogFile", "gurobi.log")
+
+            # Construct model
+            if formulation == "L1NORM":
+                m.setParam("NonConvex", 2)
+                m.setParam("MIPFocus", 2)
+                m = self._ssmg_l1_norm(m)
+            else:
+                print("Formulation not recognized!")
+                return []
+
+            # Optimize model
+            m.optimize()
+
+            sol_w = dict()
+            for v in m.getVars():
+                if 'w_' in v.VarName:
+                    split = v.VarName.split('_')
+                    final_groups[int(split[1])-1][int(split[2])-1] = round(v.X)
+                    sol_w[v.VarName] = v.X
+            print('Obj: %s' % m.ObjVal)
+            print(*sol_w.items(), sep='\n')
+            print('wf: %s' % self._groups)
+            # Applies a final GCD reduction just in case.
+            final_groups = list(map(frac2int_lossless, final_groups))
+
+            return final_groups
+
+        except gp.GurobiError as e:
+            print('Error code ' + str(e.errno) + ': ' + str(e))
+            return []
+        except AttributeError:
+            print('Encountered an attribute error')
+            return []
+
+    def _ssmg_l1_norm(self, model):
+        '''
+        Build an ILP formulation using L1 norm as the objective for the single
+        switch multi group (SSMG) optimization.
+
+        model: pre-built empty model, needs decision vars and constraints.
+        '''
+        # Create variables: wf[m][i] is the intended (fractional) weight for
+        # port i of group m after normalization, w[i] is the actual (integral)
+        # weight.
+        C, T = self._table_limit, self._traffic
+        wf, wf_sum = self._groups, [sum(g) for g in self._groups]
+        w, u, l1_norm, z = [], [], [], []
+        for m in range(len(wf)):
+            wm, um = [], []
+            for i in range(len(wf[m])):
+                wm.append(model.addVar(vtype=GRB.INTEGER, lb=0, ub=C,
+                                       name="w_{}_{}".format(m+1, i+1)))
+                um.append(model.addVar(vtype=GRB.CONTINUOUS,
+                                       name="u_{}_{}".format(m+1, i+1)))
+            w.append(wm)
+            u.append(um)
+            l1_norm.append(model.addVar(vtype=GRB.CONTINUOUS,
+                                        name="l1_norm_{}".format(m+1)))
+            z.append(model.addVar(vtype=GRB.CONTINUOUS,
+                                  name="z_{}".format(m+1)))
+
+        # Set objective: sum(T[m] * l1_norm[m]).
+        model.setObjective(gp.LinExpr(T, l1_norm), GRB.MINIMIZE)
+
+        # Add constraint: sum(w[m][i]) <= table_limit. Note that w is flattened
+        # from a 2D list to 1D.
+        model.addConstr(gp.quicksum(list(chain.from_iterable(w))) <= C,
+                        "group_size_ub")
+        for m in range(len(wf)):
+            # Add constraint: per-group L1 norm.
+            model.addConstr(l1_norm[m] == gp.quicksum(u[m]))
+            # Add constraint: z[m] = 1 / sum(w[m])
+            model.addConstr(z[m] * gp.quicksum(w[m]) == 1,
+                            "z_{}_limitation".format(m+1))
+            for i in range(len(wf[m])):
+                # Add constraint: u[m][i] == abs(w[m][i] / C - wf[m][i]).
+                model.addConstr(w[m][i] * z[m] - wf[m][i] / wf_sum[m] <= u[m][i])
+                model.addConstr(wf[m][i] / wf_sum[m] - w[m][i] * z[m] <= u[m][i])
+                # Add constraint only if inputs are already scaled up to
+                # integers: w[m][i] <= wf[m][i]
+                if FLAG_USE_INT_INPUT_GROUPS:
+                    model.addConstr(w[m][i] <= wf[m][i],
+                                    "no_scale_up_{}_{}".format(m+1, i+1))
+
+        return model
+
 if __name__ == "__main__":
     table_limit = 16*1024
-    # num ports
-    p = 4
-    # fraction precision
-    frac_digits = 3
+    # groups, # port per group, lower bound, upper bound, fraction precision
+    g, p, lb, ub, frac_digits = 2, 2, 1, 100, 3
+    # Assuming uniform unit traffic.
+    traffic_vol = [1] * g
 
-    #input_groups = [[1.1, 2.1, 3.1]]
-    #input_groups = [[10.5, 20.1, 31.0, 39.7]]
-    #input_groups = [[1.0, 2.0, 3.0, 4.0, 5.0, 6.0]]
-    #input_groups = [[1.1, 2.1, 3.1, 4.1]]
-    #input_groups = [[i + 0.1 for i in range(1, 17)]]
-    input_groups = list(map(lambda x: [round(v, frac_digits) for v in x],
-                            np.random.uniform(1, 100, size=(1, p)).tolist()))
+    #input_groups = [[1.1, 2.1], [3.1, 4.1]]
+    input_groups = input_groups_gen(g, p, lb, ub, frac_digits)
     start = time.time_ns()
-    group_reduction = GroupReduction(input_groups, table_limit)
-    output_groups = group_reduction.solve_sssg('MIP2')
+    group_reduction = GroupReduction(input_groups, traffic_vol, table_limit)
+    output_groups = group_reduction.solve_ssmg('L1NORM')
     end = time.time_ns()
     print('Input: %s' % input_groups)
     print('Output: %s' % output_groups)
-    res = l1_norm_diff(input_groups[0], output_groups[0])
-    print('Input/Output L1 norm diff: %s' % res)
-    res = cosine_similarity(input_groups[0], output_groups[0])
-    print('Input/Output cosine similarity: %s' % res)
-    print('Solving time (usec):', (end - start)/10**6)
+    for i in range(len(input_groups)):
+        diff = l1_norm_diff(input_groups[i], output_groups[i])
+        print('Group {} L1 Norm: {}'.format(i, diff))
+    print('Solving time (msec):', (end - start)/10**6)
