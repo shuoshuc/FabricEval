@@ -1,8 +1,9 @@
 import gurobipy as gp
 import numpy as np
 import time
+import copy
 from gurobipy import GRB
-from math import gcd, sqrt, isclose
+from math import gcd, sqrt, isclose, ceil, floor
 from functools import reduce
 from itertools import chain
 
@@ -80,8 +81,8 @@ class GroupReduction:
         int_groups: original groups after lossless scaleup to integers.
         table_limit: upper bound of the group entries on the switch.
         '''
-        self._orig_groups = groups
-        self._int_groups = list(map(frac2int_lossless, groups))
+        self._orig_groups = copy.deepcopy(groups)
+        self._int_groups = list(map(frac2int_lossless, copy.deepcopy(groups)))
         self._groups = self._int_groups if FLAG_USE_INT_INPUT_GROUPS else \
                                            self._orig_groups
         self._traffic = traffic
@@ -166,7 +167,7 @@ class GroupReduction:
         '''
         # Create variables: wf[i] is intended (fractional) weight, w[i] is
         # actual (integral) weight. ws[i] is the square of w[i].
-        wf, w, ws = self._groups[0], [], []
+        wf, w, ws = self._groups[0].copy(), [], []
         for n in range(len(wf)):
             w.append(m.addVar(vtype=GRB.INTEGER, lb=0,
                                ub=self._table_limit,
@@ -215,7 +216,7 @@ class GroupReduction:
         '''
         # Create variables: wf[i] is intended (fractional) weight, w[i] is
         # actual (integral) weight.
-        wf, w, z, ws, zs = self._groups[0], [], [], [], []
+        wf, w, z, ws, zs = self._groups[0].copy(), [], [], [], []
         for n in range(len(wf)):
             w.append(m.addVar(vtype=GRB.INTEGER, lb=0, ub=self._table_limit,
                               name="w_" + str(n+1)))
@@ -265,7 +266,7 @@ class GroupReduction:
         '''
         # Create variables: wf[i] is the intended (fractional) weight after
         # normalization, w[i] is the actual (integral) weight.
-        wf, wf_sum, w, u = self._groups[0], sum(self._groups[0]), [], []
+        wf, wf_sum, w, u = self._groups[0].copy(), sum(self._groups[0]), [], []
         for n in range(len(wf)):
             w.append(m.addVar(vtype=GRB.INTEGER, lb=0, ub=self._table_limit,
                               name="w_" + str(n+1)))
@@ -300,7 +301,7 @@ class GroupReduction:
         '''
         # Create variables: wf[i] is the intended (fractional) weight after
         # normalization, w[i] is the actual (integral) weight.
-        wf, wf_sum, w, u = self._groups[0], sum(self._groups[0]), [], []
+        wf, wf_sum, w, u = self._groups[0].copy(), sum(self._groups[0]), [], []
         for n in range(len(wf)):
             w.append(m.addVar(vtype=GRB.INTEGER, lb=0, ub=self._table_limit,
                               name="w_" + str(n+1)))
@@ -341,7 +342,7 @@ class GroupReduction:
             print('[ERROR] %s: group size %s and traffic size %s mismatch' %
                   solve_sssg.__name__, len(self._groups), len(self._traffic))
             return []
-        final_groups = self._groups.copy()
+        final_groups = copy.deepcopy(self._groups)
 
         try:
             # Initialize a new model
@@ -400,7 +401,7 @@ class GroupReduction:
         # port i of group m after normalization, w[i] is the actual (integral)
         # weight.
         C, T = self._table_limit, self._traffic
-        wf, wf_sum = self._groups, [sum(g) for g in self._groups]
+        wf, wf_sum = copy.deepcopy(self._groups), [sum(g) for g in self._groups]
         w, u, l1_norm, z = [], [], [], []
         for m in range(len(wf)):
             wm, um = [], []
