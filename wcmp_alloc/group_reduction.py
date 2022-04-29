@@ -76,8 +76,8 @@ def calc_group_oversub(G, G_prime, mode='max'):
           of max to find the group oversub.
     Return: group oversub.
     '''
-    G_sum = np.sum(G)
-    G_prime_sum = np.sum(G_prime)
+    G_sum = sum(G)
+    G_prime_sum = sum(G_prime)
     numerator = np.asarray(G_prime) * G_sum
     demominator = np.asarray(G) * G_prime_sum
 
@@ -130,8 +130,8 @@ class GroupReduction:
             return -1
 
         min_oversub, index = float('inf'), -1
-        gtr_size = np.sum(group_to_reduce)
-        gur_size = np.sum(group_under_reduction)
+        gtr_size = sum(group_to_reduce)
+        gur_size = sum(group_under_reduction)
         for i in range(len(group_under_reduction)):
             oversub = ((group_under_reduction[i] + 1) *
                        gtr_size) / ((gur_size + 1) * group_to_reduce[i])
@@ -150,7 +150,8 @@ class GroupReduction:
         while calc_group_oversub(group_to_reduce, final_group) > delta_max:
             index = self._choose_port_to_update(group_to_reduce, final_group)
             final_group[index] += 1
-            if np.sum(final_group) >= np.sum(group_to_reduce):
+            if sum(final_group) >= sum(group_to_reduce):
+                print('I give up!!')
                 return group_to_reduce
 
         return final_group.tolist()
@@ -169,7 +170,7 @@ class GroupReduction:
         group_to_reduce = self._int_groups[0]
         T = self._table_limit
         final_group = copy.deepcopy(group_to_reduce)
-        while np.sum(final_group) > T:
+        while sum(final_group) > T:
             non_reducible_size = 0
             # Counts singleton ports, as they cannot be reduced any further.
             for i in range(len(final_group)):
@@ -183,7 +184,7 @@ class GroupReduction:
             # technically be sum(group_to_reduce) - non_reducible_size since the
             # singleton ports should just be left out of reduction. But the
             # algorithm still reduces (to 0) and then always rounds up to 1.
-            reduction_ratio = (T - non_reducible_size) / np.sum(group_to_reduce)
+            reduction_ratio = (T - non_reducible_size) / sum(group_to_reduce)
             for i in range(len(final_group)):
                 final_group[i] = np.floor(group_to_reduce[i] * reduction_ratio)
                 if final_group[i] == 0:
@@ -192,7 +193,7 @@ class GroupReduction:
         # In case the previous round-down over-reduced groups, which leaves some
         # headroom in T, we make full use of the headroom while minimizing the
         # oversub.
-        remaining_size = int(T - np.sum(final_group))
+        remaining_size = int(T - sum(final_group))
         min_oversub = calc_group_oversub(group_to_reduce, final_group)
         final_group_2 = copy.deepcopy(final_group)
         for _ in range(remaining_size):
@@ -221,13 +222,13 @@ class GroupReduction:
         # Sort groups in descending order of size.
         groups_in = sorted(self._int_groups, key=sum, reverse=True)
         groups_out = copy.deepcopy(groups_in)
-        total_size = np.sum([np.sum(g) for g in groups_in])
+        total_size = sum([sum(g) for g in groups_in])
 
         while total_size > S:
             for i in range(len(groups_in)):
                 groups_out[i] = self.reduce_wcmp_group(groups_in[i],
                                                        enforced_oversub)
-                total_size = np.sum([np.sum(g) for g in groups_out])
+                total_size = sum([sum(g) for g in groups_out])
                 if total_size <= S:
                     return groups_out
             # Relaxes oversub limit if we fail to fit all groups with the same
