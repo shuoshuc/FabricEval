@@ -64,6 +64,34 @@ def input_groups_gen(g, p, lb, ub, frac_digits):
     input_groups = np.random.uniform(lb, ub, size=(g, p)).tolist()
     return [[round(w, frac_digits) for w in g] for g in input_groups]
 
+def calc_group_oversub(G, G_prime, mode='max'):
+    '''
+    Group oversub delta(G, G') is defined as the max port oversub of the
+    group, as per equation 2 in the EuroSys WCMP paper. Used in the group
+    reduction algoritm (Algorithm 1 in the paper).
+
+    G: original group before reduction.
+    G': final group after reduction.
+    mode: a knob that allows the function to use avg or percentile instead
+          of max to find the group oversub.
+    Return: group oversub.
+    '''
+    G_sum = np.sum(G)
+    G_prime_sum = np.sum(G_prime)
+    numerator = np.asarray(G_prime) * G_sum
+    demominator = np.asarray(G) * G_prime_sum
+
+    if mode == 'max':
+        return np.max(numerator / demominator)
+    elif mode == 'avg':
+        return np.average(numerator / demominator)
+    elif mode == 'mean':
+        return np.percentile(numerator / demominator, 50)
+    else:
+        print('Mode %s not recognized!' % mode)
+        return None
+
+
 class GroupReduction:
     '''
     GroupReduction runs various solvers to reduce input groups to acceptable
@@ -88,97 +116,96 @@ class GroupReduction:
         self._traffic = traffic
         self._table_limit = table_limit
 
-    def _calculate_oversub(self, group_to_reduce, output_groups, mode="ratio"):
-        '''
-        Implementation of equation 2 in the Eurosys WCMP paper. Used in the
-        group reduction algoritm (Algorithm 1 in the paper).
-        '''
-        if mode == "L1":
-            orig_groups_sum = np.sum(group_to_reduce)
-            output_groups_sum = np.sum(output_groups)
-            return np.sum(np.abs(orig_groups_sum - output_groups_sum))
-        elif mode == "ratio":
-            orig_groups_sum = np.sum(group_to_reduce)
-            output_groups_sum = np.sum(output_groups)
-            numerator = np.asarray(output_groups) * orig_groups_sum
-            demominator = np.asarray(group_to_reduce) * output_groups_sum
-            return np.max(numerator / demominator)
-        else:
-            print("Mode not recognized!")
-            return []
-
-    def _choose_port_to_update(self, output_groups):
+    def _choose_port_to_update(self, group_to_reduce, group_under_reduction):
         '''
         Helper function for the reduce_wcmp_group algorithm.
-        Iteratively goes through all ports, returns the index of member port
-        whose weight should be incremented to result in least maximum oversub.
+        Iteratively goes through all ports of the group under reduction,
+        returns the index of member port whose weight should be incremented to
+        result in least maximum oversub.
         '''
-        min_oversub = float('inf')
-        index = -1
-        port_len = len(output_groups)
-        for i in range(port_len):
-            oversub = ((output_groups[i] + 1) * len(self._groups))\
-                / ((len(output_groups) + 1) * self._groups[0][i])
+        if len(group_to_reduce) != len(group_under_reduction):
+            print('[ERROR] %s: group dimension mismatch %s %s' %
+                  _choose_port_to_update.__name__, len(group_to_reduce),
+                  len(group_under_reduction))
+            return -1
+
+        min_oversub, index = float('inf'), -1
+        gtr_size = np.sum(group_to_reduce)
+        gur_size = np.sum(group_under_reduction)
+        for i in range(len(group_under_reduction)):
+            oversub = ((group_under_reduction[i] + 1) *
+                       gtr_size) / ((gur_size + 1) * group_to_reduce[i])
             if min_oversub > oversub:
                 min_oversub = oversub
                 index = i
+
         return index
 
     def reduce_wcmp_group(self, group_to_reduce, delta_max=1.2):
         '''
-        Weight reduction algoritm with an oversub limit.
-        Algorithm 1 in the Eurosys WCMP paper.
+        Single group weight reduction algoritm with an oversub limit.
+        This is algorithm 1 in the EuroSys WCMP paper.
         '''
-        port_len = len(group_to_reduce)
-        # print("port len ", port_len)
-        output_groups = np.ones(port_len)
-        oversub = self._calculate_oversub(group_to_reduce, output_groups,
-                                          mode="ratio")
-        while (oversub > delta_max):
-            oversub = self._calculate_oversub(group_to_reduce, output_groups,
-                                              mode="ratio")
-            # print("oversub ", oversub)
-            index = self._choose_port_to_update(output_groups)
-            output_groups[index] += 1
-            if np.sum(output_groups) > np.sum(group_to_reduce):
+        final_group = np.ones(len(group_to_reduce))
+        while calc_group_oversub(group_to_reduce, final_group) > delta_max:
+            index = self._choose_port_to_update(group_to_reduce, final_group)
+            final_group[index] += 1
+            if np.sum(final_group) >= np.sum(group_to_reduce):
                 return group_to_reduce
 
-        # print("Final oversub: ", oversub)
-        return output_groups.tolist()
+        return final_group.tolist()
 
-    def table_fitting_sssg(self, group_to_reduce, T):
+    def table_fitting_sssg(self):
         '''
-        WCMP Weight Reduction for Table Fitting a single WCMP group G into size
-        T. Assuming that we're fitting self._int_groups, since self._orig_groups
-        doesn't really require reduction.
+        WCMP weight reduction for table fitting a single WCMP group into table
+        limit. Assuming that we are fitting self._int_groups, since
+        self._orig_groups do not necessarily have integer weights.
         '''
-        output_groups = group_to_reduce
-        while np.sum(output_groups) > T:
+        if len(self._int_groups) != 1:
+            print('[ERROR] %s: unexpected number of input groups %s' %
+                  table_fitting_sssg.__name__, len(self._int_groups))
+            return []
+
+        group_to_reduce = self._int_groups[0]
+        T = self._table_limit
+        final_group = copy.deepcopy(group_to_reduce)
+        while np.sum(final_group) > T:
             non_reducible_size = 0
-            for i in range(len(output_groups)):
-                if output_groups[i] == 1:
+            # Counts singleton ports, as they cannot be reduced any further.
+            for i in range(len(final_group)):
+                if final_group[i] == 1:
                     non_reducible_size += 1
-            if non_reducible_size == len(output_groups):
+            # If none of the port weights can be reduced further, just give up.
+            if non_reducible_size == len(final_group):
                 break
-            reduction_ratio = (T - non_reducible_size) / np.sum(output_groups)
-            for i in range(len(output_groups)):
-                output_groups[i] = np.floor(output_groups[i] * reduction_ratio)
-                if output_groups[i] == 0:
-                    output_groups[i] = 1
+            # Directly shrinks original weights by `reduction_ratio` so that
+            # the final group can fit into T. Note that the denominator should
+            # technically be sum(group_to_reduce) - non_reducible_size since the
+            # singleton ports should just be left out of reduction. But the
+            # algorithm still reduces (to 0) and then always rounds up to 1.
+            reduction_ratio = (T - non_reducible_size) / np.sum(group_to_reduce)
+            for i in range(len(final_group)):
+                final_group[i] = np.floor(group_to_reduce[i] * reduction_ratio)
+                if final_group[i] == 0:
+                    final_group[i] = 1
 
-        remaining_size = (int)(T - np.sum(output_groups))
-        min_oversub = self._calculate_oversub(output_groups)
-        output_groups_2 = output_groups
-        for k in range(1, remaining_size):
-            index = self._choose_port_to_update(output_groups)
-            output_groups[index] += 1
-            if min_oversub > self._calculate_oversub(output_groups):
-                output_groups_2 = output_groups
-                min_oversub = self._calculate_oversub(output_groups)
+        # In case the previous round-down over-reduced groups, which leaves some
+        # headroom in T, we make full use of the headroom while minimizing the
+        # oversub.
+        remaining_size = int(T - np.sum(final_group))
+        min_oversub = calc_group_oversub(group_to_reduce, final_group)
+        final_group_2 = copy.deepcopy(final_group)
+        for _ in range(remaining_size):
+            index = self._choose_port_to_update(group_to_reduce, final_group)
+            final_group[index] += 1
+            curr_oversub = calc_group_oversub(group_to_reduce, final_group)
+            if min_oversub > curr_oversub:
+                final_group_2 = copy.deepcopy(final_group)
+                min_oversub = curr_oversub
 
-        return [output_groups_2]
+        return [final_group_2]
 
-    def table_fitting_ssmg(self, target_size):
+    def table_fitting_ssmg(self):
         '''
         WCMP Weight Reduction for Table Fitting a set of WCMP groups H into
         size S. Algorithm 4 in the WCMP Eurosys paper.
@@ -186,22 +213,31 @@ class GroupReduction:
         entries does not exceed target_size.
         Returns true
         '''
+        if len(self._int_groups) <= 0:
+            print('[ERROR] %s: unexpected number of input groups %s' %
+                  table_fitting_ssmg.__name__, len(self._int_groups))
+            return []
+
         enforced_oversub = 1.002
         step_size = 0.001
+        S = self._table_limit
         # Sort groups in descending order of size.
-        self._groups.sort(key=len, reverse=True)
-        num_groups = len(self._groups)
-        total_size = np.sum(np.asarray(self._groups))
-        while total_size > target_size:
-            for i in range(num_groups):
-                self._groups[i] = self.reduce_wcmp_group(self._groups[i],
-                                                         enforced_oversub)
-                total_size = np.sum(np.asarray(self._groups))
-                if total_size <= target_size:
-                    return True
+        groups_in = sorted(self._int_groups, key=sum, reverse=True)
+        groups_out = copy.deepcopy(groups_in)
+        total_size = np.sum([np.sum(g) for g in groups_in])
+
+        while total_size > S:
+            for i in range(len(groups_in)):
+                groups_out[i] = self.reduce_wcmp_group(groups_in[i],
+                                                       enforced_oversub)
+                total_size = np.sum([np.sum(g) for g in groups_out])
+                if total_size <= S:
+                    return groups_out
+            # Relaxes oversub limit if we fail to fit all groups with the same
+            # oversub.
             enforced_oversub += step_size
 
-        return False
+        return groups_out
 
     def solve_sssg(self, formulation='L1NORM2'):
         '''
