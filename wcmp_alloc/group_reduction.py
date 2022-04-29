@@ -207,11 +207,8 @@ class GroupReduction:
 
     def table_fitting_ssmg(self):
         '''
-        WCMP Weight Reduction for Table Fitting a set of WCMP groups H into
-        size S. Algorithm 4 in the WCMP Eurosys paper.
-        target_size: We want to shrink all groups so that the total # of
-        entries does not exceed target_size.
-        Returns true
+        WCMP weight reduction for table fitting a set of WCMP groups H into
+        size S. Algorithm 4 in the EuroSys WCMP paper.
         '''
         if len(self._int_groups) <= 0:
             print('[ERROR] %s: unexpected number of input groups %s' %
