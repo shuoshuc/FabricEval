@@ -250,6 +250,8 @@ class GroupReduction:
             #m.setParam("LogFile", "gurobi.log")
 
             # Construct model
+            # L1NORM1 normalizes actual integer weights over table limit.
+            # L1NORM2 normalizes actual integer weights over its own group sum.
             if formulation == "L1NORM1":
                 m = self._sssg_l1_norm_1(m)
             elif formulation == "L1NORM2":
