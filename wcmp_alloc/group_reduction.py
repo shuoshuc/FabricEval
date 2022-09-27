@@ -73,7 +73,7 @@ def calc_group_oversub(G, G_prime, mode='max'):
     G: original group before reduction.
     G': final group after reduction.
     mode: a knob that allows the function to use avg or percentile instead
-          of max to find the group oversub.
+          of max to find the group oversub. Must be one of 'max', 'avg', 'p50'.
     Return: group oversub.
     '''
     G_sum = sum(G)
@@ -85,7 +85,7 @@ def calc_group_oversub(G, G_prime, mode='max'):
         return np.max(numerator / demominator)
     elif mode == 'avg':
         return np.average(numerator / demominator)
-    elif mode == 'mean':
+    elif mode == 'p50':
         return np.percentile(numerator / demominator, 50)
     else:
         print('Mode %s not recognized!' % mode)
