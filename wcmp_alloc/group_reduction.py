@@ -29,20 +29,6 @@ def frac2int_lossless(frac_list):
         frac_list = list(map(lambda x: x * 10, frac_list))
     return gcd_reduce(list(map(int, frac_list)))
 
-def cosine_similarity(G1, G2):
-    '''
-    Computes the cosine similarity between group G1 and G2. They must be of the
-    same size.
-    '''
-    assert len(G1) == len(G2) and G1 and G2, 'G1 and G2 must be non-empty ' \
-                                             'equal size.'
-    dot_sum, g1_l2_norm_sq, g2_l2_norm_sq = 0, 0, 0
-    for i in range(len(G1)):
-        dot_sum += G1[i] * G2[i]
-        g1_l2_norm_sq += G1[i] * G1[i]
-        g2_l2_norm_sq += G2[i] * G2[i]
-    return dot_sum / (sqrt(g1_l2_norm_sq) * sqrt(g2_l2_norm_sq))
-
 def l1_norm_diff(G1, G2):
     '''
     Computes the L1 norm of difference between group G1 and G2. They must be of
@@ -262,15 +248,7 @@ class GroupReduction:
             #m.setParam("LogFile", "gurobi.log")
 
             # Construct model
-            if formulation == "COSSIM1":
-                m.setParam("NonConvex", 2)
-                m.setParam("MIPFocus", 2)
-                m = self._sssg_cosine_similarity_1(m)
-            elif formulation == "COSSIM2":
-                m.setParam("NonConvex", 2)
-                m.setParam("MIPFocus", 2)
-                m = self._sssg_cosine_similarity_2(m)
-            elif formulation == "L1NORM1":
+            if formulation == "L1NORM1":
                 m = self._sssg_l1_norm_1(m)
             elif formulation == "L1NORM2":
                 m.setParam("NonConvex", 2)
@@ -306,104 +284,6 @@ class GroupReduction:
         except AttributeError:
             print('Encountered an attribute error')
             return []
-
-    def _sssg_cosine_similarity_1(self, m):
-        '''
-        Build a non-convex MINLP (QP+QC) formulation using cosine similarity as
-        objective for the single switch single group (SSSG) optimization.
-
-        m: pre-built empty model, needs decision vars and constraints.
-        '''
-        # Create variables: wf[i] is intended (fractional) weight, w[i] is
-        # actual (integral) weight. ws[i] is the square of w[i].
-        wf, w, ws = self._groups[0].copy(), [], []
-        for n in range(len(wf)):
-            w.append(m.addVar(vtype=GRB.INTEGER, lb=0,
-                               ub=self._table_limit,
-                               name="w_" + str(n+1)))
-            ws.append(m.addVar(vtype=GRB.CONTINUOUS, lb=0,
-                                ub=self._table_limit * self._table_limit,
-                                name="ws_" + str(n+1)))
-        z = m.addVar(vtype=GRB.CONTINUOUS, name="z")
-        zs = m.addVar(vtype=GRB.CONTINUOUS, name="zs")
-
-        # Objective is quadratic.
-        obj = gp.QuadExpr();
-        # fastest way to construct a large objective.
-        # Params are: coeffs, var1s, var2s (must be of same size).
-        obj.addTerms(wf, w, [z] * len(wf))
-        # Set objective
-        m.setObjective(obj, GRB.MAXIMIZE)
-
-        # Add constraint: sum(w) <= table_limit
-        m.addConstr(gp.quicksum(w) <= self._table_limit, "group_size_ub")
-        # Add constraint: sum(w) >= 1 (group cannot be empty)
-        m.addConstr(gp.quicksum(w) >= 1, "group_size_lb")
-        # Add constraint: zs * sum(wf^2) * sum(wis) == 1
-        c = gp.QuadExpr()
-        c.addTerms([sum(v*v for v in wf)] * len(ws), [zs] * len(ws), ws)
-        m.addConstr(c == 1, "linearization_zs")
-        # Add constraint: zs = z * z
-        m.addConstr(zs == z * z, "linearization_z")
-        for i in range(len(w)):
-            # Add constraint: ws = w * w
-            m.addConstr(ws[i] == w[i] * w[i],
-                        "linearization_ws_" + str(1 + i))
-            # Add constraint only if inputs are already scaled up to integers:
-            # w[i] <= wf[i]
-            if FLAG_USE_INT_INPUT_GROUPS:
-                m.addConstr(w[i] <= wf[i], "no_scale_up_" + str(1+i))
-
-        return m
-
-    def _sssg_cosine_similarity_2(self, m):
-        '''
-        Build a non-convex MINLP formulation using cosine similarity as
-        objective for the single switch single group (SSSG) optimization.
-
-        m: pre-built empty model, needs decision vars and constraints.
-        '''
-        # Create variables: wf[i] is intended (fractional) weight, w[i] is
-        # actual (integral) weight.
-        wf, w, z, ws, zs = self._groups[0].copy(), [], [], [], []
-        for n in range(len(wf)):
-            w.append(m.addVar(vtype=GRB.INTEGER, lb=0, ub=self._table_limit,
-                              name="w_" + str(n+1)))
-            w[n].start = self._int_groups[0][n]
-            ws.append(m.addVar(vtype=GRB.CONTINUOUS, lb=0,
-                               ub=self._table_limit * self._table_limit,
-                               name="ws_" + str(n+1)))
-            ws[n].start = self._int_groups[0][n] * self._int_groups[0][n]
-            z.append(m.addVar(vtype=GRB.CONTINUOUS, lb=0, ub=1,
-                              name="z_" + str(n+1)))
-            zs.append(m.addVar(vtype=GRB.CONTINUOUS, lb=0, ub=1,
-                               name="zs_" + str(n+1)))
-        m.update()
-
-        # Objective is linear.
-        obj = gp.LinExpr(wf, z);
-        # Set objective
-        m.setObjective(1/sqrt(sum(v*v for v in wf)) * obj, GRB.MAXIMIZE)
-
-        # Add constraint: sum(wi) <= table_limit
-        m.addConstr(gp.quicksum(w) <= self._table_limit, "group_size_ub")
-        # Add constraint: sum(wi) >= 1 (group cannot be empty)
-        m.addConstr(gp.quicksum(w) >= 1, "group_size_lb")
-        for i in range(len(w)):
-            # Add constraint: zs[i] * sum(ws) == ws[i]
-            c = gp.QuadExpr()
-            c.addTerms([1] * len(ws), [zs[i]] * len(ws), ws)
-            m.addConstr(c == ws[i], "binding_w_z_" + str(1+i))
-            # Add constraint: zs[i] = z[i] * z[i]
-            m.addConstr(zs[i] == z[i] * z[i], "linearization_z_" + str(1+i))
-            # Add constraint: ws[i] = w[i] * w[i]
-            m.addConstr(ws[i] == w[i] * w[i], "linearization_w_" + str(1+i))
-            # Add constraint only if inputs are already scaled up to integers:
-            # w[i] <= wf[i]
-            if FLAG_USE_INT_INPUT_GROUPS:
-                m.addConstr(w[i] <= wf[i], "no_scale_up_" + str(1+i))
-
-        return m
 
     def _sssg_l1_norm_1(self, m):
         '''
