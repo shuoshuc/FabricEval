@@ -93,7 +93,9 @@ class GroupReduction:
         orig_groups: a list of lists, where each element list is a set of
                      weights for the corresponding group.
         int_groups: original groups after lossless scaleup to integers.
-        table_limit: upper bound of the group entries on the switch.
+        table_limit: upper bound of the group entries on the switch. Note that
+                     this does not have to be the physical limit, but can also
+                     be the available headroom left.
         '''
         self._orig_groups = copy.deepcopy(groups)
         self._int_groups = list(map(frac2int_lossless, copy.deepcopy(groups)))
