@@ -304,13 +304,10 @@ class GroupReduction:
             w.append(m.addVar(vtype=GRB.INTEGER, lb=0, ub=self._table_limit,
                               name="w_" + str(n+1)))
             u.append(m.addVar(vtype=GRB.CONTINUOUS, name="u_" + str(n+1)))
-        l1_norm = m.addVar(vtype=GRB.CONTINUOUS, name="l1_norm")
 
         # Set objective
-        m.setObjective(l1_norm, GRB.MINIMIZE)
+        m.setObjective(gp.quicksum(u), GRB.MINIMIZE)
 
-        # Force l1_norm to be sum(u), which is the sum of all absolute values.
-        m.addConstr(l1_norm == gp.quicksum(u))
         # Add constraint: sum(w) <= table_limit
         m.addConstr(gp.quicksum(w) <= self._table_limit, "group_size_ub")
         for i in range(len(w)):
@@ -340,13 +337,10 @@ class GroupReduction:
                               name="w_" + str(n+1)))
             u.append(m.addVar(vtype=GRB.CONTINUOUS, name="u_" + str(n+1)))
         z = m.addVar(vtype=GRB.CONTINUOUS, name="z")
-        l1_norm = m.addVar(vtype=GRB.CONTINUOUS, name="l1_norm")
 
         # Set objective
-        m.setObjective(l1_norm, GRB.MINIMIZE)
+        m.setObjective(gp.quicksum(u), GRB.MINIMIZE)
 
-        # Force l1_norm to be sum(u), which is the sum of all absolute values.
-        m.addConstr(l1_norm == gp.quicksum(u))
         # Add constraint: sum(w) <= table_limit.
         m.addConstr(gp.quicksum(w) <= self._table_limit, "group_size_ub")
         # Add constraint: z == 1/sum(w).
