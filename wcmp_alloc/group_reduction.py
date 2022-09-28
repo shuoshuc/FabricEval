@@ -225,7 +225,7 @@ class GroupReduction:
 
         return groups_out
 
-    def solve_sssg(self, formulation='L1NORM2'):
+    def solve_sssg(self, formulation='L1NORM3'):
         '''
         Given the input groups and table limit, solve the single switch single
         group (SSSG) optimization problem.
@@ -252,12 +252,17 @@ class GroupReduction:
             # Construct model
             # L1NORM1 normalizes actual integer weights over table limit.
             # L1NORM2 normalizes actual integer weights over its own group sum.
+            # L1NORM3 minimizes L1 norm of absolute weights (no normalization).
             if formulation == "L1NORM1":
                 m = self._sssg_l1_norm_1(m)
             elif formulation == "L1NORM2":
                 m.setParam("NonConvex", 2)
                 m.setParam("MIPFocus", 2)
                 m = self._sssg_l1_norm_2(m)
+            elif formulation == "L1NORM3":
+                m.setParam("NonConvex", 2)
+                m.setParam("MIPFocus", 2)
+                m = self._sssg_l1_norm_3(m)
             else:
                 print("Formulation not recognized!")
                 return []
@@ -348,11 +353,45 @@ class GroupReduction:
         # Add constraint: z == 1/sum(w).
         m.addConstr(z * gp.quicksum(w) == 1, "z_limitation")
         for i in range(len(w)):
-            # Add constraint: u[i] >= abs(w[i] / table_limit - wf[i]).
+            # Add constraint: u[i] >= abs(w[i] / sum(w[i]) - wf[i] / wf_sum).
             # Note: '==' can be relaxed to '>=' because the objective is to
             # minimize sum(u[i]).
             m.addConstr(w[i] * z - wf[i] / wf_sum <= u[i])
             m.addConstr(wf[i] / wf_sum - w[i] * z <= u[i])
+            # Add constraint only if inputs are already scaled up to integers:
+            # w[i] <= wf[i]
+            if FLAG_USE_INT_INPUT_GROUPS:
+                m.addConstr(w[i] <= wf[i], "no_scale_up_" + str(1+i))
+
+        return m
+
+    def _sssg_l1_norm_3(self, m):
+        '''
+        Build an MILP formulation using L1 norm as the objective for the single
+        switch single group (SSSG) optimization. The L1 norm directly measures
+        the absolute weight difference without normalization.
+
+        m: pre-built empty model, needs decision vars and constraints.
+        '''
+        # Create variables: wf[i] is the intended (fractional) weight after
+        # normalization, w[i] is the actual (integral) weight.
+        wf, wf_sum, w, u = self._groups[0].copy(), sum(self._groups[0]), [], []
+        for n in range(len(wf)):
+            w.append(m.addVar(vtype=GRB.INTEGER, lb=0, ub=self._table_limit,
+                              name="w_" + str(n+1)))
+            u.append(m.addVar(vtype=GRB.CONTINUOUS, name="u_" + str(n+1)))
+
+        # Set objective
+        m.setObjective(gp.quicksum(u), GRB.MINIMIZE)
+
+        # Add constraint: sum(w) <= table_limit.
+        m.addConstr(gp.quicksum(w) <= self._table_limit, "group_size_ub")
+        for i in range(len(w)):
+            # Add constraint: u[i] >= abs(w[i] - wf[i]).
+            # Note: '==' can be relaxed to '>=' because the objective is to
+            # minimize sum(u[i]).
+            m.addConstr(w[i] - wf[i] <= u[i])
+            m.addConstr(wf[i] - w[i] <= u[i])
             # Add constraint only if inputs are already scaled up to integers:
             # w[i] <= wf[i]
             if FLAG_USE_INT_INPUT_GROUPS:
