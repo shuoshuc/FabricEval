@@ -113,8 +113,8 @@ class GroupReduction:
         '''
         if len(group_to_reduce) != len(group_under_reduction):
             print('[ERROR] %s: group dimension mismatch %s %s' %
-                  _choose_port_to_update.__name__, len(group_to_reduce),
-                  len(group_under_reduction))
+                  GroupReduction._choose_port_to_update.__name__,
+                  len(group_to_reduce), len(group_under_reduction))
             return -1
 
         min_oversub, index = float('inf'), -1
@@ -152,7 +152,8 @@ class GroupReduction:
         '''
         if len(self._int_groups) != 1:
             print('[ERROR] %s: unexpected number of input groups %s' %
-                  table_fitting_sssg.__name__, len(self._int_groups))
+                  GroupReduction.table_fitting_sssg.__name__,
+                  len(self._int_groups))
             return []
 
         group_to_reduce = self._int_groups[0]
@@ -201,7 +202,8 @@ class GroupReduction:
         '''
         if len(self._int_groups) <= 0:
             print('[ERROR] %s: unexpected number of input groups %s' %
-                  table_fitting_ssmg.__name__, len(self._int_groups))
+                  GroupReduction.table_fitting_ssmg.__name__,
+                  len(self._int_groups))
             return []
 
         enforced_oversub = 1.002
@@ -233,7 +235,7 @@ class GroupReduction:
         final_groups = []
         if len(self._groups) != 1:
             print('[ERROR] %s: unexpected number of input groups %s' %
-                  solve_sssg.__name__, len(self._groups))
+                  GroupReduction.solve_sssg.__name__, len(self._groups))
             return []
 
         try:
@@ -406,11 +408,12 @@ class GroupReduction:
         '''
         if len(self._groups) <= 0:
             print('[ERROR] %s: unexpected number of input groups %s' %
-                  solve_ssmg.__name__, len(self._groups))
+                  GroupReduction.solve_ssmg.__name__, len(self._groups))
             return []
         if len(self._groups) != len(self._traffic):
             print('[ERROR] %s: group size %s and traffic size %s mismatch' %
-                  solve_sssg.__name__, len(self._groups), len(self._traffic))
+                  GroupReduction.solve_sssg.__name__, len(self._groups),
+                  len(self._traffic))
             return []
         final_groups = copy.deepcopy(self._groups)
 
