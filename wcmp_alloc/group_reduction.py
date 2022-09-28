@@ -311,7 +311,9 @@ class GroupReduction:
         # Add constraint: sum(w) <= table_limit
         m.addConstr(gp.quicksum(w) <= self._table_limit, "group_size_ub")
         for i in range(len(w)):
-            # Add constraint: u[i] == abs(w[i] / table_limit - wf[i]).
+            # Add constraint: u[i] >= abs(w[i] / table_limit - wf[i]).
+            # Note: '==' can be relaxed to '>=' because the objective is to
+            # minimize sum(u[i]).
             m.addConstr(w[i] / self._table_limit - wf[i] / wf_sum <= u[i])
             m.addConstr(wf[i] / wf_sum - w[i] / self._table_limit <= u[i])
             # Add constraint only if inputs are already scaled up to integers:
@@ -346,7 +348,9 @@ class GroupReduction:
         # Add constraint: z == 1/sum(w).
         m.addConstr(z * gp.quicksum(w) == 1, "z_limitation")
         for i in range(len(w)):
-            # Add constraint: u[i] == abs(w[i] / table_limit - wf[i]).
+            # Add constraint: u[i] >= abs(w[i] / table_limit - wf[i]).
+            # Note: '==' can be relaxed to '>=' because the objective is to
+            # minimize sum(u[i]).
             m.addConstr(w[i] * z - wf[i] / wf_sum <= u[i])
             m.addConstr(wf[i] / wf_sum - w[i] * z <= u[i])
             # Add constraint only if inputs are already scaled up to integers:
