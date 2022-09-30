@@ -84,11 +84,10 @@ class GroupReduction:
     integer groups that can be directly implemented on switch hardware, based on
     defined problem formulation and constraints.
     '''
-    def __init__(self, groups, traffic, table_limit=TABLE_LIMIT):
+    def __init__(self, groups, table_limit=TABLE_LIMIT):
         '''
         groups: input groups of intended weights reflecting desired traffic
                 distribution.
-        traffic: input per group traffic volume in Gbps.
 
         orig_groups: a list of lists, where each element list is a set of
                      weights for the corresponding group.
@@ -101,7 +100,6 @@ class GroupReduction:
         self._int_groups = list(map(frac2int_lossless, copy.deepcopy(groups)))
         self._groups = self._int_groups if FLAG_USE_INT_INPUT_GROUPS else \
                                            self._orig_groups
-        self._traffic = traffic
         self._table_limit = table_limit
 
     def _choose_port_to_update(self, group_to_reduce, group_under_reduction):
@@ -227,7 +225,7 @@ class GroupReduction:
 
         return groups_out
 
-    def solve_sssg(self, formulation='L1NORM3'):
+    def solve_sssg(self, formulation='L1NORM2'):
         '''
         Given the input groups and table limit, solve the single switch single
         group (SSSG) optimization problem.
@@ -254,17 +252,12 @@ class GroupReduction:
             # Construct model
             # L1NORM1 normalizes actual integer weights over table limit.
             # L1NORM2 normalizes actual integer weights over its own group sum.
-            # L1NORM3 minimizes L1 norm of absolute weights (no normalization).
             if formulation == "L1NORM1":
                 m = self._sssg_l1_norm_1(m)
             elif formulation == "L1NORM2":
                 m.setParam("NonConvex", 2)
                 m.setParam("MIPFocus", 2)
                 m = self._sssg_l1_norm_2(m)
-            elif formulation == "L1NORM3":
-                m.setParam("NonConvex", 2)
-                m.setParam("MIPFocus", 2)
-                m = self._sssg_l1_norm_3(m)
             else:
                 print("Formulation not recognized!")
                 return []
@@ -304,8 +297,8 @@ class GroupReduction:
 
         m: pre-built empty model, needs decision vars and constraints.
         '''
-        # Create variables: wf[i] is the intended (fractional) weight after
-        # normalization, w[i] is the actual (integral) weight.
+        # Create variables: wf[i] is the intended (fractional) weight, w[i] is
+        # the actual (integral) weight.
         wf, wf_sum, w, u = self._groups[0].copy(), sum(self._groups[0]), [], []
         for n in range(len(wf)):
             w.append(m.addVar(vtype=GRB.INTEGER, lb=0, ub=self._table_limit,
@@ -338,8 +331,8 @@ class GroupReduction:
 
         m: pre-built empty model, needs decision vars and constraints.
         '''
-        # Create variables: wf[i] is the intended (fractional) weight after
-        # normalization, w[i] is the actual (integral) weight.
+        # Create variables: wf[i] is the intended (fractional) weight, w[i] is
+        # the actual (integral) weight.
         wf, wf_sum, w, u = self._groups[0].copy(), sum(self._groups[0]), [], []
         for n in range(len(wf)):
             w.append(m.addVar(vtype=GRB.INTEGER, lb=0, ub=self._table_limit,
@@ -367,40 +360,6 @@ class GroupReduction:
 
         return m
 
-    def _sssg_l1_norm_3(self, m):
-        '''
-        Build an MILP formulation using L1 norm as the objective for the single
-        switch single group (SSSG) optimization. The L1 norm directly measures
-        the absolute weight difference without normalization.
-
-        m: pre-built empty model, needs decision vars and constraints.
-        '''
-        # Create variables: wf[i] is the intended (fractional) weight after
-        # normalization, w[i] is the actual (integral) weight.
-        wf, wf_sum, w, u = self._groups[0].copy(), sum(self._groups[0]), [], []
-        for n in range(len(wf)):
-            w.append(m.addVar(vtype=GRB.INTEGER, lb=0, ub=self._table_limit,
-                              name="w_" + str(n+1)))
-            u.append(m.addVar(vtype=GRB.CONTINUOUS, name="u_" + str(n+1)))
-
-        # Set objective
-        m.setObjective(gp.quicksum(u), GRB.MINIMIZE)
-
-        # Add constraint: sum(w) <= table_limit.
-        m.addConstr(gp.quicksum(w) <= self._table_limit, "group_size_ub")
-        for i in range(len(w)):
-            # Add constraint: u[i] >= abs(w[i] - wf[i]).
-            # Note: '==' can be relaxed to '>=' because the objective is to
-            # minimize sum(u[i]).
-            m.addConstr(w[i] - wf[i] <= u[i])
-            m.addConstr(wf[i] - w[i] <= u[i])
-            # Add constraint only if inputs are already scaled up to integers:
-            # w[i] <= wf[i]
-            if FLAG_USE_INT_INPUT_GROUPS:
-                m.addConstr(w[i] <= wf[i], "no_scale_up_" + str(1+i))
-
-        return m
-
     def solve_ssmg(self, formulation='L1NORM'):
         '''
         Given the input groups and table limit, solve the single switch multi 
@@ -409,11 +368,6 @@ class GroupReduction:
         if len(self._groups) <= 0:
             print('[ERROR] %s: unexpected number of input groups %s' %
                   GroupReduction.solve_ssmg.__name__, len(self._groups))
-            return []
-        if len(self._groups) != len(self._traffic):
-            print('[ERROR] %s: group size %s and traffic size %s mismatch' %
-                  GroupReduction.solve_sssg.__name__, len(self._groups),
-                  len(self._traffic))
             return []
         final_groups = copy.deepcopy(self._groups)
 
@@ -471,13 +425,14 @@ class GroupReduction:
         model: pre-built empty model, needs decision vars and constraints.
         '''
         # Create variables: wf[m][i] is the intended (fractional) weight for
-        # port i of group m after normalization, w[i] is the actual (integral)
-        # weight.
-        C, T = self._table_limit, self._traffic
+        # port i of group m, w[i] is the actual (integral) weight.
+        C = self._table_limit
         wf, wf_sum = copy.deepcopy(self._groups), [sum(g) for g in self._groups]
         w, u, l1_norm, z = [], [], [], []
+        # Iterates over group m.
         for m in range(len(wf)):
             wm, um = [], []
+            # Iterates over port i of group m.
             for i in range(len(wf[m])):
                 wm.append(model.addVar(vtype=GRB.INTEGER, lb=0, ub=C,
                                        name="w_{}_{}".format(m+1, i+1)))
@@ -490,13 +445,14 @@ class GroupReduction:
             z.append(model.addVar(vtype=GRB.CONTINUOUS,
                                   name="z_{}".format(m+1)))
 
-        # Set objective: sum(T[m] * l1_norm[m]).
-        model.setObjective(gp.LinExpr(T, l1_norm), GRB.MINIMIZE)
+        # Set objective: sum(wf_sum[m] * l1_norm[m]).
+        model.setObjective(gp.LinExpr(wf_sum, l1_norm), GRB.MINIMIZE)
 
         # Add constraint: sum(w[m][i]) <= table_limit. Note that w is flattened
         # from a 2D list to 1D.
         model.addConstr(gp.quicksum(list(chain.from_iterable(w))) <= C,
                         "group_size_ub")
+
         for m in range(len(wf)):
             # Add constraint: per-group L1 norm.
             model.addConstr(l1_norm[m] == gp.quicksum(u[m]))
@@ -504,7 +460,8 @@ class GroupReduction:
             model.addConstr(z[m] * gp.quicksum(w[m]) == 1,
                             "z_{}_limitation".format(m+1))
             for i in range(len(wf[m])):
-                # Add constraint: u[m][i] == abs(w[m][i] / C - wf[m][i]).
+                # Add constraint:
+                # u[m][i] == abs(w[m][i] / sum(w[m]) - wf[m][i] / sum(wf[m])).
                 model.addConstr(w[m][i] * z[m] - wf[m][i] / wf_sum[m] <= u[m][i])
                 model.addConstr(wf[m][i] / wf_sum[m] - w[m][i] * z[m] <= u[m][i])
                 # Add constraint only if inputs are already scaled up to
@@ -519,13 +476,11 @@ if __name__ == "__main__":
     table_limit = 16*1024
     # groups, # port per group, lower bound, upper bound, fraction precision
     g, p, lb, ub, frac_digits = 2, 2, 1, 100, 3
-    # Assuming uniform unit traffic.
-    traffic_vol = [1] * g
 
     #input_groups = [[1.1, 2.1], [3.1, 4.1]]
     input_groups = input_groups_gen(g, p, lb, ub, frac_digits)
     start = time.time_ns()
-    group_reduction = GroupReduction(input_groups, traffic_vol, table_limit)
+    group_reduction = GroupReduction(input_groups, table_limit)
     output_groups = group_reduction.solve_ssmg('L1NORM')
     end = time.time_ns()
     print('Input: %s' % input_groups)

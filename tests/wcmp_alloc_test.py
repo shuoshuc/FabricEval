@@ -48,36 +48,34 @@ class TestWCMPAlloc(unittest.TestCase):
 
 class TestGroupReduction(unittest.TestCase):
     def test_single_switch_single_group_1(self):
-        group_reduction = GroupReduction([[1, 2, 3, 4]], [1], 16*1024)
+        group_reduction = GroupReduction([[1, 2, 3, 4]], 16*1024)
         self.assertEqual([[1, 2, 3, 4]], group_reduction.solve_sssg())
 
     def test_single_switch_single_group_2(self):
-        group_reduction = GroupReduction([[20, 40, 60, 80]], [1], 16*1024)
+        group_reduction = GroupReduction([[20, 40, 60, 80]], 16*1024)
         self.assertEqual([[1, 2, 3, 4]], group_reduction.solve_sssg())
 
     def test_single_switch_single_group_3(self):
-        group_reduction = GroupReduction([[10.5, 20.1, 31.0, 39.7]], [1], 10)
+        group_reduction = GroupReduction([[10.5, 20.1, 31.0, 39.7]], 10)
         self.assertEqual([[1, 2, 3, 4]], group_reduction.solve_sssg())
 
     def test_single_switch_single_group_4(self):
         group_reduction = GroupReduction([[i + 0.1 for i in range(1, 17)]],
-                                         [1], 16*1024)
+                                         16*1024)
         self.assertEqual([[(i + 0.1) * 10 for i in range(1, 17)]],
                          group_reduction.solve_sssg())
 
     def test_single_switch_multi_group_1(self):
-        group_reduction = GroupReduction([[1, 2], [3, 4]], [1, 1],
-                                         16*1024)
+        group_reduction = GroupReduction([[1, 2], [3, 4]], 16*1024)
         self.assertEqual([[1, 2], [3, 4]], group_reduction.solve_ssmg())
 
     def test_single_switch_multi_group_2(self):
-        group_reduction = GroupReduction([[1.1, 2.1], [3.1, 4.1]], [1, 1],
-                                         16*1024)
+        group_reduction = GroupReduction([[1.1, 2.1], [3.1, 4.1]], 16*1024)
         self.assertEqual([[11, 21], [31, 41]], group_reduction.solve_ssmg())
 
     def test_single_switch_multi_group_3(self):
         group_reduction = GroupReduction([[7.784, 67.785], [10.753, 14.765]],
-                                         [1, 2], 16*1024)
+                                         16*1024)
         self.assertEqual([[137, 1193], [729, 1001]],
                          group_reduction.solve_ssmg())
 
