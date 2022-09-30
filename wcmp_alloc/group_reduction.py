@@ -8,7 +8,7 @@ from functools import reduce
 from itertools import chain
 
 # If True, feeds solver with scaled up integer groups.
-FLAG_USE_INT_INPUT_GROUPS = True
+FLAG_USE_INT_INPUT_GROUPS = False
 
 # Broadcom Tomahawk 2 ECMP table limit.
 TABLE_LIMIT = 16 * 1024
@@ -475,7 +475,7 @@ class GroupReduction:
 if __name__ == "__main__":
     table_limit = 16*1024
     # groups, # port per group, lower bound, upper bound, fraction precision
-    g, p, lb, ub, frac_digits = 2, 2, 1, 100, 3
+    g, p, lb, ub, frac_digits = 2, 2, 100, 100000, 3
 
     #input_groups = [[1.1, 2.1], [3.1, 4.1]]
     input_groups = input_groups_gen(g, p, lb, ub, frac_digits)
