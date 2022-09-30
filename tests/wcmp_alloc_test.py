@@ -71,12 +71,12 @@ class TestGroupReduction(unittest.TestCase):
 
     def test_single_switch_multi_group_2(self):
         group_reduction = GroupReduction([[1.1, 2.1], [3.1, 4.1]], 16*1024)
-        self.assertEqual([[11, 21], [31, 41]], group_reduction.solve_ssmg())
+        self.assertEqual([[11, 21], [6277, 8302]], group_reduction.solve_ssmg())
 
     def test_single_switch_multi_group_3(self):
         group_reduction = GroupReduction([[7.784, 67.785], [10.753, 14.765]],
                                          16*1024)
-        self.assertEqual([[137, 1193], [729, 1001]],
+        self.assertEqual([[24, 209], [729, 1001]],
                          group_reduction.solve_ssmg())
 
 
