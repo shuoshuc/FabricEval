@@ -29,6 +29,13 @@ def frac2int_lossless(frac_list):
         frac_list = list(map(lambda x: x * 10, frac_list))
     return gcd_reduce(list(map(int, frac_list)))
 
+def frac2int_round(frac_list):
+    '''
+    Converts list of fractions to list of integers by simply rounding to the
+    nearest integer.
+    '''
+    return list(map(round, frac_list))
+
 def l1_norm_diff(G1, G2):
     '''
     Computes the L1 norm of difference between group G1 and G2. They must be of
@@ -53,11 +60,11 @@ def input_groups_gen(g, p, lb, ub, frac_digits):
 def calc_group_oversub(G, G_prime, mode='max'):
     '''
     Group oversub delta(G, G') is defined as the max port oversub of the
-    group, as per equation 2 in the EuroSys WCMP paper. Used in the group
+    group, as per equation 2 in the EuroSys WCMP paper. It is used in the group
     reduction algoritm (Algorithm 1 in the paper).
 
     G: original group before reduction.
-    G': final group after reduction.
+    G_prime: final group after reduction.
     mode: a knob that allows the function to use avg or percentile instead
           of max to find the group oversub. Must be one of 'max', 'avg', 'p50'.
     Return: group oversub.
@@ -91,13 +98,13 @@ class GroupReduction:
 
         orig_groups: a list of lists, where each element list is a set of
                      weights for the corresponding group.
-        int_groups: original groups after lossless scaleup to integers.
+        int_groups: original groups after rounding to integers.
         table_limit: upper bound of the group entries on the switch. Note that
                      this does not have to be the physical limit, but can also
                      be the available headroom left.
         '''
         self._orig_groups = copy.deepcopy(groups)
-        self._int_groups = list(map(frac2int_lossless, copy.deepcopy(groups)))
+        self._int_groups = list(map(frac2int_round, copy.deepcopy(groups)))
         self._groups = self._int_groups if FLAG_USE_INT_INPUT_GROUPS else \
                                            self._orig_groups
         self._table_limit = table_limit
@@ -115,12 +122,10 @@ class GroupReduction:
                   len(group_to_reduce), len(group_under_reduction))
             return -1
 
-        min_oversub, index = float('inf'), -1
-        gtr_size = sum(group_to_reduce)
-        gur_size = sum(group_under_reduction)
-        for i in range(len(group_under_reduction)):
-            oversub = ((group_under_reduction[i] + 1) *
-                       gtr_size) / ((gur_size + 1) * group_to_reduce[i])
+        min_oversub, index, P = float('inf'), -1, len(group_to_reduce)
+        for i in range(P):
+            oversub = ((group_under_reduction[i] + 1) * sum(group_to_reduce)) \
+                      / ((sum(group_under_reduction) + 1) * group_to_reduce[i])
             if min_oversub > oversub:
                 min_oversub = oversub
                 index = i
@@ -155,16 +160,16 @@ class GroupReduction:
             return []
 
         group_to_reduce = self._int_groups[0]
-        T = self._table_limit
+        T, P = self._table_limit, len(group_to_reduce)
         final_group = copy.deepcopy(group_to_reduce)
         while sum(final_group) > T:
             non_reducible_size = 0
             # Counts singleton ports, as they cannot be reduced any further.
-            for i in range(len(final_group)):
+            for i in range(P):
                 if final_group[i] == 1:
-                    non_reducible_size += 1
-            # If none of the port weights can be reduced further, just give up.
-            if non_reducible_size == len(final_group):
+                    non_reducible_size += final_group[i]
+            # If the group is already ECMP, just give up.
+            if non_reducible_size == P:
                 break
             # Directly shrinks original weights by `reduction_ratio` so that
             # the final group can fit into T. Note that the denominator should
@@ -172,7 +177,7 @@ class GroupReduction:
             # singleton ports should just be left out of reduction. But the
             # algorithm still reduces (to 0) and then always rounds up to 1.
             reduction_ratio = (T - non_reducible_size) / sum(group_to_reduce)
-            for i in range(len(final_group)):
+            for i in range(P):
                 final_group[i] = np.floor(group_to_reduce[i] * reduction_ratio)
                 if final_group[i] == 0:
                     final_group[i] = 1
