@@ -132,17 +132,19 @@ class GroupReduction:
 
         return index
 
-    def reduce_wcmp_group(self, group_to_reduce, delta_max=1.2):
+    def _reduce_wcmp_group(self, group_to_reduce, theta_max=1.2):
         '''
         Single group weight reduction algoritm with an oversub limit.
         This is algorithm 1 in the EuroSys WCMP paper.
         '''
+        # First initializes final group to ECMP.
         final_group = np.ones(len(group_to_reduce))
-        while calc_group_oversub(group_to_reduce, final_group) > delta_max:
+        while calc_group_oversub(group_to_reduce, final_group) > theta_max:
             index = self._choose_port_to_update(group_to_reduce, final_group)
             final_group[index] += 1
             if sum(final_group) >= sum(group_to_reduce):
-                print('I give up!!')
+                print('[%s] I give up!!' %
+                      GroupReduction._reduce_wcmp_group.__name__)
                 return group_to_reduce
 
         return final_group.tolist()
@@ -219,8 +221,8 @@ class GroupReduction:
 
         while total_size > S:
             for i in range(len(groups_in)):
-                groups_out[i] = self.reduce_wcmp_group(groups_in[i],
-                                                       enforced_oversub)
+                groups_out[i] = self._reduce_wcmp_group(groups_in[i],
+                                                        enforced_oversub)
                 total_size = sum([sum(g) for g in groups_out])
                 if total_size <= S:
                     return groups_out
