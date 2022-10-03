@@ -36,15 +36,24 @@ def frac2int_round(frac_list):
     '''
     return list(map(round, frac_list))
 
-def l1_norm_diff(G1, G2):
+def l1_norm_diff(GL1, GL2):
     '''
-    Computes the L1 norm of difference between group G1 and G2. They must be of
-    the same size.
+    Computes the L1 norm between group list GL1 and GL2. They must be of the
+    same size both in terms of the list and each individual group.
+    Assume GL1 is the original group list and GL2 is the reduced one.
     '''
-    assert len(G1) == len(G2) and G1 and G2, 'G1 and G2 must be non-empty ' \
-                                             'equal size.'
-    G1, G2 = np.array(G1), np.array(G2)
-    return np.linalg.norm((G2 / sum(G2) - G1 / sum(G1)), ord=1)
+    assert len(GL1) == len(GL2) and GL1 and GL2, 'GL1 and GL2 must be ' \
+                                                 'non-empty equal size.'
+    for i in range(len(GL1)):
+        assert len(GL1[i]) == len(GL2[i]), 'Groups should be equal size.'
+
+    l1_norm = 0
+    for i in range(len(GL1)):
+        G1, G2 = np.array(GL1[i]), np.array(GL2[i])
+        traffic_vol = sum(G1) if len(GL1) > 1 else 1
+        l1_norm += traffic_vol * np.linalg.norm((G2 / sum(G2) - G1 / sum(G1)),
+                                                ord=1)
+    return l1_norm
 
 def input_groups_gen(g, p, lb, ub, frac_digits):
     '''
@@ -492,7 +501,5 @@ if __name__ == "__main__":
     end = time.time_ns()
     print('Input: %s' % input_groups)
     print('Output: %s' % output_groups)
-    for i in range(len(input_groups)):
-        diff = l1_norm_diff(input_groups[i], output_groups[i])
-        print('Group {} L1 Norm: {}'.format(i, diff))
+    print(f'L1 Norm: {l1_norm_diff(input_groups, output_groups)}')
     print('Solving time (msec):', (end - start)/10**6)
