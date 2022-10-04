@@ -11,9 +11,9 @@ if __name__ == "__main__":
 
     with open('sweep.csv', 'w') as f:
         writer = csv.writer(f)
-        writer.writerow(['input_group', 'run', 'solver', 'solve_time (msec)',
-                         'l1_norm', 'num_groups', 'num_ports', 'weight_lb',
-                         'weight_ub', 'fraction_digits'])
+        writer.writerow(['run', 'solver', 'solve_time (msec)', 'l1_norm',
+                         'num_groups', 'num_ports', 'weight_lb', 'weight_ub',
+                         'fraction_digits'])
 
         for p in [2, 4, 8, 16]:
             runtime = []
@@ -35,6 +35,5 @@ if __name__ == "__main__":
                     print(f'L1 Norm: {l1_norm}')
                     solving_time = (end - start)/10**6
                     print('Solving time (msec):', solving_time)
-                    writer.writerow([",".join(map(str, input_groups[0])), run,
-                                     solver, solving_time, l1_norm, g, p, lb,
-                                     ub, frac_digits])
+                    writer.writerow([run, solver, solving_time, l1_norm, g, p,
+                                     lb, ub, frac_digits])
