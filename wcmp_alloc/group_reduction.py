@@ -491,15 +491,16 @@ class GroupReduction:
 if __name__ == "__main__":
     table_limit = 16*1024
     # groups, # port per group, lower bound, upper bound, fraction precision
-    g, p, lb, ub, frac_digits = 2, 2, 100, 100000, 3
+    g, p, lb, ub, frac_digits = 1, 16, 100, 100000, 3
 
     #input_groups = [[1.1, 2.1], [3.1, 4.1]]
     input_groups = input_groups_gen(g, p, lb, ub, frac_digits)
-    start = time.time_ns()
     group_reduction = GroupReduction(input_groups, table_limit)
-    output_groups = group_reduction.solve_ssmg('L1NORM')
-    end = time.time_ns()
-    print('Input: %s' % input_groups)
-    print('Output: %s' % output_groups)
-    print(f'L1 Norm: {l1_norm_diff(input_groups, output_groups)}')
-    print('Solving time (msec):', (end - start)/10**6)
+    for method in ['L1NORM1', 'L1NORM2']:
+        start = time.time_ns()
+        output_groups = group_reduction.solve_sssg(method)
+        end = time.time_ns()
+        print('Input: %s' % input_groups)
+        print('Output: %s' % output_groups)
+        print(f'L1 Norm: {l1_norm_diff(input_groups, output_groups)}')
+        print('Solving time (msec):', (end - start)/10**6)
