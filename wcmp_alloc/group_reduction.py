@@ -302,19 +302,26 @@ class GroupReduction:
             print('Encountered an attribute error')
             return []
 
-    def _sssg_l1_norm_1(self, m):
+    def _sssg_l1_norm_1(self, m, group_in=None, C=None):
         '''
         Build an MILP formulation using L1 norm as the objective for the single
         switch single group (SSSG) optimization. In L1 norm, actual weights to
         be solved are normalized against the swtich table limit.
 
         m: pre-built empty model, needs decision vars and constraints.
+        group_in: the input group to be reduced.
+        C: table limit allowed to be used.
         '''
+        if not group_in:
+            group_in = self._groups[0].copy()
+        if not C:
+            C = self._table_limit
+
         # Create variables: wf[i] is the intended (fractional) weight, w[i] is
         # the actual (integral) weight.
-        wf, wf_sum, w, u = self._groups[0].copy(), sum(self._groups[0]), [], []
+        wf, wf_sum, w, u = group_in, sum(group_in), [], []
         for n in range(len(wf)):
-            w.append(m.addVar(vtype=GRB.INTEGER, lb=0, ub=self._table_limit,
+            w.append(m.addVar(vtype=GRB.INTEGER, lb=0, ub=C,
                               name="w_" + str(n+1)))
             u.append(m.addVar(vtype=GRB.CONTINUOUS, name="u_" + str(n+1)))
 
@@ -322,13 +329,13 @@ class GroupReduction:
         m.setObjective(gp.quicksum(u), GRB.MINIMIZE)
 
         # Add constraint: sum(w) <= table_limit
-        m.addConstr(gp.quicksum(w) <= self._table_limit, "group_size_ub")
+        m.addConstr(gp.quicksum(w) <= C, "group_size_ub")
         for i in range(len(w)):
             # Add constraint: u[i] >= abs(w[i] / table_limit - wf[i]).
             # Note: '==' can be relaxed to '>=' because the objective is to
             # minimize sum(u[i]).
-            m.addConstr(w[i] / self._table_limit - wf[i] / wf_sum <= u[i])
-            m.addConstr(wf[i] / wf_sum - w[i] / self._table_limit <= u[i])
+            m.addConstr(w[i] / C - wf[i] / wf_sum <= u[i])
+            m.addConstr(wf[i] / wf_sum - w[i] / C <= u[i])
             # Add constraint only if inputs are already scaled up to integers:
             # w[i] <= wf[i]
             if FLAG_USE_INT_INPUT_GROUPS:
@@ -336,19 +343,26 @@ class GroupReduction:
 
         return m
 
-    def _sssg_l1_norm_2(self, m):
+    def _sssg_l1_norm_2(self, m, group_in=None, C=None):
         '''
         Build an MIQCP formulation using L1 norm as the objective for the single
         switch single group (SSSG) optimization. In L1 norm, actual weights to
         be solved are normalized against the sum of actual weights.
 
         m: pre-built empty model, needs decision vars and constraints.
+        group_in: the input group to be reduced.
+        C: table limit allowed to be used.
         '''
+        if not group_in:
+            group_in = self._groups[0].copy()
+        if not C:
+            C = self._table_limit
+
         # Create variables: wf[i] is the intended (fractional) weight, w[i] is
         # the actual (integral) weight.
-        wf, wf_sum, w, u = self._groups[0].copy(), sum(self._groups[0]), [], []
+        wf, wf_sum, w, u = group_in, sum(group_in), [], []
         for n in range(len(wf)):
-            w.append(m.addVar(vtype=GRB.INTEGER, lb=0, ub=self._table_limit,
+            w.append(m.addVar(vtype=GRB.INTEGER, lb=0, ub=C,
                               name="w_" + str(n+1)))
             u.append(m.addVar(vtype=GRB.CONTINUOUS, name="u_" + str(n+1)))
         z = m.addVar(vtype=GRB.CONTINUOUS, name="z")
@@ -357,7 +371,7 @@ class GroupReduction:
         m.setObjective(gp.quicksum(u), GRB.MINIMIZE)
 
         # Add constraint: sum(w) <= table_limit.
-        m.addConstr(gp.quicksum(w) <= self._table_limit, "group_size_ub")
+        m.addConstr(gp.quicksum(w) <= C, "group_size_ub")
         # Add constraint: z == 1/sum(w).
         m.addConstr(z * gp.quicksum(w) == 1, "z_limitation")
         for i in range(len(w)):
@@ -485,7 +499,7 @@ class GroupReduction:
 
         return model
 
-    def table_carving_ssmg(self):
+    def table_carving_ssmg(self, formulation="L1NORM1"):
         '''
         Carve the table limit into multiple smaller limits and solve the SSMG
         problem as individual SSSG.
@@ -517,7 +531,15 @@ class GroupReduction:
                 #m.setParam("LogFile", "gurobi.log")
 
                 # Construct model
-                m = self._table_carving_sssg(m, G_in, Cg[i])
+                if formulation == "L1NORM1":
+                    m = self._sssg_l1_norm_1(m, G_in, Cg[i])
+                elif formulation == "L1NORM2":
+                    m.setParam("NonConvex", 2)
+                    m.setParam("MIPFocus", 2)
+                    m = self._sssg_l1_norm_2(m, G_in, Cg[i])
+                else:
+                    print("Formulation not recognized!")
+                    return []
 
                 # Optimize model
                 m.optimize()
@@ -542,54 +564,19 @@ class GroupReduction:
             print('Encountered an attribute error')
             return []
 
-    def _table_carving_sssg(self, m, group_in, C):
-        '''
-        Build an MILP formulation using L1 norm as the objective for the single
-        switch single group (SSSG) optimization. In L1 norm, actual weights to
-        be solved are normalized against the swtich table limit.
-
-        m: pre-built empty model, needs decision vars and constraints.
-        group_in: input SSSG group to be reduced.
-        C: carved table limit that can be used by `group_in`.
-        '''
-        # Create variables: wf[i] is the intended (fractional) weight, w[i] is
-        # the actual (integral) weight.
-        wf, wf_sum, w, u = group_in.copy(), sum(group_in), [], []
-        for n in range(len(wf)):
-            w.append(m.addVar(vtype=GRB.INTEGER, lb=0, ub=C,
-                              name="w_" + str(n+1)))
-            u.append(m.addVar(vtype=GRB.CONTINUOUS, name="u_" + str(n+1)))
-
-        # Set objective
-        m.setObjective(gp.quicksum(u), GRB.MINIMIZE)
-
-        # Add constraint: sum(w) <= table_limit
-        m.addConstr(gp.quicksum(w) <= self._table_limit, "group_size_ub")
-        for i in range(len(w)):
-            # Add constraint: u[i] >= abs(w[i] / table_limit - wf[i]).
-            # Note: '==' can be relaxed to '>=' because the objective is to
-            # minimize sum(u[i]).
-            m.addConstr(w[i] / C - wf[i] / wf_sum <= u[i])
-            m.addConstr(wf[i] / wf_sum - w[i] / C <= u[i])
-            # Add constraint only if inputs are already scaled up to integers:
-            # w[i] <= wf[i]
-            if FLAG_USE_INT_INPUT_GROUPS:
-                m.addConstr(w[i] <= wf[i], "no_scale_up_" + str(1+i))
-
-        return m
-
 if __name__ == "__main__":
     table_limit = 16*1024
     # groups, # port per group, lower bound, upper bound, fraction precision
-    g, p, lb, ub, frac_digits = 1, 16, 100, 100000, 3
+    g, p, lb, ub, frac_digits = 8, 16, 100, 100000, 3
 
     #input_groups = [[1.1, 2.1], [3.1, 4.1]]
     input_groups = input_groups_gen(g, p, lb, ub, frac_digits)
     group_reduction = GroupReduction(input_groups, table_limit)
     for method in ['L1NORM1', 'L1NORM2']:
         start = time.time_ns()
-        output_groups = group_reduction.solve_sssg(method)
+        output_groups = group_reduction.table_carving_ssmg(method)
         end = time.time_ns()
+        print(f"===== Method: {method} =====")
         print('Input: %s' % input_groups)
         print('Output: %s' % output_groups)
         print(f'L1 Norm: {l1_norm_diff(input_groups, output_groups)}')
