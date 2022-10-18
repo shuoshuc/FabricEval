@@ -282,16 +282,13 @@ class GroupReduction:
             m.optimize()
 
             group = []
-            sol_w, sol_z = dict(), dict()
+            sol_w = dict()
             for v in m.getVars():
                 if 'w_' in v.VarName:
                     group.append(round(v.X))
                     sol_w[v.VarName] = v.X
-                if 'z_' in v.VarName:
-                    sol_z[v.VarName] = v.X
             print('Obj: %s' % m.ObjVal)
             print(*sol_w.items(), sep='\n')
-            print(*sol_z.items(), sep='\n')
             print('wf: %s' % self._groups[0])
             # Applies a final GCD reduction just in case.
             final_groups.append(frac2int_lossless(group))
@@ -487,6 +484,99 @@ class GroupReduction:
                                     "no_scale_up_{}_{}".format(m+1, i+1))
 
         return model
+
+    def table_carving_ssmg(self):
+        '''
+        Carve the table limit into multiple smaller limits and solve the SSMG
+        problem as individual SSSG.
+        '''
+        if len(self._groups) <= 0:
+            print('[ERROR] %s: unexpected number of input groups %s' %
+                  GroupReduction.table_carving_ssmg.__name__, len(self._groups))
+            return []
+        final_groups = copy.deepcopy(self._groups)
+
+        # Computes per-group table limit. This is proportional to the group
+        # traffic volume/weight sum.
+        C, wf = self._table_limit, copy.deepcopy(self._groups)
+        wf_sums = [sum(g) for g in self._groups]
+        Cg = [ceil(wf_sum / sum(wf_sums) * C) for wf_sum in wf_sums]
+
+        try:
+            for i, G_in in enumerate(wf):
+                # Initialize a new model
+                m = gp.Model("SSMG_SSSG")
+                m.setParam("FeasibilityTol", 1e-7)
+                m.setParam("IntFeasTol", 1e-8)
+                m.setParam("MIPGap", 1e-4)
+                m.setParam("LogToConsole", 1)
+                #m.setParam("NodefileStart", 0.5)
+                m.setParam("NodefileDir", "/tmp")
+                m.setParam("Threads", 0)
+                #m.setParam("TimeLimit", 100)
+                #m.setParam("LogFile", "gurobi.log")
+
+                # Construct model
+                m = self._table_carving_sssg(m, G_in, Cg[i])
+
+                # Optimize model
+                m.optimize()
+
+                group, sol_w = [], dict()
+                for v in m.getVars():
+                    if 'w_' in v.VarName:
+                        group.append(round(v.X))
+                        sol_w[v.VarName] = v.X
+                print('Obj: %s' % m.ObjVal)
+                print(*sol_w.items(), sep='\n')
+                print('wf: %s' % G_in)
+                # Applies a final GCD reduction just in case.
+                final_groups[i] = frac2int_lossless(group)
+
+            return final_groups
+
+        except gp.GurobiError as e:
+            print('Error code ' + str(e.errno) + ': ' + str(e))
+            return []
+        except AttributeError:
+            print('Encountered an attribute error')
+            return []
+
+    def _table_carving_sssg(self, m, group_in, C):
+        '''
+        Build an MILP formulation using L1 norm as the objective for the single
+        switch single group (SSSG) optimization. In L1 norm, actual weights to
+        be solved are normalized against the swtich table limit.
+
+        m: pre-built empty model, needs decision vars and constraints.
+        group_in: input SSSG group to be reduced.
+        C: carved table limit that can be used by `group_in`.
+        '''
+        # Create variables: wf[i] is the intended (fractional) weight, w[i] is
+        # the actual (integral) weight.
+        wf, wf_sum, w, u = group_in.copy(), sum(group_in), [], []
+        for n in range(len(wf)):
+            w.append(m.addVar(vtype=GRB.INTEGER, lb=0, ub=C,
+                              name="w_" + str(n+1)))
+            u.append(m.addVar(vtype=GRB.CONTINUOUS, name="u_" + str(n+1)))
+
+        # Set objective
+        m.setObjective(gp.quicksum(u), GRB.MINIMIZE)
+
+        # Add constraint: sum(w) <= table_limit
+        m.addConstr(gp.quicksum(w) <= self._table_limit, "group_size_ub")
+        for i in range(len(w)):
+            # Add constraint: u[i] >= abs(w[i] / table_limit - wf[i]).
+            # Note: '==' can be relaxed to '>=' because the objective is to
+            # minimize sum(u[i]).
+            m.addConstr(w[i] / C - wf[i] / wf_sum <= u[i])
+            m.addConstr(wf[i] / wf_sum - w[i] / C <= u[i])
+            # Add constraint only if inputs are already scaled up to integers:
+            # w[i] <= wf[i]
+            if FLAG_USE_INT_INPUT_GROUPS:
+                m.addConstr(w[i] <= wf[i], "no_scale_up_" + str(1+i))
+
+        return m
 
 if __name__ == "__main__":
     table_limit = 16*1024
