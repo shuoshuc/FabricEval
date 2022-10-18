@@ -501,10 +501,13 @@ class GroupReduction:
 
         return model
 
-    def table_carving_ssmg(self, formulation="L1NORM1"):
+    def table_carving_ssmg(self, formulation="L1NORM1", parallel=True):
         '''
         Carve the table limit into multiple smaller limits and solve the SSMG
         problem as individual SSSG.
+
+        parallel: True enables parallel solving, which uses all the CPU cores.
+                  False means sequential solving.
         '''
         if len(self._groups) <= 0:
             print('[ERROR] %s: unexpected number of input groups %s' %
@@ -519,8 +522,8 @@ class GroupReduction:
         Cg = [ceil(wf_sum / sum(wf_sums) * C) for wf_sum in wf_sums]
 
         try:
-            futures = {}
-            with ThreadPoolExecutor(max_workers=os.cpu_count()) as executor:
+            futures, parallelism = {}, os.cpu_count() if parallel else 1
+            with ThreadPoolExecutor(max_workers=parallelism) as executor:
                 for i, G_in in enumerate(wf):
                     # Initialize a new model
                     m = gp.Model("SSMG_SSSG_" + str(i))
