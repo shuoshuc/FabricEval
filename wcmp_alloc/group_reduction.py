@@ -264,7 +264,7 @@ class GroupReduction:
             #m.setParam("NodefileStart", 0.5)
             m.setParam("NodefileDir", "/tmp")
             m.setParam("Threads", 0)
-            #m.setParam("TimeLimit", 100)
+            m.setParam("TimeLimit", 120)
             #m.setParam("LogFile", "gurobi.log")
 
             # Construct model
@@ -410,7 +410,7 @@ class GroupReduction:
             #m.setParam("NodefileStart", 0.5)
             m.setParam("NodefileDir", "/tmp")
             m.setParam("Threads", 0)
-            #m.setParam("TimeLimit", 100)
+            m.setParam("TimeLimit", 120)
             #m.setParam("LogFile", "gurobi.log")
 
             # Construct model
