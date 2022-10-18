@@ -1,11 +1,13 @@
+import copy
 import gurobipy as gp
 import numpy as np
+import os
 import time
-import copy
-from gurobipy import GRB
-from math import gcd, sqrt, isclose, ceil, floor
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from functools import reduce
+from gurobipy import GRB
 from itertools import chain
+from math import gcd, sqrt, isclose, ceil, floor
 
 # If True, feeds solver with scaled up integer groups.
 FLAG_USE_INT_INPUT_GROUPS = False
@@ -517,43 +519,46 @@ class GroupReduction:
         Cg = [ceil(wf_sum / sum(wf_sums) * C) for wf_sum in wf_sums]
 
         try:
-            for i, G_in in enumerate(wf):
-                # Initialize a new model
-                m = gp.Model("SSMG_SSSG")
-                m.setParam("FeasibilityTol", 1e-7)
-                m.setParam("IntFeasTol", 1e-8)
-                m.setParam("MIPGap", 1e-4)
-                m.setParam("LogToConsole", 1)
-                #m.setParam("NodefileStart", 0.5)
-                m.setParam("NodefileDir", "/tmp")
-                m.setParam("Threads", 0)
-                m.setParam("TimeLimit", 120)
-                #m.setParam("LogFile", "gurobi.log")
+            futures = {}
+            with ThreadPoolExecutor(max_workers=os.cpu_count()) as executor:
+                for i, G_in in enumerate(wf):
+                    # Initialize a new model
+                    m = gp.Model("SSMG_SSSG_" + str(i))
+                    m.setParam("FeasibilityTol", 1e-7)
+                    m.setParam("IntFeasTol", 1e-8)
+                    m.setParam("MIPGap", 1e-4)
+                    m.setParam("LogToConsole", 0)
+                    #m.setParam("NodefileStart", 0.5)
+                    m.setParam("NodefileDir", "/tmp")
+                    m.setParam("Threads", 0)
+                    m.setParam("TimeLimit", 120)
+                    #m.setParam("LogFile", "gurobi.log")
 
-                # Construct model
-                if formulation == "L1NORM1":
-                    m = self._sssg_l1_norm_1(m, G_in, Cg[i])
-                elif formulation == "L1NORM2":
-                    m.setParam("NonConvex", 2)
-                    m.setParam("MIPFocus", 2)
-                    m = self._sssg_l1_norm_2(m, G_in, Cg[i])
-                else:
-                    print("Formulation not recognized!")
-                    return []
+                    # Construct model
+                    if formulation == "L1NORM1":
+                        m = self._sssg_l1_norm_1(m, G_in, Cg[i])
+                    elif formulation == "L1NORM2":
+                        m.setParam("NonConvex", 2)
+                        m.setParam("MIPFocus", 2)
+                        m = self._sssg_l1_norm_2(m, G_in, Cg[i])
+                    else:
+                        print("Formulation not recognized!")
+                        return []
 
-                # Optimize model
-                m.optimize()
+                    # Optimize model. futures contain execution results.
+                    futures[executor.submit(m.optimize)] = (i, m)
 
-                group, sol_w = [], dict()
-                for v in m.getVars():
-                    if 'w_' in v.VarName:
-                        group.append(round(v.X))
-                        sol_w[v.VarName] = v.X
-                print('Obj: %s' % m.ObjVal)
-                print(*sol_w.items(), sep='\n')
-                print('wf: %s' % G_in)
-                # Applies a final GCD reduction just in case.
-                final_groups[i] = frac2int_lossless(group)
+                for future in as_completed(futures):
+                    i, m = futures[future]
+                    group, sol_w = [], dict()
+                    for v in m.getVars():
+                        if 'w_' in v.VarName:
+                            group.append(round(v.X))
+                            sol_w[v.VarName] = v.X
+                    print('Obj: %s' % m.ObjVal)
+                    print(*sol_w.items(), sep='\n')
+                    # Applies a final GCD reduction just in case.
+                    final_groups[i] = frac2int_lossless(group)
 
             return final_groups
 
