@@ -15,6 +15,10 @@ FLAG_USE_INT_INPUT_GROUPS = False
 # Broadcom Tomahawk 2 ECMP table limit.
 TABLE_LIMIT = 16 * 1024
 
+# VERBOSE=0: no Gurobi log. VERBOSE=1: Gurobi final log only. VERBOSE=2: full
+# Gubrobi log.
+VERBOSE = 0
+
 def gcd_reduce(vector):
     '''
     Reduces a vector by its gcd.
@@ -119,6 +123,44 @@ class GroupReduction:
         self._groups = self._int_groups if FLAG_USE_INT_INPUT_GROUPS else \
                                            self._orig_groups
         self._table_limit = table_limit
+        self._final_groups = None
+
+    def get_input_groups(self):
+        '''
+        Returns the input groups.
+        '''
+        return self._orig_groups
+
+    def get_output_groups(self):
+        '''
+        Returns the output groups.
+        '''
+        return self._final_groups
+
+    def get_table_limit(self):
+        '''
+        Returns the group table limit.
+        '''
+        return self._table_limit
+
+    def get_table_util(self, percentage=False):
+        '''
+        Returns the group table utilization.
+
+        percentage: If true, returns utilization in percentage, otherwise
+                    returns raw entries consumed.
+        '''
+        sum_entries = sum([sum(g) for g in self._final_groups])
+        return sum_entries / self._table_limit if percentage else sum_entries
+
+    def cache(self, final_groups):
+        '''
+        Caches the final groups and returns the same input.
+
+        final_groups: the final integer groups to be cached.
+        '''
+        self._final_groups = final_groups
+        return final_groups
 
     def _choose_port_to_update(self, group_to_reduce, group_under_reduction):
         '''
@@ -209,7 +251,7 @@ class GroupReduction:
                 final_group_2 = copy.deepcopy(final_group)
                 min_oversub = curr_oversub
 
-        return [final_group_2]
+        return self.cache([final_group_2])
 
     def table_fitting_ssmg(self):
         '''
@@ -241,7 +283,7 @@ class GroupReduction:
             # oversub.
             enforced_oversub += step_size
 
-        return groups_out
+        return self.cache(groups_out)
 
     def solve_sssg(self, formulation='L1NORM2'):
         '''
@@ -257,10 +299,10 @@ class GroupReduction:
         try:
             # Initialize a new model
             m = gp.Model("single_switch_single_group")
+            m.setParam("LogToConsole", 1 if VERBOSE >= 2 else 0)
             m.setParam("FeasibilityTol", 1e-7)
             m.setParam("IntFeasTol", 1e-8)
             m.setParam("MIPGap", 1e-4)
-            m.setParam("LogToConsole", 1)
             #m.setParam("NodefileStart", 0.5)
             m.setParam("NodefileDir", "/tmp")
             m.setParam("Threads", 0)
@@ -289,13 +331,14 @@ class GroupReduction:
                 if 'w_' in v.VarName:
                     group.append(round(v.X))
                     sol_w[v.VarName] = v.X
-            print('Obj: %s' % m.ObjVal)
-            print(*sol_w.items(), sep='\n')
-            print('wf: %s' % self._groups[0])
+            if VERBOSE > 0:
+                print('Obj: %s' % m.ObjVal)
+                print(*sol_w.items(), sep='\n')
+                print('wf: %s' % self._groups[0])
             # Applies a final GCD reduction just in case.
             final_groups.append(frac2int_lossless(group))
 
-            return final_groups
+            return self.cache(final_groups)
 
         except gp.GurobiError as e:
             print('Error code ' + str(e.errno) + ': ' + str(e))
@@ -403,10 +446,10 @@ class GroupReduction:
         try:
             # Initialize a new model
             m = gp.Model("single_switch_multi_group")
+            m.setParam("LogToConsole", 1 if VERBOSE >= 2 else 0)
             m.setParam("FeasibilityTol", 1e-7)
             m.setParam("IntFeasTol", 1e-8)
             m.setParam("MIPGap", 1e-4)
-            m.setParam("LogToConsole", 1)
             #m.setParam("NodefileStart", 0.5)
             m.setParam("NodefileDir", "/tmp")
             m.setParam("Threads", 0)
@@ -431,13 +474,14 @@ class GroupReduction:
                     split = v.VarName.split('_')
                     final_groups[int(split[1])-1][int(split[2])-1] = round(v.X)
                     sol_w[v.VarName] = v.X
-            print('Obj: %s' % m.ObjVal)
-            print(*sol_w.items(), sep='\n')
-            print('wf: %s' % self._groups)
+            if VERBOSE > 0:
+                print('Obj: %s' % m.ObjVal)
+                print(*sol_w.items(), sep='\n')
+                print('wf: %s' % self._groups)
             # Applies a final GCD reduction just in case.
             final_groups = list(map(frac2int_lossless, final_groups))
 
-            return final_groups
+            return self.cache(final_groups)
 
         except gp.GurobiError as e:
             print('Error code ' + str(e.errno) + ': ' + str(e))
@@ -527,10 +571,10 @@ class GroupReduction:
                 for i, G_in in enumerate(wf):
                     # Initialize a new model
                     m = gp.Model("SSMG_SSSG_" + str(i))
+                    m.setParam("LogToConsole", 1 if VERBOSE >= 2 else 0)
                     m.setParam("FeasibilityTol", 1e-7)
                     m.setParam("IntFeasTol", 1e-8)
                     m.setParam("MIPGap", 1e-4)
-                    m.setParam("LogToConsole", 0)
                     #m.setParam("NodefileStart", 0.5)
                     m.setParam("NodefileDir", "/tmp")
                     m.setParam("Threads", 0)
@@ -558,12 +602,13 @@ class GroupReduction:
                         if 'w_' in v.VarName:
                             group.append(round(v.X))
                             sol_w[v.VarName] = v.X
-                    print('Obj: %s' % m.ObjVal)
-                    print(*sol_w.items(), sep='\n')
+                    if VERBOSE > 0:
+                        print('Obj: %s' % m.ObjVal)
+                        print(*sol_w.items(), sep='\n')
                     # Applies a final GCD reduction just in case.
                     final_groups[i] = frac2int_lossless(group)
 
-            return final_groups
+            return self.cache(final_groups)
 
         except gp.GurobiError as e:
             print('Error code ' + str(e.errno) + ': ' + str(e))
@@ -589,3 +634,6 @@ if __name__ == "__main__":
         print('Output: %s' % output_groups)
         print(f'L1 Norm: {l1_norm_diff(input_groups, output_groups)}')
         print('Solving time (msec):', (end - start)/10**6)
+        print(f'Table util: {group_reduction.get_table_util()} /'
+              f' {group_reduction.get_table_limit()}, headroom: '
+              f'{group_reduction.get_table_limit() - group_reduction.get_table_util()}')
