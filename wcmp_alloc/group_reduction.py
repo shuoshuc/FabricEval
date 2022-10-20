@@ -1,13 +1,14 @@
 import copy
-import gurobipy as gp
-import numpy as np
 import os
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from functools import reduce
-from gurobipy import GRB
 from itertools import chain
-from math import gcd, sqrt, isclose, ceil, floor
+from math import ceil, floor, gcd, isclose, sqrt
+
+import gurobipy as gp
+import numpy as np
+from gurobipy import GRB
 
 # If True, feeds solver with scaled up integer groups.
 FLAG_USE_INT_INPUT_GROUPS = False
@@ -18,6 +19,13 @@ TABLE_LIMIT = 16 * 1024
 # VERBOSE=0: no Gurobi log. VERBOSE=1: Gurobi final log only. VERBOSE=2: full
 # Gubrobi log.
 VERBOSE = 0
+
+def PRINTV(verbose, logstr):
+    '''
+    Print helper with verbosity control.
+    '''
+    if VERBOSE >= verbose:
+        print(logstr)
 
 def gcd_reduce(vector):
     '''
@@ -143,14 +151,17 @@ class GroupReduction:
         '''
         return self._table_limit
 
-    def get_table_util(self, percentage=False):
+    def get_table_util(self, percentage=False, final_groups=None):
         '''
         Returns the group table utilization.
 
         percentage: If true, returns utilization in percentage, otherwise
                     returns raw entries consumed.
+        final_groups: directly provided final groups instead of the one stored
+                      as a member variable.
         '''
-        sum_entries = sum([sum(g) for g in self._final_groups])
+        final_G = final_groups if final_groups else self._final_groups
+        sum_entries = sum([sum(g) for g in final_G])
         return sum_entries / self._table_limit if percentage else sum_entries
 
     def cache(self, final_groups):
@@ -285,15 +296,20 @@ class GroupReduction:
 
         return self.cache(groups_out)
 
-    def solve_sssg(self, formulation='L1NORM2'):
+    def solve_sssg(self, formulation='L1NORM2', groups_in=None, C=None):
         '''
         Given the input groups and table limit, solve the single switch single
         group (SSSG) optimization problem.
+
+        group_in (optional): input groups to use instead.
+        C (optional): table limit to use instead.
         '''
+        input_groups = groups_in if groups_in else self._groups
+        table_limit = C if C else self._table_limit
         final_groups = []
-        if len(self._groups) != 1:
+        if len(input_groups) != 1:
             print('[ERROR] %s: unexpected number of input groups %s' %
-                  GroupReduction.solve_sssg.__name__, len(self._groups))
+                  GroupReduction.solve_sssg.__name__, len(input_groups))
             return []
 
         try:
@@ -313,11 +329,11 @@ class GroupReduction:
             # L1NORM1 normalizes actual integer weights over table limit.
             # L1NORM2 normalizes actual integer weights over its own group sum.
             if formulation == "L1NORM1":
-                m = self._sssg_l1_norm_1(m)
+                m = self._sssg_l1_norm_1(m, input_groups[0], table_limit)
             elif formulation == "L1NORM2":
                 m.setParam("NonConvex", 2)
                 m.setParam("MIPFocus", 2)
-                m = self._sssg_l1_norm_2(m)
+                m = self._sssg_l1_norm_2(m, input_groups[0], table_limit)
             else:
                 print("Formulation not recognized!")
                 return []
@@ -331,10 +347,9 @@ class GroupReduction:
                 if 'w_' in v.VarName:
                     group.append(round(v.X))
                     sol_w[v.VarName] = v.X
-            if VERBOSE > 0:
-                print('Obj: %s' % m.ObjVal)
-                print(*sol_w.items(), sep='\n')
-                print('wf: %s' % self._groups[0])
+            PRINTV(1, f'Obj: {m.ObjVal}')
+            PRINTV(1, f'wf: {self._groups[0]}')
+            PRINTV(1, str(sol_w))
             # Applies a final GCD reduction just in case.
             final_groups.append(frac2int_lossless(group))
 
@@ -347,21 +362,16 @@ class GroupReduction:
             print('Encountered an attribute error')
             return []
 
-    def _sssg_l1_norm_1(self, m, group_in=None, C=None):
+    def _sssg_l1_norm_1(self, m, group_in, C):
         '''
         Build an MILP formulation using L1 norm as the objective for the single
         switch single group (SSSG) optimization. In L1 norm, actual weights to
         be solved are normalized against the swtich table limit.
 
         m: pre-built empty model, needs decision vars and constraints.
-        group_in: the input group to be reduced.
+        group_in: the (single) input group to be reduced.
         C: table limit allowed to be used.
         '''
-        if not group_in:
-            group_in = self._groups[0].copy()
-        if not C:
-            C = self._table_limit
-
         # Create variables: wf[i] is the intended (fractional) weight, w[i] is
         # the actual (integral) weight.
         wf, wf_sum, w, u = group_in, sum(group_in), [], []
@@ -388,21 +398,16 @@ class GroupReduction:
 
         return m
 
-    def _sssg_l1_norm_2(self, m, group_in=None, C=None):
+    def _sssg_l1_norm_2(self, m, group_in, C):
         '''
         Build an MIQCP formulation using L1 norm as the objective for the single
         switch single group (SSSG) optimization. In L1 norm, actual weights to
         be solved are normalized against the sum of actual weights.
 
         m: pre-built empty model, needs decision vars and constraints.
-        group_in: the input group to be reduced.
+        group_in: the (single) input group to be reduced.
         C: table limit allowed to be used.
         '''
-        if not group_in:
-            group_in = self._groups[0].copy()
-        if not C:
-            C = self._table_limit
-
         # Create variables: wf[i] is the intended (fractional) weight, w[i] is
         # the actual (integral) weight.
         wf, wf_sum, w, u = group_in, sum(group_in), [], []
@@ -474,10 +479,9 @@ class GroupReduction:
                     split = v.VarName.split('_')
                     final_groups[int(split[1])-1][int(split[2])-1] = round(v.X)
                     sol_w[v.VarName] = v.X
-            if VERBOSE > 0:
-                print('Obj: %s' % m.ObjVal)
-                print(*sol_w.items(), sep='\n')
-                print('wf: %s' % self._groups)
+            PRINTV(1, 'Obj: %s' % m.ObjVal)
+            PRINTV(1, str(sol_w))
+            PRINTV(1, 'wf: %s' % self._groups)
             # Applies a final GCD reduction just in case.
             final_groups = list(map(frac2int_lossless, final_groups))
 
@@ -562,51 +566,88 @@ class GroupReduction:
         # Computes per-group table limit. This is proportional to the group
         # traffic volume/weight sum.
         C, wf = self._table_limit, copy.deepcopy(self._groups)
-        wf_sums = [sum(g) for g in self._groups]
-        Cg = [ceil(wf_sum / sum(wf_sums) * C) for wf_sum in wf_sums]
+        wf_sums = [sum(g) for g in wf]
+        Cg = [floor(wf_sum / sum(wf_sums) * C) for wf_sum in wf_sums]
 
         try:
-            futures, parallelism = {}, os.cpu_count() if parallel else 1
+            # Step 1: solve SSSG using table carving limits.
+            # Not all groups would fully use up the allocated space, so there
+            # will be unused entries at the end of this step.
+            parallelism = os.cpu_count() if parallel else 1
             with ThreadPoolExecutor(max_workers=parallelism) as executor:
-                for i, G_in in enumerate(wf):
-                    # Initialize a new model
-                    m = gp.Model("SSMG_SSSG_" + str(i))
-                    m.setParam("LogToConsole", 1 if VERBOSE >= 2 else 0)
-                    m.setParam("FeasibilityTol", 1e-7)
-                    m.setParam("IntFeasTol", 1e-8)
-                    m.setParam("MIPGap", 1e-4)
-                    #m.setParam("NodefileStart", 0.5)
-                    m.setParam("NodefileDir", "/tmp")
-                    m.setParam("Threads", 0)
-                    m.setParam("TimeLimit", 120)
-                    #m.setParam("LogFile", "gurobi.log")
-
-                    # Construct model
-                    if formulation == "L1NORM1":
-                        m = self._sssg_l1_norm_1(m, G_in, Cg[i])
-                    elif formulation == "L1NORM2":
-                        m.setParam("NonConvex", 2)
-                        m.setParam("MIPFocus", 2)
-                        m = self._sssg_l1_norm_2(m, G_in, Cg[i])
-                    else:
-                        print("Formulation not recognized!")
-                        return []
-
-                    # Optimize model. futures contain execution results.
-                    futures[executor.submit(m.optimize)] = (i, m)
+                futures = {executor.submit(self.solve_sssg, formulation,
+                                           [G_in], Cg[i]): i
+                           for i, G_in in enumerate(wf)}
 
                 for future in as_completed(futures):
-                    i, m = futures[future]
-                    group, sol_w = [], dict()
-                    for v in m.getVars():
-                        if 'w_' in v.VarName:
-                            group.append(round(v.X))
-                            sol_w[v.VarName] = v.X
-                    if VERBOSE > 0:
-                        print('Obj: %s' % m.ObjVal)
-                        print(*sol_w.items(), sep='\n')
+                    i = futures[future]
+                    group = future.result()
+                    if not group[0]:
+                        print('[ERROR] %s: final group %s is invalid - %s ' %
+                              GroupReduction.table_carving_ssmg.__name__, i,
+                              group[0])
                     # Applies a final GCD reduction just in case.
-                    final_groups[i] = frac2int_lossless(group)
+                    final_groups[i] = frac2int_lossless(group[0])
+
+            PRINTV(1, f'Intermediate metric: {l1_norm_diff(wf, final_groups)}')
+            PRINTV(1, f'Intermediate groups: {final_groups}')
+            PRINTV(1, 'Intermediate table util: %s / %s, unused %s' %
+                   (self.get_table_util(final_groups=final_groups), C,
+                   C - self.get_table_util(final_groups=final_groups)))
+
+            # Step 2: iteratively reclaim and redistribute unused entries.
+            # Goal is to find the group with worst metric and improve it with
+            # unused entries.
+            per_group_metric = sorted([
+                [i, sum(wf[i]) * l1_norm_diff([wf[i]], [final_groups[i]])]
+                for i in range(len(wf))], key=lambda x: x[1], reverse=True)
+            while len(per_group_metric) > 0:
+                # Group with worst metric is ranked first.
+                i, last_metric = per_group_metric[0]
+                unused = C - self.get_table_util(final_groups=final_groups)
+                PRINTV(1, f'Working on group {i} with metric {last_metric}, '
+                       f'unused entries {unused}.')
+                # Table is full, nothing to be done.
+                if unused <= 0:
+                    break
+                while True:
+                    # Group i might have not used up its allocated space. By
+                    # simply allowing an extra `unused` entries will lead to
+                    # double counting. Therefore, only unused entries from other
+                    # groups can be allocated to group i.
+                    Cg[i] += unused - (Cg[i] - sum(final_groups[i]))
+                    group = self.solve_sssg(formulation, [wf[i]], Cg[i])[0]
+                    # Applies a final GCD reduction just in case.
+                    group = frac2int_lossless(group)
+
+                    # Inner loop stop criteria 1: metric stops decreasing. Also
+                    # pops head of `per_group_metric` and moves on to next. The
+                    # worst group cannot be improved further, but the second
+                    # worst might.
+                    if sum(wf[i]) * l1_norm_diff([wf[i]], [group]) \
+                            >= last_metric:
+                        per_group_metric.pop(0)
+                        PRINTV(1, f'No metric improvement, skip group {i}.')
+                        break
+
+                    # Metric of worst group indeed improves. There might be some
+                    # leftover entries that can be used to improve the metric
+                    # again, but the group that needs this most could be
+                    # different now. So we sort the list again and see if we
+                    # should continue on the same group.
+                    final_groups[i] = group
+                    last_metric = sum(wf[i]) * l1_norm_diff([wf[i]],
+                                                            [final_groups[i]])
+                    per_group_metric[0][1] = last_metric
+                    PRINTV(1, f'Group {i} new metric {last_metric}.')
+                    per_group_metric = sorted(per_group_metric,
+                                              key=lambda x: x[1],
+                                              reverse=True)
+                    # Inner loop stop criteria 2: group with worst metric has
+                    # changed, start over.
+                    if per_group_metric[0][1] != i:
+                        PRINTV(1, f'New worst group: {per_group_metric[0][0]}.')
+                        break
 
             return self.cache(final_groups)
 
@@ -624,16 +665,17 @@ if __name__ == "__main__":
 
     #input_groups = [[1.1, 2.1], [3.1, 4.1]]
     input_groups = input_groups_gen(g, p, lb, ub, frac_digits)
-    group_reduction = GroupReduction(input_groups, table_limit)
+    gr = GroupReduction(input_groups, table_limit)
     for method in ['L1NORM1', 'L1NORM2']:
         start = time.time_ns()
-        output_groups = group_reduction.table_carving_ssmg(method)
+        output_groups = gr.table_carving_ssmg(method)
         end = time.time_ns()
         print(f"===== Method: {method} =====")
         print('Input: %s' % input_groups)
         print('Output: %s' % output_groups)
         print(f'L1 Norm: {l1_norm_diff(input_groups, output_groups)}')
         print('Solving time (msec):', (end - start)/10**6)
-        print(f'Table util: {group_reduction.get_table_util()} /'
-              f' {group_reduction.get_table_limit()}, headroom: '
-              f'{group_reduction.get_table_limit() - group_reduction.get_table_util()}')
+        print(f'Table util: {gr.get_table_util()} /'
+              f' {gr.get_table_limit()}, headroom: '
+              f'{gr.get_table_limit() - gr.get_table_util()}')
+        print(f"===== End of method: {method} =====")
