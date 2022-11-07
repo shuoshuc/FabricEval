@@ -106,6 +106,13 @@ class TestLoadToyNet(unittest.TestCase):
         self.assertNotEqual(None, toy2_traffic)
         self.assertEqual(traffic_pb2.TrafficDemand.DemandType.LEVEL_AGGR_BLOCK,
                          toy2_traffic.type)
+        self.assertEqual(2, len(toy2_traffic.demands))
+        self.assertEqual('toy2-c1-ab1', toy2_traffic.demands[0].src)
+        self.assertEqual('toy2-c3-ab1', toy2_traffic.demands[0].dst)
+        self.assertEqual(300000, toy2_traffic.demands[0].volume_mbps)
+        self.assertEqual('toy2-c3-ab1', toy2_traffic.demands[1].src)
+        self.assertEqual('toy2-c1-ab1', toy2_traffic.demands[1].dst)
+        self.assertEqual(100000, toy2_traffic.demands[1].volume_mbps)
 
 if __name__ == "__main__":
     unittest.main()
