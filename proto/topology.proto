@@ -5,8 +5,8 @@ package topo;
 message Port {
     // Unique name identifier.
     string name = 1;
-    // Port speed in bits/sec.
-    int64 port_speed = 2;
+    // Port speed in Mbits/sec.
+    int64 port_speed_mbps = 2;
     // True if this port is facing the data-center network (DCN).
     bool dcn_facing = 3;
 }
@@ -18,8 +18,8 @@ message Link {
     string src_port_id = 2;
     // Unique name identifier of the destination port.
     string dst_port_id = 3;
-    // Link speed in bits/sec.
-    int64 link_speed = 4;
+    // Link speed in Mbits/sec.
+    int64 link_speed_mbps = 4;
 }
 
 message Node {
@@ -63,6 +63,8 @@ message Path {
     string src_aggr_block = 2;
     // Unique name identifier of the destination aggregation block.
     string dst_aggr_block = 3;
+    // Path capacity in Mbits/sec, should match the sum of member link capacity.
+    int64 capacity_mbps = 4;
 }
 
 message Cluster {

@@ -48,22 +48,22 @@ clusters {
       group_limit: 128
       ports {
         name: "toy2-c1-ab1-s2i1-p1"
-        port_speed: 100000000000
+        port_speed_mbps: 100000
         dcn_facing: false
       }
       ports {
         name: "toy2-c1-ab1-s2i1-p2"
-        port_speed: 100000000000
+        port_speed_mbps: 100000
         dcn_facing: false
       }
       ports {
         name: "toy2-c1-ab1-s2i1-p3"
-        port_speed: 100000000000
+        port_speed_mbps: 100000
         dcn_facing: false
       }
       ports {
         name: "toy2-c1-ab1-s2i1-p4"
-        port_speed: 100000000000
+        port_speed_mbps: 100000
         dcn_facing: false
       }
     }
@@ -76,22 +76,22 @@ clusters {
       group_limit: 128
       ports {
         name: "toy2-c1-ab1-s3i1-p1"
-        port_speed: 100000000000
+        port_speed_mbps: 100000
         dcn_facing: false
       }
       ports {
         name: "toy2-c1-ab1-s3i1-p2"
-        port_speed: 100000000000
+        port_speed_mbps: 100000
         dcn_facing: false
       }
       ports {
         name: "toy2-c1-ab1-s3i1-p3"
-        port_speed: 100000000000
+        port_speed_mbps: 100000
         dcn_facing: true
       }
       ports {
         name: "toy2-c1-ab1-s3i1-p4"
-        port_speed: 100000000000
+        port_speed_mbps: 100000
         dcn_facing: true
       }
     }
@@ -104,22 +104,22 @@ clusters {
       group_limit: 128
       ports {
         name: "toy2-c1-ab1-s2i2-p1"
-        port_speed: 100000000000
+        port_speed_mbps: 100000
         dcn_facing: false
       }
       ports {
         name: "toy2-c1-ab1-s2i2-p2"
-        port_speed: 100000000000
+        port_speed_mbps: 100000
         dcn_facing: false
       }
       ports {
         name: "toy2-c1-ab1-s2i2-p3"
-        port_speed: 100000000000
+        port_speed_mbps: 100000
         dcn_facing: false
       }
       ports {
         name: "toy2-c1-ab1-s2i2-p4"
-        port_speed: 100000000000
+        port_speed_mbps: 100000
         dcn_facing: false
       }
     }
@@ -132,22 +132,22 @@ clusters {
       group_limit: 128
       ports {
         name: "toy2-c1-ab1-s3i2-p1"
-        port_speed: 100000000000
+        port_speed_mbps: 100000
         dcn_facing: false
       }
       ports {
         name: "toy2-c1-ab1-s3i2-p2"
-        port_speed: 100000000000
+        port_speed_mbps: 100000
         dcn_facing: false
       }
       ports {
         name: "toy2-c1-ab1-s3i2-p3"
-        port_speed: 100000000000
+        port_speed_mbps: 100000
         dcn_facing: true
       }
       ports {
         name: "toy2-c1-ab1-s3i2-p4"
-        port_speed: 100000000000
+        port_speed_mbps: 100000
         dcn_facing: true
       }
     }
@@ -161,7 +161,7 @@ clusters {
     group_limit: 128
     ports {
       name: "toy2-c1-ab1-s1i1-p1"
-      port_speed: 100000000000
+      port_speed_mbps: 100000
       dcn_facing: false
     }
     host_prefix: "172.16.0.0"
@@ -176,7 +176,7 @@ clusters {
     group_limit: 128
     ports {
       name: "toy2-c1-ab1-s1i2-p1"
-      port_speed: 100000000000
+      port_speed_mbps: 100000
       dcn_facing: false
     }
     host_prefix: "172.16.0.32"
@@ -191,7 +191,7 @@ clusters {
     group_limit: 128
     ports {
       name: "toy2-c1-ab1-s1i3-p1"
-      port_speed: 100000000000
+      port_speed_mbps: 100000
       dcn_facing: false
     }
     host_prefix: "172.16.0.64"
@@ -206,7 +206,7 @@ clusters {
     group_limit: 128
     ports {
       name: "toy2-c1-ab1-s1i4-p1"
-      port_speed: 100000000000
+      port_speed_mbps: 100000
       dcn_facing: false
     }
     host_prefix: "172.16.0.96"
@@ -226,22 +226,22 @@ clusters {
       group_limit: 128
       ports {
         name: "toy2-c2-ab1-s2i1-p1"
-        port_speed: 100000000000
+        port_speed_mbps: 100000
         dcn_facing: false
       }
       ports {
         name: "toy2-c2-ab1-s2i1-p2"
-        port_speed: 100000000000
+        port_speed_mbps: 100000
         dcn_facing: false
       }
       ports {
         name: "toy2-c2-ab1-s2i1-p3"
-        port_speed: 100000000000
+        port_speed_mbps: 100000
         dcn_facing: false
       }
       ports {
         name: "toy2-c2-ab1-s2i1-p4"
-        port_speed: 100000000000
+        port_speed_mbps: 100000
         dcn_facing: false
       }
     }
@@ -254,22 +254,22 @@ clusters {
       group_limit: 128
       ports {
         name: "toy2-c2-ab1-s3i1-p1"
-        port_speed: 100000000000
+        port_speed_mbps: 100000
         dcn_facing: false
       }
       ports {
         name: "toy2-c2-ab1-s3i1-p2"
-        port_speed: 100000000000
+        port_speed_mbps: 100000
         dcn_facing: false
       }
       ports {
         name: "toy2-c2-ab1-s3i1-p3"
-        port_speed: 100000000000
+        port_speed_mbps: 100000
         dcn_facing: true
       }
       ports {
         name: "toy2-c2-ab1-s3i1-p4"
-        port_speed: 100000000000
+        port_speed_mbps: 100000
         dcn_facing: true
       }
     }
@@ -282,22 +282,22 @@ clusters {
       group_limit: 128
       ports {
         name: "toy2-c2-ab1-s2i2-p1"
-        port_speed: 100000000000
+        port_speed_mbps: 100000
         dcn_facing: false
       }
       ports {
         name: "toy2-c2-ab1-s2i2-p2"
-        port_speed: 100000000000
+        port_speed_mbps: 100000
         dcn_facing: false
       }
       ports {
         name: "toy2-c2-ab1-s2i2-p3"
-        port_speed: 100000000000
+        port_speed_mbps: 100000
         dcn_facing: false
       }
       ports {
         name: "toy2-c2-ab1-s2i2-p4"
-        port_speed: 100000000000
+        port_speed_mbps: 100000
         dcn_facing: false
       }
     }
@@ -310,22 +310,22 @@ clusters {
       group_limit: 128
       ports {
         name: "toy2-c2-ab1-s3i2-p1"
-        port_speed: 100000000000
+        port_speed_mbps: 100000
         dcn_facing: false
       }
       ports {
         name: "toy2-c2-ab1-s3i2-p2"
-        port_speed: 100000000000
+        port_speed_mbps: 100000
         dcn_facing: false
       }
       ports {
         name: "toy2-c2-ab1-s3i2-p3"
-        port_speed: 100000000000
+        port_speed_mbps: 100000
         dcn_facing: true
       }
       ports {
         name: "toy2-c2-ab1-s3i2-p4"
-        port_speed: 100000000000
+        port_speed_mbps: 100000
         dcn_facing: true
       }
     }
@@ -344,22 +344,22 @@ clusters {
       group_limit: 128
       ports {
         name: "toy2-c3-ab1-s2i1-p1"
-        port_speed: 100000000000
+        port_speed_mbps: 100000
         dcn_facing: false
       }
       ports {
         name: "toy2-c3-ab1-s2i1-p2"
-        port_speed: 100000000000
+        port_speed_mbps: 100000
         dcn_facing: false
       }
       ports {
         name: "toy2-c3-ab1-s2i1-p3"
-        port_speed: 100000000000
+        port_speed_mbps: 100000
         dcn_facing: false
       }
       ports {
         name: "toy2-c3-ab1-s2i1-p4"
-        port_speed: 100000000000
+        port_speed_mbps: 100000
         dcn_facing: false
       }
     }
@@ -372,22 +372,22 @@ clusters {
       group_limit: 128
       ports {
         name: "toy2-c3-ab1-s3i1-p1"
-        port_speed: 100000000000
+        port_speed_mbps: 100000
         dcn_facing: false
       }
       ports {
         name: "toy2-c3-ab1-s3i1-p2"
-        port_speed: 100000000000
+        port_speed_mbps: 100000
         dcn_facing: false
       }
       ports {
         name: "toy2-c3-ab1-s3i1-p3"
-        port_speed: 100000000000
+        port_speed_mbps: 100000
         dcn_facing: true
       }
       ports {
         name: "toy2-c3-ab1-s3i1-p4"
-        port_speed: 100000000000
+        port_speed_mbps: 100000
         dcn_facing: true
       }
     }
@@ -400,22 +400,22 @@ clusters {
       group_limit: 128
       ports {
         name: "toy2-c3-ab1-s2i2-p1"
-        port_speed: 100000000000
+        port_speed_mbps: 100000
         dcn_facing: false
       }
       ports {
         name: "toy2-c3-ab1-s2i2-p2"
-        port_speed: 100000000000
+        port_speed_mbps: 100000
         dcn_facing: false
       }
       ports {
         name: "toy2-c3-ab1-s2i2-p3"
-        port_speed: 100000000000
+        port_speed_mbps: 100000
         dcn_facing: false
       }
       ports {
         name: "toy2-c3-ab1-s2i2-p4"
-        port_speed: 100000000000
+        port_speed_mbps: 100000
         dcn_facing: false
       }
     }
@@ -428,22 +428,22 @@ clusters {
       group_limit: 128
       ports {
         name: "toy2-c3-ab1-s3i2-p1"
-        port_speed: 100000000000
+        port_speed_mbps: 100000
         dcn_facing: false
       }
       ports {
         name: "toy2-c3-ab1-s3i2-p2"
-        port_speed: 100000000000
+        port_speed_mbps: 100000
         dcn_facing: false
       }
       ports {
         name: "toy2-c3-ab1-s3i2-p3"
-        port_speed: 100000000000
+        port_speed_mbps: 100000
         dcn_facing: true
       }
       ports {
         name: "toy2-c3-ab1-s3i2-p4"
-        port_speed: 100000000000
+        port_speed_mbps: 100000
         dcn_facing: true
       }
     }
@@ -457,7 +457,7 @@ clusters {
     group_limit: 128
     ports {
       name: "toy2-c3-ab1-s1i1-p1"
-      port_speed: 100000000000
+      port_speed_mbps: 100000
       dcn_facing: false
     }
     host_prefix: "172.16.1.0"
@@ -472,7 +472,7 @@ clusters {
     group_limit: 128
     ports {
       name: "toy2-c3-ab1-s1i2-p1"
-      port_speed: 100000000000
+      port_speed_mbps: 100000
       dcn_facing: false
     }
     host_prefix: "172.16.1.32"
@@ -487,7 +487,7 @@ clusters {
     group_limit: 128
     ports {
       name: "toy2-c3-ab1-s1i3-p1"
-      port_speed: 100000000000
+      port_speed_mbps: 100000
       dcn_facing: false
     }
     host_prefix: "172.16.1.64"
@@ -502,7 +502,7 @@ clusters {
     group_limit: 128
     ports {
       name: "toy2-c3-ab1-s1i4-p1"
-      port_speed: 100000000000
+      port_speed_mbps: 100000
       dcn_facing: false
     }
     host_prefix: "172.16.1.96"
@@ -514,344 +514,350 @@ links {
   name: "toy2-c1-ab1-s2i1-p3:toy2-c1-ab1-s3i1-p1"
   src_port_id: "toy2-c1-ab1-s2i1-p3"
   dst_port_id: "toy2-c1-ab1-s3i1-p1"
-  link_speed: 100000000000
+  link_speed_mbps: 100000
 }
 links {
   name: "toy2-c1-ab1-s3i1-p1:toy2-c1-ab1-s2i1-p3"
   src_port_id: "toy2-c1-ab1-s3i1-p1"
   dst_port_id: "toy2-c1-ab1-s2i1-p3"
-  link_speed: 100000000000
+  link_speed_mbps: 100000
 }
 links {
   name: "toy2-c1-ab1-s2i1-p4:toy2-c1-ab1-s3i2-p1"
   src_port_id: "toy2-c1-ab1-s2i1-p4"
   dst_port_id: "toy2-c1-ab1-s3i2-p1"
-  link_speed: 100000000000
+  link_speed_mbps: 100000
 }
 links {
   name: "toy2-c1-ab1-s3i2-p1:toy2-c1-ab1-s2i1-p4"
   src_port_id: "toy2-c1-ab1-s3i2-p1"
   dst_port_id: "toy2-c1-ab1-s2i1-p4"
-  link_speed: 100000000000
+  link_speed_mbps: 100000
 }
 links {
   name: "toy2-c1-ab1-s2i2-p3:toy2-c1-ab1-s3i1-p2"
   src_port_id: "toy2-c1-ab1-s2i2-p3"
   dst_port_id: "toy2-c1-ab1-s3i1-p2"
-  link_speed: 100000000000
+  link_speed_mbps: 100000
 }
 links {
   name: "toy2-c1-ab1-s3i1-p2:toy2-c1-ab1-s2i2-p3"
   src_port_id: "toy2-c1-ab1-s3i1-p2"
   dst_port_id: "toy2-c1-ab1-s2i2-p3"
-  link_speed: 100000000000
+  link_speed_mbps: 100000
 }
 links {
   name: "toy2-c1-ab1-s2i2-p4:toy2-c1-ab1-s3i2-p2"
   src_port_id: "toy2-c1-ab1-s2i2-p4"
   dst_port_id: "toy2-c1-ab1-s3i2-p2"
-  link_speed: 100000000000
+  link_speed_mbps: 100000
 }
 links {
   name: "toy2-c1-ab1-s3i2-p2:toy2-c1-ab1-s2i2-p4"
   src_port_id: "toy2-c1-ab1-s3i2-p2"
   dst_port_id: "toy2-c1-ab1-s2i2-p4"
-  link_speed: 100000000000
+  link_speed_mbps: 100000
 }
 links {
   name: "toy2-c1-ab1-s1i1-p1:toy2-c1-ab1-s2i1-p1"
   src_port_id: "toy2-c1-ab1-s1i1-p1"
   dst_port_id: "toy2-c1-ab1-s2i1-p1"
-  link_speed: 100000000000
+  link_speed_mbps: 100000
 }
 links {
   name: "toy2-c1-ab1-s2i1-p1:toy2-c1-ab1-s1i1-p1"
   src_port_id: "toy2-c1-ab1-s2i1-p1"
   dst_port_id: "toy2-c1-ab1-s1i1-p1"
-  link_speed: 100000000000
+  link_speed_mbps: 100000
 }
 links {
   name: "toy2-c1-ab1-s1i2-p1:toy2-c1-ab1-s2i1-p2"
   src_port_id: "toy2-c1-ab1-s1i2-p1"
   dst_port_id: "toy2-c1-ab1-s2i1-p2"
-  link_speed: 100000000000
+  link_speed_mbps: 100000
 }
 links {
   name: "toy2-c1-ab1-s2i1-p2:toy2-c1-ab1-s1i2-p1"
   src_port_id: "toy2-c1-ab1-s2i1-p2"
   dst_port_id: "toy2-c1-ab1-s1i2-p1"
-  link_speed: 100000000000
+  link_speed_mbps: 100000
 }
 links {
   name: "toy2-c1-ab1-s1i3-p1:toy2-c1-ab1-s2i2-p1"
   src_port_id: "toy2-c1-ab1-s1i3-p1"
   dst_port_id: "toy2-c1-ab1-s2i2-p1"
-  link_speed: 100000000000
+  link_speed_mbps: 100000
 }
 links {
   name: "toy2-c1-ab1-s2i2-p1:toy2-c1-ab1-s1i3-p1"
   src_port_id: "toy2-c1-ab1-s2i2-p1"
   dst_port_id: "toy2-c1-ab1-s1i3-p1"
-  link_speed: 100000000000
+  link_speed_mbps: 100000
 }
 links {
   name: "toy2-c1-ab1-s1i4-p1:toy2-c1-ab1-s2i2-p2"
   src_port_id: "toy2-c1-ab1-s1i4-p1"
   dst_port_id: "toy2-c1-ab1-s2i2-p2"
-  link_speed: 100000000000
+  link_speed_mbps: 100000
 }
 links {
   name: "toy2-c1-ab1-s2i2-p2:toy2-c1-ab1-s1i4-p1"
   src_port_id: "toy2-c1-ab1-s2i2-p2"
   dst_port_id: "toy2-c1-ab1-s1i4-p1"
-  link_speed: 100000000000
+  link_speed_mbps: 100000
 }
 # Cluster 2 internal links
 links {
   name: "toy2-c2-ab1-s2i1-p3:toy2-c2-ab1-s3i1-p1"
   src_port_id: "toy2-c2-ab1-s2i1-p3"
   dst_port_id: "toy2-c2-ab1-s3i1-p1"
-  link_speed: 100000000000
+  link_speed_mbps: 100000
 }
 links {
   name: "toy2-c2-ab1-s3i1-p1:toy2-c2-ab1-s2i1-p3"
   src_port_id: "toy2-c2-ab1-s3i1-p1"
   dst_port_id: "toy2-c2-ab1-s2i1-p3"
-  link_speed: 100000000000
+  link_speed_mbps: 100000
 }
 links {
   name: "toy2-c2-ab1-s2i1-p4:toy2-c2-ab1-s3i2-p1"
   src_port_id: "toy2-c2-ab1-s2i1-p4"
   dst_port_id: "toy2-c2-ab1-s3i2-p1"
-  link_speed: 100000000000
+  link_speed_mbps: 100000
 }
 links {
   name: "toy2-c2-ab1-s3i2-p1:toy2-c2-ab1-s2i1-p4"
   src_port_id: "toy2-c2-ab1-s3i2-p1"
   dst_port_id: "toy2-c2-ab1-s2i1-p4"
-  link_speed: 100000000000
+  link_speed_mbps: 100000
 }
 links {
   name: "toy2-c2-ab1-s2i2-p3:toy2-c2-ab1-s3i1-p2"
   src_port_id: "toy2-c2-ab1-s2i2-p3"
   dst_port_id: "toy2-c2-ab1-s3i1-p2"
-  link_speed: 100000000000
+  link_speed_mbps: 100000
 }
 links {
   name: "toy2-c2-ab1-s3i1-p2:toy2-c2-ab1-s2i2-p3"
   src_port_id: "toy2-c2-ab1-s3i1-p2"
   dst_port_id: "toy2-c2-ab1-s2i2-p3"
-  link_speed: 100000000000
+  link_speed_mbps: 100000
 }
 links {
   name: "toy2-c2-ab1-s2i2-p4:toy2-c2-ab1-s3i2-p2"
   src_port_id: "toy2-c2-ab1-s2i2-p4"
   dst_port_id: "toy2-c2-ab1-s3i2-p2"
-  link_speed: 100000000000
+  link_speed_mbps: 100000
 }
 links {
   name: "toy2-c2-ab1-s3i2-p2:toy2-c2-ab1-s2i2-p4"
   src_port_id: "toy2-c2-ab1-s3i2-p2"
   dst_port_id: "toy2-c2-ab1-s2i2-p4"
-  link_speed: 100000000000
+  link_speed_mbps: 100000
 }
 # Cluster 3 internal links
 links {
   name: "toy2-c3-ab1-s2i1-p3:toy2-c3-ab1-s3i1-p1"
   src_port_id: "toy2-c3-ab1-s2i1-p3"
   dst_port_id: "toy2-c3-ab1-s3i1-p1"
-  link_speed: 100000000000
+  link_speed_mbps: 100000
 }
 links {
   name: "toy2-c3-ab1-s3i1-p1:toy2-c3-ab1-s2i1-p3"
   src_port_id: "toy2-c3-ab1-s3i1-p1"
   dst_port_id: "toy2-c3-ab1-s2i1-p3"
-  link_speed: 100000000000
+  link_speed_mbps: 100000
 }
 links {
   name: "toy2-c3-ab1-s2i1-p4:toy2-c3-ab1-s3i2-p1"
   src_port_id: "toy2-c3-ab1-s2i1-p4"
   dst_port_id: "toy2-c3-ab1-s3i2-p1"
-  link_speed: 100000000000
+  link_speed_mbps: 100000
 }
 links {
   name: "toy2-c3-ab1-s3i2-p1:toy2-c3-ab1-s2i1-p4"
   src_port_id: "toy2-c3-ab1-s3i2-p1"
   dst_port_id: "toy2-c3-ab1-s2i1-p4"
-  link_speed: 100000000000
+  link_speed_mbps: 100000
 }
 links {
   name: "toy2-c3-ab1-s2i2-p3:toy2-c3-ab1-s3i1-p2"
   src_port_id: "toy2-c3-ab1-s2i2-p3"
   dst_port_id: "toy2-c3-ab1-s3i1-p2"
-  link_speed: 100000000000
+  link_speed_mbps: 100000
 }
 links {
   name: "toy2-c3-ab1-s3i1-p2:toy2-c3-ab1-s2i2-p3"
   src_port_id: "toy2-c3-ab1-s3i1-p2"
   dst_port_id: "toy2-c3-ab1-s2i2-p3"
-  link_speed: 100000000000
+  link_speed_mbps: 100000
 }
 links {
   name: "toy2-c3-ab1-s2i2-p4:toy2-c3-ab1-s3i2-p2"
   src_port_id: "toy2-c3-ab1-s2i2-p4"
   dst_port_id: "toy2-c3-ab1-s3i2-p2"
-  link_speed: 100000000000
+  link_speed_mbps: 100000
 }
 links {
   name: "toy2-c3-ab1-s3i2-p2:toy2-c3-ab1-s2i2-p4"
   src_port_id: "toy2-c3-ab1-s3i2-p2"
   dst_port_id: "toy2-c3-ab1-s2i2-p4"
-  link_speed: 100000000000
+  link_speed_mbps: 100000
 }
 links {
   name: "toy2-c3-ab1-s1i1-p1:toy2-c3-ab1-s2i1-p1"
   src_port_id: "toy2-c3-ab1-s1i1-p1"
   dst_port_id: "toy2-c3-ab1-s2i1-p1"
-  link_speed: 100000000000
+  link_speed_mbps: 100000
 }
 links {
   name: "toy2-c3-ab1-s2i1-p1:toy2-c3-ab1-s1i1-p1"
   src_port_id: "toy2-c3-ab1-s2i1-p1"
   dst_port_id: "toy2-c3-ab1-s1i1-p1"
-  link_speed: 100000000000
+  link_speed_mbps: 100000
 }
 links {
   name: "toy2-c3-ab1-s1i2-p1:toy2-c3-ab1-s2i1-p2"
   src_port_id: "toy2-c3-ab1-s1i2-p1"
   dst_port_id: "toy2-c3-ab1-s2i1-p2"
-  link_speed: 100000000000
+  link_speed_mbps: 100000
 }
 links {
   name: "toy2-c3-ab1-s2i1-p2:toy2-c3-ab1-s1i2-p1"
   src_port_id: "toy2-c3-ab1-s2i1-p2"
   dst_port_id: "toy2-c3-ab1-s1i2-p1"
-  link_speed: 100000000000
+  link_speed_mbps: 100000
 }
 links {
   name: "toy2-c3-ab1-s1i3-p1:toy2-c3-ab1-s2i2-p1"
   src_port_id: "toy2-c3-ab1-s1i3-p1"
   dst_port_id: "toy2-c3-ab1-s2i2-p1"
-  link_speed: 100000000000
+  link_speed_mbps: 100000
 }
 links {
   name: "toy2-c3-ab1-s2i2-p1:toy2-c3-ab1-s1i3-p1"
   src_port_id: "toy2-c3-ab1-s2i2-p1"
   dst_port_id: "toy2-c3-ab1-s1i3-p1"
-  link_speed: 100000000000
+  link_speed_mbps: 100000
 }
 links {
   name: "toy2-c3-ab1-s1i4-p1:toy2-c3-ab1-s2i2-p2"
   src_port_id: "toy2-c3-ab1-s1i4-p1"
   dst_port_id: "toy2-c3-ab1-s2i2-p2"
-  link_speed: 100000000000
+  link_speed_mbps: 100000
 }
 links {
   name: "toy2-c3-ab1-s2i2-p2:toy2-c3-ab1-s1i4-p1"
   src_port_id: "toy2-c3-ab1-s2i2-p2"
   dst_port_id: "toy2-c3-ab1-s1i4-p1"
-  link_speed: 100000000000
+  link_speed_mbps: 100000
 }
 # DCN links
 links {
   name: "toy2-c1-ab1-s3i1-p3:toy2-c2-ab1-s3i1-p3"
   src_port_id: "toy2-c1-ab1-s3i1-p3"
   dst_port_id: "toy2-c2-ab1-s3i1-p3"
-  link_speed: 100000000000
+  link_speed_mbps: 100000
 }
 links {
   name: "toy2-c2-ab1-s3i1-p3:toy2-c1-ab1-s3i1-p3"
   src_port_id: "toy2-c2-ab1-s3i1-p3"
   dst_port_id: "toy2-c1-ab1-s3i1-p3"
-  link_speed: 100000000000
+  link_speed_mbps: 100000
 }
 links {
   name: "toy2-c1-ab1-s3i1-p4:toy2-c3-ab1-s3i1-p3"
   src_port_id: "toy2-c1-ab1-s3i1-p4"
   dst_port_id: "toy2-c3-ab1-s3i1-p3"
-  link_speed: 100000000000
+  link_speed_mbps: 100000
 }
 links {
   name: "toy2-c3-ab1-s3i1-p3:toy2-c1-ab1-s3i1-p4"
   src_port_id: "toy2-c3-ab1-s3i1-p3"
   dst_port_id: "toy2-c1-ab1-s3i1-p4"
-  link_speed: 100000000000
+  link_speed_mbps: 100000
 }
 links {
   name: "toy2-c1-ab1-s3i2-p3:toy2-c2-ab1-s3i2-p3"
   src_port_id: "toy2-c1-ab1-s3i2-p3"
   dst_port_id: "toy2-c2-ab1-s3i2-p3"
-  link_speed: 100000000000
+  link_speed_mbps: 100000
 }
 links {
   name: "toy2-c2-ab1-s3i2-p3:toy2-c1-ab1-s3i2-p3"
   src_port_id: "toy2-c2-ab1-s3i2-p3"
   dst_port_id: "toy2-c1-ab1-s3i2-p3"
-  link_speed: 100000000000
+  link_speed_mbps: 100000
 }
 links {
   name: "toy2-c1-ab1-s3i2-p4:toy2-c3-ab1-s3i2-p3"
   src_port_id: "toy2-c1-ab1-s3i2-p4"
   dst_port_id: "toy2-c3-ab1-s3i2-p3"
-  link_speed: 100000000000
+  link_speed_mbps: 100000
 }
 links {
   name: "toy2-c3-ab1-s3i2-p3:toy2-c1-ab1-s3i2-p4"
   src_port_id: "toy2-c3-ab1-s3i2-p3"
   dst_port_id: "toy2-c1-ab1-s3i2-p4"
-  link_speed: 100000000000
+  link_speed_mbps: 100000
 }
 links {
   name: "toy2-c2-ab1-s3i1-p4:toy2-c3-ab1-s3i1-p4"
   src_port_id: "toy2-c2-ab1-s3i1-p4"
   dst_port_id: "toy2-c3-ab1-s3i1-p4"
-  link_speed: 100000000000
+  link_speed_mbps: 100000
 }
 links {
   name: "toy2-c3-ab1-s3i1-p4:toy2-c2-ab1-s3i1-p4"
   src_port_id: "toy2-c3-ab1-s3i1-p4"
   dst_port_id: "toy2-c2-ab1-s3i1-p4"
-  link_speed: 100000000000
+  link_speed_mbps: 100000
 }
 links {
   name: "toy2-c2-ab1-s3i2-p4:toy2-c3-ab1-s3i2-p4"
   src_port_id: "toy2-c2-ab1-s3i2-p4"
   dst_port_id: "toy2-c3-ab1-s3i2-p4"
-  link_speed: 100000000000
+  link_speed_mbps: 100000
 }
 links {
   name: "toy2-c3-ab1-s3i2-p4:toy2-c2-ab1-s3i2-p4"
   src_port_id: "toy2-c3-ab1-s3i2-p4"
   dst_port_id: "toy2-c2-ab1-s3i2-p4"
-  link_speed: 100000000000
+  link_speed_mbps: 100000
 }
 paths {
   name: "toy2-c1-ab1:toy2-c2-ab1"
   src_aggr_block: "toy2-c1-ab1"
   dst_aggr_block: "toy2-c2-ab1"
+  capacity_mbps: 200000
 }
 paths {
   name: "toy2-c2-ab1:toy2-c1-ab1"
   src_aggr_block: "toy2-c2-ab1"
   dst_aggr_block: "toy2-c1-ab1"
+  capacity_mbps: 200000
 }
 paths {
   name: "toy2-c1-ab1:toy2-c3-ab1"
   src_aggr_block: "toy2-c1-ab1"
   dst_aggr_block: "toy2-c3-ab1"
+  capacity_mbps: 200000
 }
 paths {
   name: "toy2-c3-ab1:toy2-c1-ab1"
   src_aggr_block: "toy2-c3-ab1"
   dst_aggr_block: "toy2-c1-ab1"
+  capacity_mbps: 200000
 }
 paths {
   name: "toy2-c2-ab1:toy2-c3-ab1"
   src_aggr_block: "toy2-c2-ab1"
   dst_aggr_block: "toy2-c3-ab1"
+  capacity_mbps: 200000
 }
 paths {
   name: "toy2-c3-ab1:toy2-c2-ab1"
   src_aggr_block: "toy2-c3-ab1"
   dst_aggr_block: "toy2-c2-ab1"
+  capacity_mbps: 200000
 }

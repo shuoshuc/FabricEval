@@ -1,6 +1,8 @@
+import ipaddress
+
 import proto.topology_pb2 as topo
 from google.protobuf import text_format
-import ipaddress
+
 
 def loadTopo(filepath):
     if not filepath:
@@ -144,13 +146,14 @@ class Path:
     name: path name
     src_aggr_block: source aggregation block of the path
     dst_aggr_block: destination aggregation block of the path
-    available_capacity: available capacity on the path, initialized to the sum
-                        of all member link capacity.
+    capacity: capacity of path, equals sum of all member link capacity.
     '''
-    def __init__(self, name, src_aggr_block=None, dst_aggr_block=None):
+    def __init__(self, name, src_aggr_block=None, dst_aggr_block=None,
+                 capacity=None):
         self.name = name
         self.src_aggr_block = src_aggr_block
         self.dst_aggr_block = dst_aggr_block
+        self.capacity = capacity
         self.available_capacity = 0
         # physical member links contained in this path.
         self._member_links = []
@@ -212,7 +215,7 @@ class Topology:
                     ag_block_obj.addMember(node_obj)
                     node_obj.setParent(ag_block_obj, cluster_obj)
                     for port in node.ports:
-                        port_obj = Port(port.name, speed=port.port_speed,
+                        port_obj = Port(port.name, speed=port.port_speed_mbps,
                                         dcn_facing=port.dcn_facing)
                         self._ports[port.name] = port_obj
                         node_obj.addMember(port_obj)
@@ -238,7 +241,7 @@ class Topology:
                 tor_obj.setParent(None, cluster_obj)
                 cluster_obj.addMemberToR(tor_obj)
                 for port in tor.ports:
-                    port_obj = Port(port.name, speed=port.port_speed,
+                    port_obj = Port(port.name, speed=port.port_speed_mbps,
                                     dcn_facing=port.dcn_facing)
                     self._ports[port.name] = port_obj
                     tor_obj.addMember(port_obj)
@@ -253,7 +256,7 @@ class Topology:
             src_port_obj = self._ports[link.src_port_id]
             dst_port_obj = self._ports[link.dst_port_id]
             link_obj = Link(link.name, src_port_obj, dst_port_obj,
-                            min(link.link_speed, src_port_obj.port_speed,
+                            min(link.link_speed_mbps, src_port_obj.port_speed,
                                 dst_port_obj.port_speed),
                             src_port_obj.dcn_facing and dst_port_obj.dcn_facing)
             self._links[link.name] = link_obj
@@ -274,7 +277,8 @@ class Topology:
                 return
             src_ag_block_obj = self._aggr_blocks[path.src_aggr_block]
             dst_ag_block_obj = self._aggr_blocks[path.dst_aggr_block]
-            path_obj = Path(path.name, src_ag_block_obj, dst_ag_block_obj)
+            path_obj = Path(path.name, src_ag_block_obj, dst_ag_block_obj,
+                            path.capacity_mbps)
             self._paths[path.name] = path_obj
             # If src-dst is not found in the link map, there is no DCN link
             # between the pair, so just skip.
@@ -284,6 +288,11 @@ class Topology:
                 path_obj.addMember(l)
                 l.setParent(path_obj)
                 path_obj.available_capacity += l.link_speed
+            if path_obj.capacity != path_obj.available_capacity:
+                print('[ERROR] Topology parsing: path {} has capacity {} and '
+                      'available_capacity {}.'.format(path.name,
+                          path_obj.capacity, path_obj.available_capacity))
+                return
 
     def numClusters(self):
         '''

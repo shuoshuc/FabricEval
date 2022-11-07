@@ -1,6 +1,7 @@
-from topology.topology import loadTopo, Topology
-import unittest
 import ipaddress
+import unittest
+
+from topology.topology import Topology, loadTopo
 
 P1 = 'toy1-c1-ab1-s2i1-p1'
 P2 = 'toy1-c1-ab1-s2i1-p2'
@@ -58,7 +59,7 @@ class TestLoadToyNet(unittest.TestCase):
         self.assertEqual(1, s2i1.index)
         # check all ports
         for port in s2i1.ports:
-            self.assertEqual(100 * 1000 * 1000 * 1000, port.port_speed)
+            self.assertEqual(100 * 1000, port.port_speed_mbps)
             self.assertEqual(False, port.dcn_facing)
         # check port s2i1-p1
         port1 = s2i1.ports[0]
@@ -68,7 +69,7 @@ class TestLoadToyNet(unittest.TestCase):
         self.assertEqual(P1 + ':' + P5, link.name)
         self.assertEqual(P1, link.src_port_id)
         self.assertEqual(P5, link.dst_port_id)
-        self.assertEqual(100 * 1000 * 1000 * 1000, link.link_speed)
+        self.assertEqual(100 * 1000, link.link_speed_mbps)
 
     def test_toy2_topology_construction(self):
         toy2 = Topology(TOY2_PATH)
@@ -83,7 +84,7 @@ class TestLoadToyNet(unittest.TestCase):
         self.assertEqual(-1, toy2.findCapacityOfPath('non-existent-path'))
         self.assertEqual(toy2.findCapacityOfPath(PATH1),
                          toy2.findCapacityOfPath(PATH2))
-        self.assertEqual(200000000000, toy2.findCapacityOfPath(PATH1))
+        self.assertEqual(200000, toy2.findCapacityOfPath(PATH1))
         # verify IP prefix assignment
         ip_aggregate_1 = ipaddress.ip_network('172.16.0.0/24')
         ip_aggregate_2 = ipaddress.ip_network('172.16.1.0/24')
