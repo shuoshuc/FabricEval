@@ -2,37 +2,23 @@ syntax = "proto3";
 
 package traffic;
 
-message ToRDemand {
-    // Unique name identifier of source ToR.
+message DemandEntry {
+    // Unique name identifier of source (ToR or aggregation block).
     string src = 1;
-    // Unique name identifier of destination ToR.
+    // Unique name identifier of destination (ToR or aggregation block).
     string dst = 2;
-    // Traffic volume in bits/sec.
-    uint64 volume = 3;
-}
-
-message AggrBlockDemand {
-    // Unique name identifier of source aggregation block.
-    string src = 1;
-    // Unique name identifier of destination aggregation block.
-    string dst = 2;
-    // Traffic volume in bits/sec.
-    uint64 volume = 3;
+    // Traffic volume in Mbits/sec.
+    uint64 volume_mbps = 3;
 }
 
 message TrafficDemand {
-    // Wrapper of single pair demands because oneof does not support repeated.
-    message ToRLevelDemand {
-        repeated ToRDemand demands = 1;
+    enum DemandType {
+      LEVEL_TOR = 0; // ToR-level demand.
+      LEVEL_AGGR_BLOCK = 1; // Aggregation-block-level demand.
     }
-    message AggrBlockLevelDemand {
-        repeated AggrBlockLevelDemand demands = 1;
-    }
+    // Specifies demand as one of the enums.
+    DemandType type = 1;
     // A traffic demand can either be a ToR-to-ToR demand or an aggregated one.
-    oneof demand_level {
-        // ToR-to-ToR demands.
-        ToRLevelDemand tor_level = 1;
-        // AggrBlock-to-AggrBlock demands.
-        AggrBlockLevelDemand aggr_block_level = 2;
-    }
+    // But all repeated entries must be consistent.
+    repeated DemandEntry demands = 2;
 }

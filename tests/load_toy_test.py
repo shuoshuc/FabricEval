@@ -2,6 +2,8 @@ import ipaddress
 import unittest
 
 from topology.topology import Topology, loadTopo
+from traffic.traffic import Traffic, loadTraffic
+import proto.traffic_pb2 as traffic_pb2
 
 P1 = 'toy1-c1-ab1-s2i1-p1'
 P2 = 'toy1-c1-ab1-s2i1-p2'
@@ -20,12 +22,16 @@ P12 = 'toy2-c3-ab1-s3i2-p3'
 PATH1 = 'toy2-c1-ab1:toy2-c2-ab1'
 PATH2 = 'toy2-c2-ab1:toy2-c1-ab1'
 TOY2_PATH = 'tests/data/toy2.textproto'
+TOY2_TRAFFIC_PATH = 'tests/data/toy2_traffic.textproto'
 TOR1 = 'toy2-c1-ab1-s1i1'
 TOR2 = 'toy2-c3-ab1-s1i4'
 
 class TestLoadToyNet(unittest.TestCase):
     def test_load_invalid_topo(self):
         self.assertEqual(None, loadTopo(''))
+
+    def test_load_invalid_traffic(self):
+        self.assertEqual(None, loadTraffic(''))
 
     def test_load_valid_toynet(self):
         toy1 = loadTopo(TOY1_PATH)
@@ -94,6 +100,12 @@ class TestLoadToyNet(unittest.TestCase):
         ip_prefix2 = toy2.findHostPrefixOfToR(TOR2)
         self.assertTrue(ip_prefix2.subnet_of(ip_aggregate_2))
         self.assertFalse(ip_prefix2.subnet_of(ip_aggregate_1))
+
+    def test_toy2_traffic_demand(self):
+        toy2_traffic = loadTraffic(TOY2_TRAFFIC_PATH)
+        self.assertNotEqual(None, toy2_traffic)
+        self.assertEqual(traffic_pb2.TrafficDemand.DemandType.LEVEL_AGGR_BLOCK,
+                         toy2_traffic.type)
 
 if __name__ == "__main__":
     unittest.main()
