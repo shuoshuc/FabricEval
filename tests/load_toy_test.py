@@ -114,5 +114,12 @@ class TestLoadToyNet(unittest.TestCase):
         self.assertEqual('toy2-c1-ab1', toy2_traffic.demands[1].dst)
         self.assertEqual(100000, toy2_traffic.demands[1].volume_mbps)
 
+    def test_toy2_traffic_construction(self):
+        toy2_traffic = Traffic(TOY2_TRAFFIC_PATH)
+        self.assertEqual(2, len(toy2_traffic.getDemand()))
+        self.assertEqual({('toy2-c1-ab1', 'toy2-c3-ab1'): 300000,
+                          ('toy2-c3-ab1', 'toy2-c1-ab1'): 100000},
+                         toy2_traffic.getDemand())
+
 if __name__ == "__main__":
     unittest.main()
