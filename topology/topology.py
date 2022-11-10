@@ -318,6 +318,12 @@ class Topology:
         '''
         return len(self._links)
 
+    def getAllPaths(self):
+        '''
+        Returns all the paths.
+        '''
+        return self._paths
+
     def findPeerPortOfPort(self, port_name):
         '''
         Looks up the peer port of the given port, returns the port object.

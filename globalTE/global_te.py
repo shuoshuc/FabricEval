@@ -1,6 +1,6 @@
 from google.protobuf import text_format
-from topology import Topology
-from traffic import Traffic
+from topology.topology import Topology
+from traffic.traffic import Traffic
 import proto.te_solution_pb2 as te_sol
 import gurobipy as gp
 import numpy as np
@@ -38,7 +38,18 @@ class GlobalTE:
             #m.setParam("LogFile", "gurobi.log")
 
             # Construct model
-            umax = m.addVar(vtype=GRB.CONTINUOUS, name="umax")
+            # umax for maximum link utilization.
+            umax = m.addVar(vtype=GRB.CONTINUOUS, lb=0, ub=1, name="umax")
+            # A map from path name to path utilization.
+            u = {}
+            # fi(x, y) is the amount of flow in commodity i assigned on (x, y).
+            # f is a map of a map: {[path]: {[commodity]: fi(x, y)}} 
+            f = {}
+            for path_name, path in self._topo.getAllPaths().items():
+                u[path_name] = m.addVar(vtype=GRB.CONTINUOUS, lb=0, ub=1,
+                                        name="u_" + path_name)
+                for (src, dst), vol in self._traffic.getDemand().items():
+                    f[path_name]
 
             # Optimize model
             m.optimize()
@@ -55,4 +66,9 @@ class GlobalTE:
             return []
 
 if __name__ == "__main__":
-    pass
+    TOY2_PATH = 'tests/data/toy2.textproto'
+    TOY2_TRAFFIC_PATH = 'tests/data/toy2_traffic.textproto'
+    toy2 = Topology(TOY2_PATH)
+    toy2_traffic = Traffic(TOY2_TRAFFIC_PATH)
+    global_te = GlobalTE(toy2, toy2_traffic)
+    global_te.solve()
