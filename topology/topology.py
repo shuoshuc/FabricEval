@@ -383,3 +383,21 @@ class Topology:
                   .format('Find host prefix', tor_name, tor.stage))
             return None
         return tor.host_prefix
+
+    def findOrigPathsOfAggrBlock(self, src):
+        '''
+        Returns a list of path names such that all these paths originate from
+        aggregation block src.
+
+        src: name of aggregation block.
+        '''
+        pass
+
+    def findTermPathsOfAggrBlock(self, dst):
+        '''
+        Returns a list of path names such that all these paths terminate at
+        aggregation block dst.
+
+        dst: name of aggregation block.
+        '''
+        pass

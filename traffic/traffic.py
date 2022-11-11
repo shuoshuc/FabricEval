@@ -47,8 +47,14 @@ class Traffic:
                 return
             self.demand[(src, dst)] = vol
 
-    def getDemand(self):
+    def getAllDemands(self):
         '''
         Returns the whole network traffic demand.
         '''
         return self.demand
+
+    def getDemand(self, src, dst):
+        '''
+        Returns a single demand for (src, dst).
+        '''
+        return self.demand[(src, dst)]
