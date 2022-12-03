@@ -324,6 +324,12 @@ class Topology:
         '''
         return self._paths
 
+    def getAllAggrBlocks(self):
+        '''
+        Returns all the aggregation blocks.
+        '''
+        return self._aggr_blocks
+
     def findPeerPortOfPort(self, port_name):
         '''
         Looks up the peer port of the given port, returns the port object.

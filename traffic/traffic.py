@@ -12,7 +12,7 @@ def loadTraffic(filepath):
 
 class Traffic:
     '''
-    Traffic class that represents the demand matric of a network. It contains
+    Traffic class that represents the demand matrix of a network. It contains
     ToR-level demand and/or aggregation-block-level demand.
     '''
     def __init__(self, input_proto):

@@ -45,68 +45,72 @@ class GlobalTE:
             # Step 1: create decision variables.
             # umax for maximum link utilization.
             umax = m.addVar(vtype=GRB.CONTINUOUS, lb=0, ub=1, name="umax")
-            # A map from path name to path utilization.
+            # A map from path name to path utilization, u(x, y).
             u = {}
-            # A map from path name to path capacity.
+            # A map from path name to path capacity, c(x, y).
             c = {}
             # fi(x, y) is the amount of flow in commodity i assigned on (x, y).
             # f is a map of a map: {[path]: {[commodity]: fi(x, y)}} 
             f = {}
+            # Outer loop: iterate over all paths.
             for path_name, path in self._topo.getAllPaths().items():
                 u[path_name] = m.addVar(vtype=GRB.CONTINUOUS, lb=0, ub=1,
                                         name="u_" + path_name)
-                # f_map = f.setdefault(path_name, {})
                 c[path_name] = path.capacity
-                for (src, dst), _ in self._traffic.getAllDemands().items():
-                    f.setdefault(path_name, {})[(src, dst)] = m.addVar(
-                        vtype=GRB.CONTINUOUS, name=f"f_{src}:{dst}_{path_name}")
-                    '''
-                    f_map[(src, dst)] = m.addVar(vtype=GRB.CONTINUOUS,
-                                                 name=f"f_{src}:{dst}_{path_name}")
-                    '''
+                # Inner loop: iterate over all commodities.
+                for i, (src, dst) in self.commodity_idx_st.items():
+                    f.setdefault(path_name, {})[i] = m.addVar(
+                        vtype=GRB.CONTINUOUS, lb=0, name=f"f_{i}_{path_name}")
 
             # Step 2: set objective.
             m.setObjective(umax, GRB.MINIMIZE)
 
             # Step 3: add constraints.
             for path_name, u_path in u.items():
+                # Definition of max link utilization.
                 # For each path, u(x, y) <= umax.
                 m.addConstr(u_path <= umax)
-                # For each path, u(x, y) == sum(fi[(x, y)]) / c(x, y).
+                # Definition of link utilization.
+                # For each path, u(x, y) == sum_i(fi[(x, y)]) / c(x, y).
                 m.addConstr(u_path == gp.quicksum(list(f[path_name].values())) /
                             c[path_name])
-                # For each path, sum(fi[(x, y)]) <= c(x, y). (Path capacity)
+                # Link capacity constraint.
+                # For each path, sum_i(fi[(x, y)]) <= c(x, y).
                 m.addConstr(gp.quicksum(list(f[path_name].values())) <=
                             c[path_name])
 
+            # Setp 3 continued: flow conservation constraints for commodity i.
             for idx, (src, dst) in self.commodity_idx_st.items():
                 demand = self._traffic.getDemand(src, dst)
-                # Construct flow conservation constraint for src.
+
+                # Construct flow conservation constraint for src si.
                 u_si_y, u_y_si = [], []
-                # A list of u for fi(si, y).
+                # `u_si_y` is a list of link util vars from src of commodity i.
                 for orig_path in self._topo.findOrigPathsOfAggrBlock(src):
-                    u_si_y.append(f[orig_path][(src, dst)])
-                # A list of u for fi(y, si).
+                    u_si_y.append(f[orig_path][idx])
+                # `u_y_si` is a list of link util vars to src of commodity i.
                 for term_path in self._topo.findTermPathsOfAggrBlock(src):
-                    u_y_si.append(f[term_path][(src, dst)])
-                # sum(fi[(si, y)]) - sum(fi(y, si)) = di
+                    u_y_si.append(f[term_path][idx])
+                # Constraint: sum_y(fi[(si, y)]) - sum_y(fi(y, si)) = di
                 m.addConstr(gp.quicksum(u_si_y) - gp.quicksum(u_y_si) ==
                             demand, "flow_conservation_src_{}".format(idx))
 
-                # Construct flow conservation constraint for dst.
+                # Construct flow conservation constraint for dst ti.
                 u_x_ti, u_ti_x = [], []
-                # A list of u for fi(x, ti).
+                # `u_x_ti` is a list of link util vars to dst of commodity i.
                 for term_path in self._topo.findTermPathsOfAggrBlock(dst):
-                    u_x_ti.append(f[term_path][(src, dst)])
-                # A list of u for fi(ti, x).
+                    u_x_ti.append(f[term_path][idx])
+                # `u_ti_x` is a list of link util vars from dst of commodity i.
                 for orig_path in self._topo.findOrigPathsOfAggrBlock(dst):
-                    u_ti_x.append(f[orig_path][(src, dst)])
-                # sum(fi[(x, ti)]) - sum(fi(ti, x)) = di
+                    u_ti_x.append(f[orig_path][idx])
+                # Constraint: sum_x(fi[(x, ti)]) - sum_x(fi(ti, x)) = di
                 m.addConstr(gp.quicksum(u_x_ti) - gp.quicksum(u_ti_x) ==
                             demand, "flow_conservation_dst_{}".format(idx))
 
                 # Construct flow conservation constraint for transit nodes.
-                # TODO:
+                for aggr_block_name in self._topo.getAllAggrBlocks().keys():
+                    if aggr_block_name in non_src_dst_nodes:
+                        pass
 
             # Optimize model
             m.optimize()
