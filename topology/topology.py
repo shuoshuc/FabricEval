@@ -407,3 +407,15 @@ class Topology:
         dst: name of aggregation block.
         '''
         pass
+
+    def findPathSetOfAggrBlockPair(self, src, dst):
+        '''
+        Returns a path set for src-dst pair.
+        A path set is a dict of {end2end path: [path segments]}. For example,
+        {
+          (s, t): [(s, t)],
+          (s, m, t): [(s, m), (m, t)],
+          ...
+        }
+        '''
+        pass

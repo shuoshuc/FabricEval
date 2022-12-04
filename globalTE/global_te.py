@@ -45,11 +45,12 @@ class GlobalTE:
             # Step 1: create decision variables.
             # umax for maximum link utilization.
             umax = m.addVar(vtype=GRB.CONTINUOUS, lb=0, ub=1, name="umax")
-            # A map from path name to path utilization, u(x, y).
+            # A map from link name to link utilization, u(x, y). Note that the
+            # term 'link' in this class means abstract level path.
             u = {}
-            # A map from path name to path capacity, c(x, y).
+            # A map from link name to link capacity, c(x, y).
             c = {}
-            # fi(x, y) is the amount of flow in commodity i assigned on (x, y).
+            # fip is the amount of flow in commodity i assigned on path p.
             # f is a map of a map: {[path]: {[commodity]: fi(x, y)}} 
             f = {}
             # Outer loop: iterate over all paths.
