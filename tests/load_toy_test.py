@@ -1,9 +1,10 @@
 import ipaddress
 import unittest
 
+import proto.traffic_pb2 as traffic_pb2
+
 from topology.topology import Topology, loadTopo
 from traffic.traffic import Traffic, loadTraffic
-import proto.traffic_pb2 as traffic_pb2
 
 P1 = 'toy1-c1-ab1-s2i1-p1'
 P2 = 'toy1-c1-ab1-s2i1-p2'
@@ -21,6 +22,9 @@ P11 = 'toy2-c1-ab1-s3i2-p4'
 P12 = 'toy2-c3-ab1-s3i2-p3'
 PATH1 = 'toy2-c1-ab1:toy2-c2-ab1'
 PATH2 = 'toy2-c2-ab1:toy2-c1-ab1'
+C1AB1 = 'toy2-c1-ab1'
+C2AB1 = 'toy2-c2-ab1'
+C3AB1 = 'toy2-c3-ab1'
 TOY2_PATH = 'tests/data/toy2.textproto'
 TOY2_TRAFFIC_PATH = 'tests/data/toy2_traffic.textproto'
 TOR1 = 'toy2-c1-ab1-s1i1'
@@ -100,6 +104,13 @@ class TestLoadToyNet(unittest.TestCase):
         ip_prefix2 = toy2.findHostPrefixOfToR(TOR2)
         self.assertTrue(ip_prefix2.subnet_of(ip_aggregate_2))
         self.assertFalse(ip_prefix2.subnet_of(ip_aggregate_1))
+        # Verify topology query results.
+        path_set = toy2.findPathSetOfAggrBlockPair(C1AB1, C3AB1)
+        expected_path_set = {
+            (C1AB1, C3AB1): [(C1AB1, C3AB1)],
+            (C1AB1, C2AB1, C3AB1): [(C1AB1, C2AB1), (C2AB1, C3AB1)]
+        }
+        self.assertEqual(expected_path_set, path_set)
 
     def test_toy2_traffic_demand(self):
         toy2_traffic = loadTraffic(TOY2_TRAFFIC_PATH)
@@ -116,10 +127,10 @@ class TestLoadToyNet(unittest.TestCase):
 
     def test_toy2_traffic_construction(self):
         toy2_traffic = Traffic(TOY2_TRAFFIC_PATH)
-        self.assertEqual(2, len(toy2_traffic.getDemand()))
+        self.assertEqual(2, len(toy2_traffic.getAllDemands()))
         self.assertEqual({('toy2-c1-ab1', 'toy2-c3-ab1'): 300000,
                           ('toy2-c3-ab1', 'toy2-c1-ab1'): 100000},
-                         toy2_traffic.getDemand())
+                         toy2_traffic.getAllDemands())
 
 if __name__ == "__main__":
     unittest.main()

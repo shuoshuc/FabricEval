@@ -375,6 +375,13 @@ class Topology:
         '''
         return (aggr_block_name in self._aggr_blocks)
 
+    def hasPath(self, src, dst):
+        '''
+        Returns true if there exists a path that corresponds to the given
+        src-dst pair.
+        '''
+        return (f"{src}:{dst}" in self._paths)
+
     def findHostPrefixOfToR(self, tor_name):
         '''
         Returns the IP prefix of given ToR.
@@ -392,21 +399,29 @@ class Topology:
 
     def findOrigPathsOfAggrBlock(self, src):
         '''
-        Returns a list of path names such that all these paths originate from
-        aggregation block src.
+        Returns a dict of {path_name: (src, dst)} such that all these paths
+        originate from aggregation block src.
 
         src: name of aggregation block.
         '''
-        pass
+        path_dict = {}
+        for path_name, path_obj in self._paths.items():
+            if src == path_obj.src_aggr_block.name:
+                path_dict[path_name] = (src, path_obj.dst_aggr_block.name)
+        return path_dict
 
     def findTermPathsOfAggrBlock(self, dst):
         '''
-        Returns a list of path names such that all these paths terminate at
-        aggregation block dst.
+        Returns a dict of {path_name: (src, dst)} such that all these paths
+        terminate at aggregation block dst.
 
         dst: name of aggregation block.
         '''
-        pass
+        path_dict = {}
+        for path_name, path_obj in self._paths.items():
+            if dst == path_obj.dst_aggr_block.name:
+                path_dict[path_name] = (path_obj.src_aggr_block.name, dst)
+        return path_dict
 
     def findPathSetOfAggrBlockPair(self, src, dst):
         '''
@@ -417,5 +432,20 @@ class Topology:
           (s, m, t): [(s, m), (m, t)],
           ...
         }
+        All s, m, t are names of aggregation blocks.
+        NB: we do not assume the path to be longer than 2-hop.
         '''
-        pass
+        path_set = {}
+        # A direct path exists, add to path set.
+        if self.hasPath(src, dst):
+            path_set[(src, dst)] = [(src, dst)]
+        orig_paths = self.findOrigPathsOfAggrBlock(src)
+        term_paths = self.findTermPathsOfAggrBlock(dst)
+        # If the terminating node of an orig_path overlaps with the orignating
+        # node of a term_path, this is a 2-hop path from src to dst. The direct
+        # path is automatically ignored since there is no (dst, dst) path. But
+        # it has been handled aboved.
+        for _, m in orig_paths.values():
+            if f"{m}:{dst}" in term_paths:
+                path_set[(src, m, dst)] = [(src, m), (m, dst)]
+        return path_set
