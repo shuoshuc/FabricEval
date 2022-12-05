@@ -4,12 +4,22 @@ import proto.te_solution_pb2 as te_sol
 from google.protobuf import text_format
 from gurobipy import GRB
 
-from topology.topology import Topology
+from topology.topology import Topology, filterPathSetWithSeg
 from traffic.traffic import Traffic
 
 # VERBOSE=0: no Gurobi log. VERBOSE=1: Gurobi final log only. VERBOSE=2: full
 # Gubrobi log.
 VERBOSE = 0
+
+def prettyPrint(te_sol):
+    '''
+    Pretty prints the TE solution.
+    '''
+    print('===== TE solution =====')
+    for c, sol in te_sol.items():
+        print(f'Demand: [{c[0]}] => [{c[1]}], {c[2]} Mbps')
+        for path_name, flow in sol.items():
+            print(f'    {flow} Mbps on {path_name}')
 
 class GlobalTE:
     '''
@@ -20,10 +30,14 @@ class GlobalTE:
     def __init__(self, topo_obj, traffic_obj):
         self._topo = topo_obj
         self._traffic = traffic_obj
-        # Auxiliary map from an integer index to (src, dst).
-        self.commodity_idx_st = {}
-        for idx, ((s, t), _) in enumerate(traffic_obj.getAllDemands().items()):
-            self.commodity_idx_st[idx] = (s, t)
+        # commodity path set map: integer index of commodity to its path set.
+        self.commodity_path_sets = {}
+        # Map from the integer index of a commodity to its (src, dst, demand).
+        self.commodity_idx_std = {}
+        for idx, ((s, t), d) in enumerate(traffic_obj.getAllDemands().items()):
+            self.commodity_idx_std[idx] = (s, t, d)
+            path_set = topo_obj.findPathSetOfAggrBlockPair(s, t)
+            self.commodity_path_sets[idx] = path_set
 
     def solve(self):
         '''
@@ -45,80 +59,70 @@ class GlobalTE:
             # Step 1: create decision variables.
             # umax for maximum link utilization.
             umax = m.addVar(vtype=GRB.CONTINUOUS, lb=0, ub=1, name="umax")
-            # A map from link name to link utilization, u(x, y). Note that the
-            # term 'link' in this class means abstract level path.
+            # A map from link's (x, y) to link utilization, u(x, y). Note that
+            # the term 'link' in this class means abstract level path.
             u = {}
-            # A map from link name to link capacity, c(x, y).
+            # A map from link's (x, y) to link capacity, c(x, y).
             c = {}
+            # Iterate over all paths in topo. Again, we call path 'link' here.
+            for link_name, link in self._topo.getAllPaths().items():
+                s, t = link.src_aggr_block.name, link.dst_aggr_block.name
+                u[(s, t)] = m.addVar(vtype=GRB.CONTINUOUS, lb=0, ub=1,
+                                     name="u_" + link_name)
+                c[(s, t)] = link.capacity
             # fip is the amount of flow in commodity i assigned on path p.
-            # f is a map of a map: {[path]: {[commodity]: fi(x, y)}} 
+            # f is a map of a map: {commodity index: {(s, m, t): fip}} 
             f = {}
-            # Outer loop: iterate over all paths.
-            for path_name, path in self._topo.getAllPaths().items():
-                u[path_name] = m.addVar(vtype=GRB.CONTINUOUS, lb=0, ub=1,
-                                        name="u_" + path_name)
-                c[path_name] = path.capacity
-                # Inner loop: iterate over all commodities.
-                for i, (src, dst) in self.commodity_idx_st.items():
-                    f.setdefault(path_name, {})[i] = m.addVar(
-                        vtype=GRB.CONTINUOUS, lb=0, name=f"f_{i}_{path_name}")
+            for i, path_set in self.commodity_path_sets.items():
+                for path in path_set.keys():
+                    f.setdefault(i, {})[path] = m.addVar(vtype=GRB.CONTINUOUS,
+                        lb=0, name=f"f_{i}_{':'.join(path)}")
 
             # Step 2: set objective.
             m.setObjective(umax, GRB.MINIMIZE)
 
             # Step 3: add constraints.
-            for path_name, u_path in u.items():
+            for link, u_link in u.items():
                 # Definition of max link utilization.
-                # For each path, u(x, y) <= umax.
-                m.addConstr(u_path <= umax)
-                # Definition of link utilization.
-                # For each path, u(x, y) == sum_i(fi[(x, y)]) / c(x, y).
-                m.addConstr(u_path == gp.quicksum(list(f[path_name].values())) /
-                            c[path_name])
+                # For each link, u(x, y) <= umax.
+                m.addConstr(u_link <= umax)
+
+                # Definition of link utilization. fip_link contains all fip that
+                # traverses `link`.
+                fip_link = []
+                for idx, path_set in self.commodity_path_sets.items():
+                    # For each commodity, get the paths that contain `link`.
+                    filtered_path_set = filterPathSetWithSeg(path_set, link)
+                    # fip of paths that contain `link` will be summed up to
+                    # compute u(x, y).
+                    for path in filtered_path_set.keys():
+                        fip_link.append(f[idx][path])
+                # For each link, u(x, y) == sum_i(sum_Pi[x,y](fip) / c(x, y),
+                # which is equivalent to u(x, y) == sum(fip_link) / c(x, y)
+                m.addConstr(u_link == gp.quicksum(fip_link) / c[link])
+
                 # Link capacity constraint.
-                # For each path, sum_i(fi[(x, y)]) <= c(x, y).
-                m.addConstr(gp.quicksum(list(f[path_name].values())) <=
-                            c[path_name])
+                # For each link, sum(fip_link) <= c(x, y).
+                m.addConstr(gp.quicksum(fip_link) <= c[link])
 
-            # Setp 3 continued: flow conservation constraints for commodity i.
-            for idx, (src, dst) in self.commodity_idx_st.items():
-                demand = self._traffic.getDemand(src, dst)
-
-                # Construct flow conservation constraint for src si.
-                u_si_y, u_y_si = [], []
-                # `u_si_y` is a list of link util vars from src of commodity i.
-                for orig_path in self._topo.findOrigPathsOfAggrBlock(src):
-                    u_si_y.append(f[orig_path][idx])
-                # `u_y_si` is a list of link util vars to src of commodity i.
-                for term_path in self._topo.findTermPathsOfAggrBlock(src):
-                    u_y_si.append(f[term_path][idx])
-                # Constraint: sum_y(fi[(si, y)]) - sum_y(fi(y, si)) = di
-                m.addConstr(gp.quicksum(u_si_y) - gp.quicksum(u_y_si) ==
-                            demand, "flow_conservation_src_{}".format(idx))
-
-                # Construct flow conservation constraint for dst ti.
-                u_x_ti, u_ti_x = [], []
-                # `u_x_ti` is a list of link util vars to dst of commodity i.
-                for term_path in self._topo.findTermPathsOfAggrBlock(dst):
-                    u_x_ti.append(f[term_path][idx])
-                # `u_ti_x` is a list of link util vars from dst of commodity i.
-                for orig_path in self._topo.findOrigPathsOfAggrBlock(dst):
-                    u_ti_x.append(f[orig_path][idx])
-                # Constraint: sum_x(fi[(x, ti)]) - sum_x(fi(ti, x)) = di
-                m.addConstr(gp.quicksum(u_x_ti) - gp.quicksum(u_ti_x) ==
-                            demand, "flow_conservation_dst_{}".format(idx))
-
-                # Construct flow conservation constraint for transit nodes.
-                for aggr_block_name in self._topo.getAllAggrBlocks().keys():
-                    if aggr_block_name in non_src_dst_nodes:
-                        pass
+            # Setp 3 continued: flow conservation constraint for each commodity.
+            for idx, path_set in self.commodity_path_sets.items():
+                _, _, demand = self.commodity_idx_std[idx]
+                # For each commodity i, sum_p(fip) == demand_i.
+                m.addConstr(gp.quicksum(list(f[idx].values())) == demand)
 
             # Optimize model
             m.optimize()
 
             # Extracts and organizes final solution.
+            te_sol = {}
+            for f in m.getVars():
+                if 'f_' in f.VarName:
+                    splits = f.VarName.split('_')
+                    i, path = int(splits[1]), splits[2]
+                    te_sol.setdefault(self.commodity_idx_std[i], {})[path] = f.X
 
-            # TODO: return
+            return te_sol
 
         except gp.GurobiError as e:
             print('Error code ' + str(e.errno) + ': ' + str(e))
@@ -133,4 +137,5 @@ if __name__ == "__main__":
     toy2 = Topology(TOY2_PATH)
     toy2_traffic = Traffic(TOY2_TRAFFIC_PATH)
     global_te = GlobalTE(toy2, toy2_traffic)
-    global_te.solve()
+    te_sol = global_te.solve()
+    prettyPrint(te_sol)
