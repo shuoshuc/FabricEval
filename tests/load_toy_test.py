@@ -3,7 +3,7 @@ import unittest
 
 import proto.traffic_pb2 as traffic_pb2
 
-from topology.topology import Topology, loadTopo
+from topology.topology import Topology, filterPathSetWithSeg, loadTopo
 from traffic.traffic import Traffic, loadTraffic
 
 P1 = 'toy1-c1-ab1-s2i1-p1'
@@ -111,6 +111,11 @@ class TestLoadToyNet(unittest.TestCase):
             (C1AB1, C2AB1, C3AB1): [(C1AB1, C2AB1), (C2AB1, C3AB1)]
         }
         self.assertEqual(expected_path_set, path_set)
+        expected_filtered_set = {
+            (C1AB1, C2AB1, C3AB1): [(C1AB1, C2AB1), (C2AB1, C3AB1)]
+        }
+        filtered_path_set = filterPathSetWithSeg(path_set, (C2AB1, C3AB1))
+        self.assertEqual(expected_filtered_set, filtered_path_set)
 
     def test_toy2_traffic_demand(self):
         toy2_traffic = loadTraffic(TOY2_TRAFFIC_PATH)

@@ -12,6 +12,18 @@ def loadTopo(filepath):
         text_format.Parse(f.read(), network)
     return network
 
+def filterPathSetWithSeg(path_set, path_segment):
+    '''
+    Filters the given `path_set` and drops all the paths that do not contain
+    `path_segment`. Returns the reduced path_set.
+
+    path_segment: a tuple of (src, dst) that represents a segment of a path.
+    '''
+    filtered_path_set = {}
+    for path, segs in path_set.items():
+        if path_segment in segs:
+            filtered_path_set[path] = segs
+    return filtered_path_set
 
 class Port:
     '''
