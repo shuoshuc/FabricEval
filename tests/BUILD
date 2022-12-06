@@ -22,3 +22,15 @@ py_test(
     data = glob(['data/*.textproto']),
     python_version = 'PY3',
 )
+
+py_test(
+    name = 'global_TE_test',
+    srcs = ['global_TE_test.py'],
+    deps = [
+        '//topology:topology',
+        '//traffic:traffic',
+        '//globalTE:global_te',
+    ],
+    data = glob(['data/*.textproto']),
+    python_version = 'PY3',
+)
