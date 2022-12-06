@@ -22,6 +22,8 @@ P11 = 'toy2-c1-ab1-s3i2-p4'
 P12 = 'toy2-c3-ab1-s3i2-p3'
 PATH1 = 'toy2-c1-ab1:toy2-c2-ab1'
 PATH2 = 'toy2-c2-ab1:toy2-c1-ab1'
+LINK1 = 'toy2-c1-ab1-s3i1-p3:toy2-c2-ab1-s3i1-p3'
+LINK2 = 'toy2-c1-ab1-s3i2-p3:toy2-c2-ab1-s3i2-p3'
 C1AB1 = 'toy2-c1-ab1'
 C2AB1 = 'toy2-c2-ab1'
 C3AB1 = 'toy2-c3-ab1'
@@ -116,6 +118,11 @@ class TestLoadToyNet(unittest.TestCase):
         }
         filtered_path_set = filterPathSetWithSeg(path_set, (C2AB1, C3AB1))
         self.assertEqual(expected_filtered_set, filtered_path_set)
+        # Verify findLinksOfPath()
+        self.assertEqual(None, toy2.findLinksOfPath('non-existent-path'))
+        links = toy2.findLinksOfPath(PATH1)
+        self.assertEqual(2, len(links))
+        self.assertEqual([LINK1, LINK2], [link.name for link in links])
 
     def test_toy2_traffic_demand(self):
         toy2_traffic = loadTraffic(TOY2_TRAFFIC_PATH)
