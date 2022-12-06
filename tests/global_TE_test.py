@@ -51,7 +51,6 @@ class TestGlobalTESolution(unittest.TestCase):
                     self.assertEqual(50000.0, nexthop_entry.weight)
         # Verify intended link utilization.
         link_util = list(toy2.dumpLinkUtil().items())
-        print(link_util)
         # 4 src links from C1AB1 have 0.75 link util.
         self.assertEqual(0.75, link_util[0][1])
         self.assertEqual(0.75, link_util[1][1])
