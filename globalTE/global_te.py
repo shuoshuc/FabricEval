@@ -11,16 +11,17 @@ from traffic.traffic import Traffic
 # Gubrobi log.
 VERBOSE = 0
 
-def prettyPrint(te_sol):
+def prettyPrint(verbose, te_sol):
     '''
     Pretty prints the TE solution.
     '''
-    print('\n===== TE solution starts =====')
-    for c, sol in te_sol.items():
-        print(f'Demand: [{c[0]}] => [{c[1]}], {c[2]} Mbps')
-        for path_name, flow in sol.items():
-            print(f'    {flow} Mbps on {path_name}')
-    print('===== TE solution ends =====\n')
+    if VERBOSE >= verbose:
+        print('\n===== TE solution starts =====')
+        for c, sol in te_sol.items():
+            print(f'Demand: [{c[0]}] => [{c[1]}], {c[2]} Mbps')
+            for path_name, flow in sol.items():
+                print(f'    {flow} Mbps on {path_name}')
+        print('===== TE solution ends =====\n')
 
 class GlobalTE:
     '''
@@ -127,7 +128,7 @@ class GlobalTE:
                     i, path = int(splits[1]), splits[2]
                     te_sol_by_commodity.setdefault(self.commodity_idx_std[i],
                                                    {})[path] = f.X
-            prettyPrint(te_sol_by_commodity)
+            prettyPrint(1, te_sol_by_commodity)
 
             for (s, t, _), path_map in te_sol_by_commodity.items():
                 # Allocates a new TEIntent for source node s.
