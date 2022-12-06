@@ -13,8 +13,9 @@ message DemandEntry {
 
 message TrafficDemand {
     enum DemandType {
-      LEVEL_TOR = 0; // ToR-level demand.
-      LEVEL_AGGR_BLOCK = 1; // Aggregation-block-level demand.
+      LEVEL_UNKNOWN = 0; // Unknown as the default forces explicitly set type.
+      LEVEL_TOR = 1; // ToR-level demand.
+      LEVEL_AGGR_BLOCK = 2; // Aggregation-block-level demand.
     }
     // Specifies demand as one of the enums.
     DemandType type = 1;

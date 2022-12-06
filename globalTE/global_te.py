@@ -1,6 +1,6 @@
 import gurobipy as gp
 import numpy as np
-import proto.te_solution_pb2 as te_sol
+import proto.te_solution_pb2 as TESolution
 from google.protobuf import text_format
 from gurobipy import GRB
 
@@ -15,11 +15,12 @@ def prettyPrint(te_sol):
     '''
     Pretty prints the TE solution.
     '''
-    print('===== TE solution =====')
+    print('\n===== TE solution starts =====')
     for c, sol in te_sol.items():
         print(f'Demand: [{c[0]}] => [{c[1]}], {c[2]} Mbps')
         for path_name, flow in sol.items():
             print(f'    {flow} Mbps on {path_name}')
+    print('===== TE solution ends =====\n')
 
 class GlobalTE:
     '''
@@ -115,14 +116,66 @@ class GlobalTE:
             m.optimize()
 
             # Extracts and organizes final solution.
-            te_sol = {}
+            te_sol_by_commodity = {}
+            te_sol_by_src = {}
             for f in m.getVars():
                 if 'f_' in f.VarName:
+                    # Skips empty flows.
+                    if f.X == 0.0:
+                        continue
                     splits = f.VarName.split('_')
                     i, path = int(splits[1]), splits[2]
-                    te_sol.setdefault(self.commodity_idx_std[i], {})[path] = f.X
+                    te_sol_by_commodity.setdefault(self.commodity_idx_std[i],
+                                                   {})[path] = f.X
+            prettyPrint(te_sol_by_commodity)
 
-            return te_sol
+            for (s, t, _), path_map in te_sol_by_commodity.items():
+                # Allocates a new TEIntent for source node s.
+                te_intent = te_sol_by_src.setdefault(s, TESolution.TEIntent())
+                te_intent.target_block = s
+                # Allocates a new PrefixIntent for destination node t.
+                prefix_intent = te_intent.prefix_intents.add()
+                prefix_intent.dst_name = t
+                # PrefixType of this entry is always SRC. But there might be
+                # TRANSIT type entries generated along the parsing, which will
+                # be appended to other TEIntent.
+                prefix_intent.type = TESolution.PrefixIntent.PrefixType.SRC
+                # Converts flows on paths to flows on links.
+                flow_dist = self._topo.distributeFlows(path_map)
+                for (u, v), port_weight_map in flow_dist.items():
+                    if u == s:
+                        # Merge all source flows across single-segment paths
+                        # into this prefix_intent.
+                        for port, weight in port_weight_map.items():
+                            nexthop_entry = prefix_intent.nexthop_entries.add()
+                            nexthop_entry.nexthop_port = port
+                            nexthop_entry.weight = weight
+                    else:
+                        # u != s means that we are dealing with transit flows.
+                        # Find the corresponding TEIntent for source AggrBlock
+                        # u and add them accordingly.
+                        transit_te_intent = te_sol_by_src.setdefault(u,
+                            TESolution.TEIntent())
+                        transit_te_intent.target_block = u
+                        # Allocates a new PrefixIntent for destination node v.
+                        # Note that another PrefixIntent might exist, but that
+                        # is for SRC, not TRANSIT.
+                        prefix_intent_v = transit_te_intent.prefix_intents.add()
+                        prefix_intent_v.dst_name = v
+                        prefix_intent_v.type = \
+                            TESolution.PrefixIntent.PrefixType.TRANSIT
+                        # Populates `prefix_intent_v` with transit flows.
+                        for port, weight in port_weight_map.items():
+                            nexthop_entry = prefix_intent_v.nexthop_entries.add()
+                            nexthop_entry.nexthop_port = port
+                            nexthop_entry.weight = weight
+
+            # Packs per-src TEIntent into a TESolution.
+            sol = TESolution.TESolution()
+            sol.type = self._traffic.getDemandType()
+            for src, te_intent in te_sol_by_src.items():
+                sol.te_intents.append(te_intent)
+            return sol
 
         except gp.GurobiError as e:
             print('Error code ' + str(e.errno) + ': ' + str(e))
@@ -137,5 +190,5 @@ if __name__ == "__main__":
     toy2 = Topology(TOY2_PATH)
     toy2_traffic = Traffic(TOY2_TRAFFIC_PATH)
     global_te = GlobalTE(toy2, toy2_traffic)
-    te_sol = global_te.solve()
-    prettyPrint(te_sol)
+    sol = global_te.solve()
+    print(text_format.MessageToString(sol))

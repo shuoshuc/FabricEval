@@ -23,6 +23,7 @@ class Traffic:
         self.demand = {}
         # parse input traffic and construct in-mem representation (this class).
         proto_traffic = loadTraffic(input_proto)
+        self.demand_type = proto_traffic.type
         # TODO: flag is_tor_level?
         for demand_entry in proto_traffic.demands:
             src, dst = demand_entry.src, demand_entry.dst
@@ -58,3 +59,9 @@ class Traffic:
         Returns a single demand for (src, dst).
         '''
         return self.demand[(src, dst)]
+    
+    def getDemandType(self):
+        '''
+        Returns the demand type.
+        '''
+        return self.demand_type

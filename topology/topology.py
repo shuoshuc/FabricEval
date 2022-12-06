@@ -461,3 +461,55 @@ class Topology:
             if f"{m}:{dst}" in term_paths:
                 path_set[(src, m, dst)] = [(src, m), (m, dst)]
         return path_set
+
+    def findLinksOfPath(self, path_name):
+        '''
+        Returns a list of link objects in path.
+        '''
+        if path_name not in self._paths:
+            print(f'[ERROR] findLinksOfPath(): path {path_name} not found.')
+            return None
+        return self._paths[path_name]._member_links
+
+    def distributeFlows(self, path_map):
+        '''
+        Distributes the MCF solution for a commodity into flows on each physical
+        link, links will accumulate the flows placed on them.
+
+        Also returns a distribution of flows of format:
+        {
+            (s, t): {port1: w1, port2: w2},
+            (s, m): {port3: w3, port4: w4},
+            (m, t): {port5: w5, port6: w6}
+        }
+        s, m, t are AggregationBlock names, port[1-6] are physical port names.
+
+        path_map: a map from multi-segment path name to traffic volume (in Mbps)
+                  carried on it.
+
+        Note: we do not expect paths longer than 2 hops.
+        '''
+        flow_dist = {}
+        for path_name, traffic_vol in path_map.items():
+            node_list = path_name.split(":")
+            if len(node_list) != 2 and len(node_list) != 3:
+                print(f'[ERROR] distributeFlows(): path {path_name} has '
+                      '{len(node_list) - 1} hops. Only 1 or 2 hops are legal.')
+                return None
+            # Enumerates all the single-segment paths. This path is at least a
+            # direct path.
+            single_seg_paths = [(node_list[0], node_list[1])]
+            # This path is a 2-hop path.
+            if len(node_list) == 3:
+                single_seg_paths.append((node_list[1], node_list[2]))
+            # Retrives all links on each single-segment path.
+            for seg in single_seg_paths:
+                links = self.findLinksOfPath(f'{seg[0]}:{seg[1]}')
+                # Traffic volume is split via ECMP among links of the same path.
+                # This is assuming all links have the same speed.
+                t_frac = traffic_vol / len(links)
+                for link in links:
+                    # Accumulates flow on each link.
+                    link._residual_capacity -= t_frac
+                    flow_dist.setdefault(seg, {})[link.src_port.name] = t_frac
+        return flow_dist

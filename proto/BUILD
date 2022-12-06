@@ -10,13 +10,13 @@ py_proto_library(
 )
 
 py_proto_library(
-    name = "te_solution_proto",
-    srcs = ["te_solution.proto"],
+    name = "traffic_proto",
+    srcs = ["traffic.proto"],
     deps = ["@com_google_protobuf//:protobuf_python"],
 )
 
 py_proto_library(
-    name = "traffic_proto",
-    srcs = ["traffic.proto"],
+    name = "te_solution_proto",
+    srcs = ["te_solution.proto"],
     deps = ["@com_google_protobuf//:protobuf_python"],
 )
