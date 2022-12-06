@@ -513,3 +513,15 @@ class Topology:
                     link._residual_capacity -= t_frac
                     flow_dist.setdefault(seg, {})[link.src_port.name] = t_frac
         return flow_dist
+
+    def dumpLinkUtil(self):
+        '''
+        Returns a map of all link utilizations normalized to 1. Returned dict is
+        sorted from highest link util to lowest.
+        '''
+        link_util_map = {}
+        for link in self._links.values():
+            util = (link.link_speed - link._residual_capacity) / link.link_speed
+            link_util_map[link.name] = util
+        return dict(sorted(link_util_map.items(), key=lambda x: x[1],
+                           reverse=True))

@@ -49,6 +49,20 @@ class TestGlobalTESolution(unittest.TestCase):
                                  len(te_intent.prefix_intents[0].nexthop_entries))
                 for nexthop_entry in te_intent.prefix_intents[0].nexthop_entries:
                     self.assertEqual(50000.0, nexthop_entry.weight)
+        # Verify intended link utilization.
+        link_util = list(toy2.dumpLinkUtil().items())
+        print(link_util)
+        # 4 src links from C1AB1 have 0.75 link util.
+        self.assertEqual(0.75, link_util[0][1])
+        self.assertEqual(0.75, link_util[1][1])
+        self.assertEqual(0.75, link_util[2][1])
+        self.assertEqual(0.75, link_util[3][1])
+        # 2 transit links from C2AB1 have 0.75 link util.
+        self.assertEqual(0.75, link_util[4][1])
+        self.assertEqual(0.75, link_util[5][1])
+        # 2 src links from C3AB1 have 0.5 link util.
+        self.assertEqual(0.5, link_util[6][1])
+        self.assertEqual(0.5, link_util[7][1])
 
 if __name__ == "__main__":
     unittest.main()

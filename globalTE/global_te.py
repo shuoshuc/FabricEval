@@ -192,3 +192,4 @@ if __name__ == "__main__":
     global_te = GlobalTE(toy2, toy2_traffic)
     sol = global_te.solve()
     print(text_format.MessageToString(sol))
+    #print(toy2.dumpLinkUtil())
