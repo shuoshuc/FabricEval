@@ -7,3 +7,11 @@ py_library(
         "//proto:topology_proto",
     ],
 )
+
+py_binary(
+    name = 'topogen',
+    srcs = ['topogen.py'],
+    deps = [
+        "//proto:topology_proto",
+    ],
+)
