@@ -200,7 +200,12 @@ class Topology:
     Topology class that represents a network. It contains physical network
     entities and abstract entities.
     '''
-    def __init__(self, input_proto):
+    def __init__(self, input_path, input_proto=None):
+        '''
+        input_path: path to the topology protobuf. Must provide.
+        input_proto: raw protobuf of the topology. Optional. If set, ignores
+                     `input_path`.
+        '''
         self._clusters = {}
         self._aggr_blocks = {}
         self._nodes = {}
@@ -210,7 +215,7 @@ class Topology:
         # A map from (src_ag_block, dst_ag_block) pair to link.
         ag_block_link_map = {}
         # parse input topology and populate this topology.
-        proto_net = loadTopo(input_proto)
+        proto_net = input_proto if input_proto else loadTopo(input_path)
         for cluster in proto_net.clusters:
             cluster_obj = Cluster(cluster.name)
             self._clusters[cluster.name] = cluster_obj

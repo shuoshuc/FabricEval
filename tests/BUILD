@@ -5,6 +5,7 @@ py_test(
     srcs = ['load_toy_test.py'],
     deps = [
         '//topology:topology',
+        '//topology:topogen',
         '//traffic:traffic',
     ],
     data = glob(['data/*.textproto']),

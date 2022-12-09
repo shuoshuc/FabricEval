@@ -3,6 +3,7 @@ import unittest
 
 import proto.traffic_pb2 as traffic_pb2
 
+from topology.topogen import generateToy3
 from topology.topology import Topology, filterPathSetWithSeg, loadTopo
 from traffic.traffic import Traffic, loadTraffic
 
@@ -31,6 +32,19 @@ TOY2_PATH = 'tests/data/toy2.textproto'
 TOY2_TRAFFIC_PATH = 'tests/data/toy2_traffic.textproto'
 TOR1 = 'toy2-c1-ab1-s1i1'
 TOR2 = 'toy2-c3-ab1-s1i4'
+# Toy3 entities.
+TOY3_PATH1 = 'toy3-c1-ab1:toy3-c2-ab1'
+TOY3_PATH2 = 'toy3-c1-ab1:toy3-c65-ab1'
+TOY3_PATH3 = 'toy3-c64-ab1:toy3-c65-ab1'
+TOY3_LINK1 = 'toy3-c1-ab1-s3i1-p1:toy3-c2-ab1-s3i1-p1'
+TOY3_LINK2 = 'toy3-c1-ab1-s3i4-p1:toy3-c2-ab1-s3i4-p1'
+TOY3_PORT1 = 'toy3-c65-ab1-s3i2-p1'
+TOY3_PEER_PORT1 = 'toy3-c1-ab1-s3i2-p127'
+TOY3_PORT2 = 'toy3-c1-ab1-s3i1-p2'
+TOY3_PEER_PORT2 = 'toy3-c1-ab1-s2i1-p1'
+TOY3_PORT3 = 'toy3-c2-ab1-s2i1-p2'
+TOY3_PEER_PORT3 = 'toy3-c2-ab1-s1i1-p1'
+TOY3_AGGR_BLOCK1 = 'toy3-c65-ab1'
 
 class TestLoadToyNet(unittest.TestCase):
     def test_load_invalid_topo(self):
@@ -143,6 +157,39 @@ class TestLoadToyNet(unittest.TestCase):
         self.assertEqual({('toy2-c1-ab1', 'toy2-c3-ab1'): 300000,
                           ('toy2-c3-ab1', 'toy2-c1-ab1'): 100000},
                          toy2_traffic.getAllDemands())
+
+    def test_toy3_topology_construction(self):
+        toy3 = Topology('', input_proto=generateToy3())
+        self.assertEqual(65, toy3.numClusters())
+        # 8 + 32 nodes per cluster
+        self.assertEqual(65 * 40, toy3.numNodes())
+        # 8 * 32 * 2 * 65 S1-S2 links per cluster, 64 * 4 * 2 * 65 S2-S3 links,
+        # 64 * 4 * 65 S3-S3 links.
+        self.assertEqual(8*32*2*65+64*4*2*65+64*4*65, toy3.numLinks())
+        self.assertEqual(65*64, len(toy3.getAllPaths()))
+        # Path between two 40G clusters: 4 * 40
+        self.assertEqual(160000, toy3.findCapacityOfPath(TOY3_PATH1))
+        # Path between a 40G cluster and a 200G cluster: 4 * 40
+        self.assertEqual(160000, toy3.findCapacityOfPath(TOY3_PATH2))
+        # Path between two 200G clusters: 4 * 200
+        self.assertEqual(160000, toy3.findCapacityOfPath(TOY3_PATH1))
+        self.assertEqual(800000, toy3.findCapacityOfPath(TOY3_PATH3))
+        links = [l.name for l in toy3.findLinksOfPath(TOY3_PATH1)]
+        self.assertTrue(TOY3_LINK1 in links)
+        self.assertTrue(TOY3_LINK2 in links)
+        # Verify S3-S3 port and peer.
+        self.assertEqual(TOY3_PEER_PORT1,
+                         toy3.findPeerPortOfPort(TOY3_PORT1).name)
+        # Verify S2-S3 port and peer.
+        self.assertEqual(TOY3_PEER_PORT2,
+                         toy3.findPeerPortOfPort(TOY3_PORT2).name)
+        # Verify S1-S2 port and peer.
+        self.assertEqual(TOY3_PEER_PORT3,
+                         toy3.findPeerPortOfPort(TOY3_PORT3).name)
+        # Verify port and AggrBlock has correct child-parent relationship.
+        self.assertEqual(TOY3_AGGR_BLOCK1,
+                         toy3.findAggrBlockOfPort(TOY3_PORT1).name)
+        self.assertTrue(toy3.hasAggrBlock(TOY3_AGGR_BLOCK1))
 
 if __name__ == "__main__":
     unittest.main()

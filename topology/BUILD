@@ -8,7 +8,7 @@ py_library(
     ],
 )
 
-py_binary(
+py_library(
     name = 'topogen',
     srcs = ['topogen.py'],
     deps = [
