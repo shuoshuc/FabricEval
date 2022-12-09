@@ -26,7 +26,7 @@ def getClusterGenByIndex(idx):
     '''
     Returns the generation of a cluster based on the cluster index.
     '''
-    if idx < 1 or idx > 65:
+    if idx < 1 or idx > (NGEN1 + NGEN2 + NGEN3):
         print(f'[ERROR] illegal cluster index {idx}')
         return -1
     if idx <= NGEN1:
@@ -60,7 +60,7 @@ def generateToy3():
     net = topo.Network()
     net.name = NETNAME
     # Add cluster under network.
-    for c_idx in range(1, 66):
+    for c_idx in range(1, NGEN1 + NGEN2 + NGEN3 + 1):
         cluster_gen = getClusterGenByIndex(c_idx)
         cluster = net.clusters.add()
         cluster.name = f'{NETNAME}-c{c_idx}'
@@ -118,8 +118,8 @@ def generateToy3():
             # TODO: assign host and mgmt prefixes.
 
     # Add paths under network.
-    for i in range(1, 66):
-        for j in range(1, 66):
+    for i in range(1, NGEN1 + NGEN2 + NGEN3 + 1):
+        for j in range(1, NGEN1 + NGEN2 + NGEN3 + 1):
             # A cluster cannot have a path to itself.
             if i == j:
                 continue
@@ -133,8 +133,115 @@ def generateToy3():
             # auto-negotiated to be the lower speed between src and dst.
             path.capacity_mbps = 4 * min(PORT_SPEEDS[i_gen], PORT_SPEEDS[j_gen])
 
-    print(text_format.MessageToString(net))
+    # Add links under network.
+    for c_idx in range(1, NGEN1 + NGEN2 + NGEN3 + 1):
+        cluster_gen = getClusterGenByIndex(c_idx)
+        # Fetch the only AggrBlock in each cluster.
+        aggr_block = net.clusters[c_idx - 1].aggr_blocks[0]
+        for node in aggr_block.nodes:
+            # ===== Add links between S1 and S2 nodes. =====
+            if node.stage == 2:
+                # Hard-coded S1-S2 striping: each S2 spreads 64 links to 32 S1
+                # nodes, so 2 links per S1. The 2 ports of the links on S2 side
+                # use port indices 64 apart. Each S1 uses the first 8 ports to
+                # connect to S2.
+                for t_idx in range(1, NS1 + 1):
+                    # Add first S2->S1 link.
+                    link1_s2_s1 = net.links.add()
+                    src_port_id = f'{node.name}-p{t_idx * 2}'
+                    dst_port_id = f'{aggr_block.name}-s1i{t_idx}-p{node.index}'
+                    link1_s2_s1.src_port_id = src_port_id
+                    link1_s2_s1.dst_port_id = dst_port_id
+                    link1_s2_s1.name = f'{src_port_id}:{dst_port_id}'
+                    link1_s2_s1.link_speed_mbps = PORT_SPEEDS[cluster_gen]
+                    # Add first S1->S2 link.
+                    link2_s1_s2 = net.links.add()
+                    src_port_id = f'{aggr_block.name}-s1i{t_idx}-p{node.index}'
+                    dst_port_id = f'{node.name}-p{t_idx * 2}'
+                    link2_s1_s2.src_port_id = src_port_id
+                    link2_s1_s2.dst_port_id = dst_port_id
+                    link2_s1_s2.name = f'{src_port_id}:{dst_port_id}'
+                    link2_s1_s2.link_speed_mbps = PORT_SPEEDS[cluster_gen]
+                    # Add second S2->S1 link.
+                    link3_s2_s1 = net.links.add()
+                    src_port_id = f'{node.name}-p{t_idx * 2 + int(NPORTS2 / 2)}'
+                    dst_port_id = f'{aggr_block.name}-s1i{t_idx}-p{node.index + NS2}'
+                    link3_s2_s1.src_port_id = src_port_id
+                    link3_s2_s1.dst_port_id = dst_port_id
+                    link3_s2_s1.name = f'{src_port_id}:{dst_port_id}'
+                    link3_s2_s1.link_speed_mbps = PORT_SPEEDS[cluster_gen]
+                    # Add second S1->S2 link.
+                    link4_s1_s2 = net.links.add()
+                    src_port_id = f'{aggr_block.name}-s1i{t_idx}-p{node.index + NS2}'
+                    dst_port_id = f'{node.name}-p{t_idx * 2 + int(NPORTS2 / 2)}'
+                    link4_s1_s2.src_port_id = src_port_id
+                    link4_s1_s2.dst_port_id = dst_port_id
+                    link4_s1_s2.name = f'{src_port_id}:{dst_port_id}'
+                    link4_s1_s2.link_speed_mbps = PORT_SPEEDS[cluster_gen]
+            if node.stage == 3:
+                # ===== Add links between S2 and S3 nodes. =====
+                for s2_idx in range(1, NS2 + 1):
+                    # Hard-coded S2-S3 striping: the first 16 ports of an S3 are
+                    # connected to the first S2 node, the next 16 ports of an S3
+                    # are connected to the next S2 node, etc. The 16 ports of
+                    # the first S3 node are connected to the first 16 ports of
+                    # each S2. The next 16 ports are connected to the next 16
+                    # ports of the S2, etc.
+                    for i, j in zip(range(32 * (s2_idx - 1) + 2,
+                                          32 * s2_idx + 1,
+                                          2),
+                                    range(32 * node.index - 31,
+                                          32 * node.index,
+                                          2)):
+                        # Add S3->S2 link.
+                        link_s3_s2 = net.links.add()
+                        src_port_id = f'{node.name}-p{i}'
+                        dst_port_id = f'{aggr_block.name}-s2i{s2_idx}-p{j}'
+                        link_s3_s2.src_port_id = src_port_id
+                        link_s3_s2.dst_port_id = dst_port_id
+                        link_s3_s2.name = f'{src_port_id}:{dst_port_id}'
+                        link_s3_s2.link_speed_mbps = PORT_SPEEDS[cluster_gen]
+                        # Add S2->S3 link.
+                        link_s2_s3 = net.links.add()
+                        src_port_id = f'{aggr_block.name}-s2i{s2_idx}-p{j}'
+                        dst_port_id = f'{node.name}-p{i}'
+                        link_s2_s3.src_port_id = src_port_id
+                        link_s2_s3.dst_port_id = dst_port_id
+                        link_s2_s3.name = f'{src_port_id}:{dst_port_id}'
+                        link_s2_s3.link_speed_mbps = PORT_SPEEDS[cluster_gen]
+                # ===== Add S3-S3 inter-cluster links. =====
+                # Calculate peer port index.
+                peer_i = 2 * (c_idx - 1) + 1
+                # Hard-coded striping: S3 nodes of the same index connect to
+                # each other. S3 of C1 spreads its links to port 1 of all peers.
+                # S3 of C2 spreads its N-1 links (first link already connects to
+                # C1) to port 3 of rest peers. S3 of C3 spreads N-2 links to
+                # port 5 of rest peers, etc.
+                for port_idx in range(peer_i, NPORTS3, 2):
+                    # Calculate peer cluster index.
+                    peer_c_idx = int(port_idx // 2 + 2)
+                    peer_aggr_block = f'{NETNAME}-c{peer_c_idx}-ab1'
+                    speed = min(PORT_SPEEDS[cluster_gen],
+                                PORT_SPEEDS[getClusterGenByIndex(peer_c_idx)])
+                    # Add current S3 to peer S3 link.
+                    link_away = net.links.add()
+                    src_port_id = f'{node.name}-p{port_idx}'
+                    dst_port_id = f'{peer_aggr_block}-s3i{node.index}-p{peer_i}'
+                    link_away.src_port_id = src_port_id
+                    link_away.dst_port_id = dst_port_id
+                    link_away.name = f'{src_port_id}:{dst_port_id}'
+                    link_away.link_speed_mbps = speed
+                    # Add peer S3 to current S3 link.
+                    link_back = net.links.add()
+                    src_port_id = f'{peer_aggr_block}-s3i{node.index}-p{peer_i}'
+                    dst_port_id = f'{node.name}-p{port_idx}'
+                    link_back.src_port_id = src_port_id
+                    link_back.dst_port_id = dst_port_id
+                    link_back.name = f'{src_port_id}:{dst_port_id}'
+                    link_back.link_speed_mbps = speed
+
     return net
 
 if __name__ == "__main__":
-    generateToy3()
+    net_proto = generateToy3()
+    print(text_format.MessageToString(net_proto))
