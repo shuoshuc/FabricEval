@@ -24,3 +24,7 @@ Run the following command to unit test calling WCMPAlloc to process a TE solutio
 ```bash
 bazel test //tests:wcmp_alloc_test
 ```
+Run the following command to invoke the e2e pipeline:
+```bash
+bazel run //e2e:run
+```
