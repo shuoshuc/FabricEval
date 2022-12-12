@@ -2,7 +2,7 @@ import itertools
 
 import proto.traffic_pb2 as traffic
 from tmgen import TrafficMatrix
-from tmgen.models import modulated_gravity_tm, uniform_tm
+from tmgen.models import exact_tm, modulated_gravity_tm, uniform_tm
 
 NETNAME = 'toy3'
 
@@ -18,12 +18,23 @@ def tmgen(tor_level, num_clusters, num_nodes, model):
     model: the type TM to use, can be flat/gravity.
     '''
     if model == 'flat':
-        return genFlat(tor_level, num_clusters, num_nodes)
+        # Generates a flat traffic demand matrix. If tor_level=True, each
+        # src-dst pair sees 152 Mbps demand. If false, each src-dst pair sees
+        # 80000 Mbps demand.
+        if tor_level:
+            tm = exact_tm(num_clusters * num_nodes,
+                          round(40000 * 8 / (num_nodes * num_clusters - 1)),
+                          num_epochs=1)
+        else:
+            tm = exact_tm(num_clusters, round(20000 * 256 / (num_clusters - 1)),
+                          num_epochs=1)
+        return genProto(tor_level, num_clusters, num_nodes, tm.at_time(0))
+    elif model == 'uniform':
+        pass
 
-def genFlat(tor_level, num_clusters, num_nodes):
+def genProto(tor_level, num_clusters, num_nodes, TM):
     '''
-    Generates a flat traffic demand matrix. If tor_level=True, each src-dst pair
-    sees 152 Mbps demand. If false, each src-dst pair sees 312 Mbps demand.
+    Returns a traffic proto using the given traffic matrix `TM`.
     '''
     tm_proto = traffic.TrafficDemand()
     tm_proto.type = traffic.TrafficDemand.DemandType.LEVEL_TOR if tor_level \
@@ -41,9 +52,8 @@ def genFlat(tor_level, num_clusters, num_nodes):
                 demand = tm_proto.demands.add()
                 demand.src = f'{NETNAME}-c{i}-ab1-s1i{u}'
                 demand.dst = f'{NETNAME}-c{j}-ab1-s1i{v}'
-                demand.volume_mbps = round(320000 / (num_nodes - 1 +
-                                                     (num_clusters - 1) *
-                                                     num_nodes))
+                demand.volume_mbps = round(TM[(i - 1) * 32 + u - 1,
+                                              (j - 1) * 32 + v - 1])
         else:
             # Populate AggrBlock-level demand matrix.
             if i == j:
@@ -51,6 +61,6 @@ def genFlat(tor_level, num_clusters, num_nodes):
             demand = tm_proto.demands.add()
             demand.src = f'{NETNAME}-c{i}-ab1'
             demand.dst = f'{NETNAME}-c{j}-ab1'
-            demand.volume_mbps = round(20000 * 256 / (num_clusters - 1))
+            demand.volume_mbps = round(TM[i-1, j-1])
 
     return tm_proto
