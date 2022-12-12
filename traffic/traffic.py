@@ -15,14 +15,16 @@ class Traffic:
     Traffic class that represents the demand matrix of a network. It contains
     ToR-level demand and/or aggregation-block-level demand.
     '''
-    def __init__(self, input_proto):
+    def __init__(self, input_path, input_proto=None):
         '''
-        input_proto: textproto format of the traffic demand.
+        input_path (required): path to the textproto of the traffic demand.
+        input_proto (optional): raw proto of the traffic demand. 
         '''
         # A map from (s, t) to demand.
         self.demand = {}
         # parse input traffic and construct in-mem representation (this class).
-        proto_traffic = loadTraffic(input_proto)
+        # If a raw proto is given, ignore `input_path`.
+        proto_traffic = input_proto if input_proto else loadTraffic(input_path)
         self.demand_type = proto_traffic.type
         # TODO: flag is_tor_level?
         for demand_entry in proto_traffic.demands:

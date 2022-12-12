@@ -1,6 +1,6 @@
 package(default_visibility = ["//visibility:public"])
 
-py_binary(
+py_library(
     name = 'global_te',
     srcs = ['global_te.py'],
     deps = [
@@ -10,9 +10,4 @@ py_binary(
         '//topology:topology',
         '//traffic:traffic',
     ],
-    data = [
-        "//tests:data/toy2.textproto",
-        "//tests:data/toy2_traffic.textproto",
-    ],
-    python_version = 'PY3',
 )

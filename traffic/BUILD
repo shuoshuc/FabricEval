@@ -7,3 +7,11 @@ py_library(
         "//proto:traffic_proto",
     ],
 )
+
+py_library(
+    name = 'tmgen',
+    srcs = ['tmgen.py'],
+    deps = [
+        "//proto:traffic_proto",
+    ],
+)

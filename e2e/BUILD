@@ -7,6 +7,8 @@ py_binary(
         '//topology:topology',
         '//topology:topogen',
         '//traffic:traffic',
+        '//traffic:tmgen',
+        '//globalTE:global_te',
     ],
     data = [
         "//tests:data/toy2.textproto",
