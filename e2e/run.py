@@ -17,4 +17,6 @@ if __name__ == "__main__":
     global_te = GlobalTE(toy3, toy3_traffic)
     sol = global_te.solve()
     #print(text_format.MessageToString(sol))
-    print(toy3.dumpLinkUtil())
+    LUs = toy3.dumpLinkUtil())
+    for k, v in LUs.items():
+        print(f'{k}: {v}')

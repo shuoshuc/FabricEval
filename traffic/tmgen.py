@@ -51,6 +51,6 @@ def genFlat(tor_level, num_clusters, num_nodes):
             demand = tm_proto.demands.add()
             demand.src = f'{NETNAME}-c{i}-ab1'
             demand.dst = f'{NETNAME}-c{j}-ab1'
-            demand.volume_mbps = round(20000 / (num_clusters - 1))
+            demand.volume_mbps = round(20000 * 256 / (num_clusters - 1))
 
     return tm_proto
