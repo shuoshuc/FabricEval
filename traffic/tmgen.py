@@ -30,7 +30,17 @@ def tmgen(tor_level, num_clusters, num_nodes, model):
                           num_epochs=1)
         return genProto(tor_level, num_clusters, num_nodes, tm.at_time(0))
     elif model == 'uniform':
-        pass
+        # Generates a uniform random traffic demand matrix. Each src-dst pair
+        # will not exceed the value of a same entry in the flat TM.
+        if tor_level:
+            tm = uniform_tm(num_clusters * num_nodes, 0,
+                            round(40000 * 8 / (num_nodes * num_clusters - 1)),
+                            num_epochs=1)
+        else:
+            tm = uniform_tm(num_clusters, 0,
+                            round(40000 * 256 / (num_clusters - 1)),
+                            num_epochs=1)
+        return genProto(tor_level, num_clusters, num_nodes, tm.at_time(0))
 
 def genProto(tor_level, num_clusters, num_nodes, TM):
     '''
