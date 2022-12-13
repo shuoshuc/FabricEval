@@ -42,7 +42,7 @@ def tmgen(tor_level, num_clusters, num_nodes, model):
         # src-dst pair has a demand proportional to the product of their egress
         # and ingress demands. The block total ingress/egress volume is sampled
         # from a uniform random/exponential/Pareto distribution.
-        upper_bound = 40000 * 8 if tor_level else 40000 * 256
+        upper_bound = (40000 * 8 if tor_level else 40000 * 256) * 0.7
         scale = upper_bound / 2
         dist = truncexpon(b=upper_bound/scale, loc=0, scale=scale)
         egress = dist.rvs(size)
