@@ -1,8 +1,9 @@
 import itertools
+from math import floor
 
+import numpy as np
 import proto.traffic_pb2 as traffic
-from tmgen import TrafficMatrix
-from tmgen.models import exact_tm, modulated_gravity_tm, uniform_tm
+from numpy.random import default_rng
 
 NETNAME = 'toy3'
 
@@ -17,30 +18,30 @@ def tmgen(tor_level, num_clusters, num_nodes, model):
     num_nodes: number of S1 nodes per cluster. Only used when tor_level=True.
     model: the type TM to use, can be flat/gravity.
     '''
+    rng = default_rng()
+    size = num_clusters * num_nodes if tor_level else num_clusters
+    tm = np.zeros(shape=(size, size))
     if model == 'flat':
         # Generates a flat traffic demand matrix. If tor_level=True, each
-        # src-dst pair sees 152 Mbps demand. If false, each src-dst pair sees
+        # src-dst pair sees 153 Mbps demand. If false, each src-dst pair sees
         # 80000 Mbps demand.
-        if tor_level:
-            tm = exact_tm(num_clusters * num_nodes,
-                          round(40000 * 8 / (num_nodes * num_clusters - 1)),
-                          num_epochs=1)
-        else:
-            tm = exact_tm(num_clusters, round(20000 * 256 / (num_clusters - 1)),
-                          num_epochs=1)
-        return genProto(tor_level, num_clusters, num_nodes, tm.at_time(0))
+        tm[tm >= 0] = 40000 * 8 / (num_nodes * num_clusters - 1) if tor_level \
+            else 20000 * 256 / (num_clusters - 1)
     elif model == 'uniform':
         # Generates a uniform random traffic demand matrix. Each src-dst pair
         # will not exceed the value of a same entry in the flat TM.
-        if tor_level:
-            tm = uniform_tm(num_clusters * num_nodes, 0,
-                            round(40000 * 8 / (num_nodes * num_clusters - 1)),
-                            num_epochs=1)
-        else:
-            tm = uniform_tm(num_clusters, 0,
-                            round(40000 * 256 / (num_clusters - 1)),
-                            num_epochs=1)
-        return genProto(tor_level, num_clusters, num_nodes, tm.at_time(0))
+        upper_bound = 40000 * 8 / (num_nodes * num_clusters - 1) if tor_level \
+            else 40000 * 256 / (num_clusters - 1)
+        for r, c in np.ndindex(tm.shape):
+            tm[r, c] = rng.uniform(low=0, high=upper_bound)
+    elif model == 'gravity':
+        # Generates a traffic demand matrix following the gravity model. Each
+        # src-dst pair has a demand proportional to the product of their egress
+        # and ingress demands.
+        # TODO: implement gravity model
+        pass
+
+    return genProto(tor_level, num_clusters, num_nodes, tm)
 
 def genProto(tor_level, num_clusters, num_nodes, TM):
     '''
@@ -62,7 +63,7 @@ def genProto(tor_level, num_clusters, num_nodes, TM):
                 demand = tm_proto.demands.add()
                 demand.src = f'{NETNAME}-c{i}-ab1-s1i{u}'
                 demand.dst = f'{NETNAME}-c{j}-ab1-s1i{v}'
-                demand.volume_mbps = round(TM[(i - 1) * 32 + u - 1,
+                demand.volume_mbps = floor(TM[(i - 1) * 32 + u - 1,
                                               (j - 1) * 32 + v - 1])
         else:
             # Populate AggrBlock-level demand matrix.
@@ -71,6 +72,6 @@ def genProto(tor_level, num_clusters, num_nodes, TM):
             demand = tm_proto.demands.add()
             demand.src = f'{NETNAME}-c{i}-ab1'
             demand.dst = f'{NETNAME}-c{j}-ab1'
-            demand.volume_mbps = round(TM[i-1, j-1])
+            demand.volume_mbps = floor(TM[i-1, j-1])
 
     return tm_proto
