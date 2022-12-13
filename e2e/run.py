@@ -12,7 +12,7 @@ if __name__ == "__main__":
     net_proto = generateToy3()
     toy3 = Topology('', net_proto)
     #print(text_format.MessageToString(net_proto))
-    traffic_proto = tmgen(False, 65, 32, 'flat')
+    traffic_proto = tmgen(False, 65, 32, 'gravity')
     toy3_traffic = Traffic('', traffic_proto)
     global_te = GlobalTE(toy3, toy3_traffic)
     sol = global_te.solve()

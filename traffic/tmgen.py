@@ -4,8 +4,11 @@ from math import floor
 import numpy as np
 import proto.traffic_pb2 as traffic
 from numpy.random import default_rng
+from scipy.stats import truncexpon
 
 NETNAME = 'toy3'
+# True means the block total ingress should equal its total egress.
+EQUAL_INGRESS_EGRESS = True
 
 def tmgen(tor_level, num_clusters, num_nodes, model):
     '''
@@ -37,9 +40,28 @@ def tmgen(tor_level, num_clusters, num_nodes, model):
     elif model == 'gravity':
         # Generates a traffic demand matrix following the gravity model. Each
         # src-dst pair has a demand proportional to the product of their egress
-        # and ingress demands.
-        # TODO: implement gravity model
-        pass
+        # and ingress demands. The block total ingress/egress volume is sampled
+        # from a uniform random/exponential/Pareto distribution.
+        upper_bound = 40000 * 8 if tor_level else 40000 * 256
+        scale = upper_bound / 2
+        dist = truncexpon(b=upper_bound/scale, loc=0, scale=scale)
+        egress = dist.rvs(size)
+        # Set block total ingress to be the same as egress if flag is true.
+        # Otherwise, sample another set of values from the same distribution.
+        if EQUAL_INGRESS_EGRESS:
+            ingress = egress
+        else:
+            ingress = dist.rvs(size)
+            # Rescale the ingress vector so that its sum equals egress. (Total
+            # egress and ingress must match).
+            ingress *= egress.sum() / ingress.sum()
+        # `r` is row vector for src, `c` is column vector for dst.
+        for r, c in np.ndindex(tm.shape):
+            # Self-loop demand is not allowed.
+            if r == c:
+                continue
+            # Gravity model.
+            tm[r, c] = egress[r] * ingress[c] / (ingress.sum() - ingress[r])
 
     return genProto(tor_level, num_clusters, num_nodes, tm)
 
