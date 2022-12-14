@@ -1,3 +1,4 @@
+import numpy as np
 import proto.topology_pb2 as topo
 import proto.traffic_pb2 as traffic_pb2
 from google.protobuf import text_format
@@ -12,7 +13,11 @@ if __name__ == "__main__":
     net_proto = generateToy3()
     toy3 = Topology('', net_proto)
     #print(text_format.MessageToString(net_proto))
-    traffic_proto = tmgen(False, 65, 32, 'gravity', 'exp')
+    traffic_proto = tmgen(tor_level=False,
+                          cluster_vector=np.array([1]*22 + [2.5]*22 + [5]*21),
+                          num_nodes=32,
+                          model='gravity',
+                          dist='exp')
     toy3_traffic = Traffic('', traffic_proto)
     global_te = GlobalTE(toy3, toy3_traffic)
     sol = global_te.solve()

@@ -8,22 +8,25 @@ from scipy.stats import truncexpon, uniform
 
 NETNAME = 'toy3'
 # True means the block total ingress should equal its total egress.
-EQUAL_INGRESS_EGRESS = True
+EQUAL_INGRESS_EGRESS = False
 
-def tmgen(tor_level, num_clusters, num_nodes, model, dist='exp'):
+def tmgen(tor_level, cluster_vector, num_nodes, model, dist='exp'):
     '''
     Generates a traffic demand matrix according to `model`.
 
     Returns the populated traffic proto.
 
     tor_level: Boolean. False means AggrBlock-level demand.
-    num_clusters: number of clusters in the fabric.
+    cluster_vector: NumPy vector of the scale factor (aka, relative speed). For
+                    example, a total of 2 40G clusters and 2 100G clusters would
+                    look like: array([1, 1, 2.5, 2.5]).
     num_nodes: number of S1 nodes per cluster. Only used when tor_level=True.
     model: the type of TM to use, can be flat/uniform/gravity.
     dist: what distribution to use for sampling ingress/egress total demand, can
           be exp/uniform/pareto.
     '''
     rng = default_rng()
+    num_clusters = cluster_vector.size
     size = num_clusters * num_nodes if tor_level else num_clusters
     tm = np.zeros(shape=(size, size))
     if model == 'flat':
@@ -45,19 +48,32 @@ def tmgen(tor_level, num_clusters, num_nodes, model, dist='exp'):
         # and ingress demands. The block total ingress/egress volume is sampled
         # from a uniform random/exponential/Pareto distribution, as specified by
         # `dist`.
-        upper_bound = (40000 * 8 if tor_level else 40000 * 256) * 0.7
-        scale = upper_bound / 2
-        if dist == 'exp':
-            X = truncexpon(b=upper_bound/scale, loc=0, scale=scale)
-        elif dist == 'uniform':
-            X = uniform(loc=0, scale=upper_bound)
-        egress = X.rvs(size)
+        egress, ingress = np.array([]), np.array([])
+        factors, counts = np.unique(cluster_vector, return_counts=True)
+        for f, count in zip(factors, counts):
+            upper_bound = (40000 * 8 if tor_level else 40000 * 256) * 0.7 * f
+            scale = upper_bound / 2
+            if dist == 'exp':
+                X = truncexpon(b=upper_bound/scale, loc=0, scale=scale)
+            elif dist == 'uniform':
+                X = uniform(loc=0, scale=upper_bound)
+            # Sample egress total volume for all src of the same speed factor.
+            sample_size = count * num_nodes if tor_level else count
+            egress = np.concatenate((egress, X.rvs(sample_size)))
         # Set block total ingress to be the same as egress if flag is true.
         # Otherwise, sample another set of values from the same distribution.
         if EQUAL_INGRESS_EGRESS:
             ingress = egress
         else:
-            ingress = X.rvs(size)
+            for f, count in zip(factors, counts):
+                up_bound = (40000 * 8 if tor_level else 40000 * 256) * 0.7 * f
+                scale = up_bound / 2
+                if dist == 'exp':
+                    X = truncexpon(b=upper_bound/scale, loc=0, scale=scale)
+                elif dist == 'uniform':
+                    X = uniform(loc=0, scale=upper_bound)
+                sample_size = count * num_nodes if tor_level else count
+                ingress = np.concatenate((ingress, X.rvs(sample_size)))
             # Rescale the ingress vector so that its sum equals egress. (Total
             # egress and ingress must match).
             ingress *= egress.sum() / ingress.sum()
