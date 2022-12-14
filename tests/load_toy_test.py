@@ -1,10 +1,12 @@
 import ipaddress
 import unittest
 
+import numpy as np
 import proto.traffic_pb2 as traffic_pb2
 
 from topology.topogen import generateToy3
 from topology.topology import Topology, filterPathSetWithSeg, loadTopo
+from traffic.tmgen import tmgen
 from traffic.traffic import Traffic, loadTraffic
 
 P1 = 'toy1-c1-ab1-s2i1-p1'
@@ -45,6 +47,7 @@ TOY3_PEER_PORT2 = 'toy3-c1-ab1-s2i1-p1'
 TOY3_PORT3 = 'toy3-c2-ab1-s2i1-p2'
 TOY3_PEER_PORT3 = 'toy3-c2-ab1-s1i1-p1'
 TOY3_AGGR_BLOCK1 = 'toy3-c65-ab1'
+TOY3_AGGR_BLOCK2 = 'toy3-c1-ab1'
 
 class TestLoadToyNet(unittest.TestCase):
     def test_load_invalid_topo(self):
@@ -190,6 +193,41 @@ class TestLoadToyNet(unittest.TestCase):
         self.assertEqual(TOY3_AGGR_BLOCK1,
                          toy3.findAggrBlockOfPort(TOY3_PORT1).name)
         self.assertTrue(toy3.hasAggrBlock(TOY3_AGGR_BLOCK1))
+
+    def test_toy3_traffic_construction1(self):
+        traffic_proto = tmgen(tor_level=False,
+                              cluster_vector=np.array([1]*22+[2.5]*22+[5]*21),
+                              num_nodes=32,
+                              model='flat',
+                              dist='')
+        toy3_traffic = Traffic('', traffic_proto)
+        self.assertEqual(traffic_pb2.TrafficDemand.DemandType.LEVEL_AGGR_BLOCK,
+                         toy3_traffic.getDemandType())
+        self.assertEqual(64 * 65, len(toy3_traffic.getAllDemands()))
+        # Flat demand matrix has the same volume in both directions.
+        self.assertEqual(80000, toy3_traffic.getDemand(TOY3_AGGR_BLOCK1,
+                                                       TOY3_AGGR_BLOCK2))
+        self.assertEqual(80000, toy3_traffic.getDemand(TOY3_AGGR_BLOCK2,
+                                                       TOY3_AGGR_BLOCK1))
+
+    def test_toy3_traffic_construction2(self):
+        traffic_proto = tmgen(tor_level=False,
+                              cluster_vector=np.array([1]*22+[2.5]*22+[5]*21),
+                              num_nodes=32,
+                              model='gravity',
+                              dist='exp')
+        toy3_traffic = Traffic('', traffic_proto)
+        self.assertEqual(traffic_pb2.TrafficDemand.DemandType.LEVEL_AGGR_BLOCK,
+                         toy3_traffic.getDemandType())
+        self.assertEqual(64 * 65, len(toy3_traffic.getAllDemands()))
+        # Verify the sum of all demands from AggrBlock1 does not exceed its
+        # total capacity.
+        tot_traffic = 0
+        for i in range(2, 66):
+            dst_block_name = f'toy3-c{i}-ab1'
+            tot_traffic += toy3_traffic.getDemand(TOY3_AGGR_BLOCK2,
+                                                  dst_block_name)
+        self.assertTrue(tot_traffic < 40000 * 256)
 
 if __name__ == "__main__":
     unittest.main()
