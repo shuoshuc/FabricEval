@@ -2,9 +2,12 @@
 A data center network simulator built for studying traffic engineering schemes.
 
 ## Structure
+* **e2e/**: a simple pipeline implementation of the entire framework.
+* **globalTE/**: traffic engineering solver component.
 * **proto/**: protobuf definitions for topological entities, traffic demands, TE solutions and other inputs.
 * **tests/**: unit tests.
 * **topology/**: the topology class that represents a network in memory.
+* **traffic/**: the traffic class that represents traffic demand matrices.
 * **wcmp\_alloc/**: the WCMPAlloc class that processes input TE solutions.
 
 ## Prerequisites
