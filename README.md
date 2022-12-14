@@ -14,15 +14,14 @@ To start, make sure you have [Bazel](https://docs.bazel.build/install.html) inst
 so make sure this is also installed.
 * FabricSim uses [Gurobi](https://www.gurobi.com/) in the WCMPAlloc component
 to solve group reduction optimization. Everything is only tested on Gurobi 9.5.0+.
+* FabricSim also uses [NumPy](https://numpy.org/) and [SciPy](https://scipy.org/).
+* FabricSim's input and output are of [Protobuf](https://developers.google.com/protocol-buffers) format,
+make sure it is also installed.
 
 ## Usage
-Run the following command to unit test loading a test network topology and verify its properties:
+Run the following command to run all unit tests.
 ```bash
-bazel test //tests:load_toy_test
-```
-Run the following command to unit test calling WCMPAlloc to process a TE solution:
-```bash
-bazel test //tests:wcmp_alloc_test
+bazel test //tests:all
 ```
 Run the following command to invoke the e2e pipeline:
 ```bash
