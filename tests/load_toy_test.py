@@ -48,6 +48,8 @@ TOY3_PORT3 = 'toy3-c2-ab1-s2i1-p2'
 TOY3_PEER_PORT3 = 'toy3-c2-ab1-s1i1-p1'
 TOY3_AGGR_BLOCK1 = 'toy3-c65-ab1'
 TOY3_AGGR_BLOCK2 = 'toy3-c1-ab1'
+TOY3_TOR1 = 'toy3-c65-ab1-s1i1'
+TOY3_TOR2 = 'toy3-c1-ab1-s1i1'
 
 class TestLoadToyNet(unittest.TestCase):
     def test_load_invalid_topo(self):
@@ -155,7 +157,8 @@ class TestLoadToyNet(unittest.TestCase):
         self.assertEqual(100000, toy2_traffic.demands[1].volume_mbps)
 
     def test_toy2_traffic_construction(self):
-        toy2_traffic = Traffic(TOY2_TRAFFIC_PATH)
+        toy2 = Topology(TOY2_PATH)
+        toy2_traffic = Traffic(toy2, TOY2_TRAFFIC_PATH)
         self.assertEqual(2, len(toy2_traffic.getAllDemands()))
         self.assertEqual({('toy2-c1-ab1', 'toy2-c3-ab1'): 300000,
                           ('toy2-c3-ab1', 'toy2-c1-ab1'): 100000},
@@ -193,14 +196,20 @@ class TestLoadToyNet(unittest.TestCase):
         self.assertEqual(TOY3_AGGR_BLOCK1,
                          toy3.findAggrBlockOfPort(TOY3_PORT1).name)
         self.assertTrue(toy3.hasAggrBlock(TOY3_AGGR_BLOCK1))
+        # Verify the 'virutal' parent of ToRs.
+        self.assertEqual(TOY3_AGGR_BLOCK1,
+                         toy3.findAggrBlockOfToR(TOY3_TOR1).name)
+        self.assertEqual(TOY3_AGGR_BLOCK2,
+                         toy3.findAggrBlockOfToR(TOY3_TOR2).name)
 
     def test_toy3_traffic_construction1(self):
+        toy3 = Topology('', input_proto=generateToy3())
         traffic_proto = tmgen(tor_level=False,
                               cluster_vector=np.array([1]*22+[2.5]*22+[5]*21),
                               num_nodes=32,
                               model='flat',
                               dist='')
-        toy3_traffic = Traffic('', traffic_proto)
+        toy3_traffic = Traffic(toy3, '', traffic_proto)
         self.assertEqual(traffic_pb2.TrafficDemand.DemandType.LEVEL_AGGR_BLOCK,
                          toy3_traffic.getDemandType())
         self.assertEqual(64 * 65, len(toy3_traffic.getAllDemands()))
@@ -211,12 +220,13 @@ class TestLoadToyNet(unittest.TestCase):
                                                        TOY3_AGGR_BLOCK1))
 
     def test_toy3_traffic_construction2(self):
+        toy3 = Topology('', input_proto=generateToy3())
         traffic_proto = tmgen(tor_level=False,
                               cluster_vector=np.array([1]*22+[2.5]*22+[5]*21),
                               num_nodes=32,
                               model='gravity',
                               dist='exp')
-        toy3_traffic = Traffic('', traffic_proto)
+        toy3_traffic = Traffic(toy3, '', traffic_proto)
         self.assertEqual(traffic_pb2.TrafficDemand.DemandType.LEVEL_AGGR_BLOCK,
                          toy3_traffic.getDemandType())
         self.assertEqual(64 * 65, len(toy3_traffic.getAllDemands()))
@@ -228,6 +238,25 @@ class TestLoadToyNet(unittest.TestCase):
             tot_traffic += toy3_traffic.getDemand(TOY3_AGGR_BLOCK2,
                                                   dst_block_name)
         self.assertTrue(tot_traffic < 40000 * 256)
+
+    def test_toy3_traffic_construction3(self):
+        toy3 = Topology('', input_proto=generateToy3())
+        traffic_proto = tmgen(tor_level=True,
+                              cluster_vector=np.array([1]*22+[2.5]*22+[5]*21),
+                              num_nodes=32,
+                              model='flat',
+                              dist='')
+        toy3_traffic = Traffic(toy3, '', traffic_proto)
+        self.assertEqual(traffic_pb2.TrafficDemand.DemandType.LEVEL_TOR,
+                         toy3_traffic.getDemandType())
+        self.assertEqual(64 * 65, len(toy3_traffic.getAllDemands()))
+        # Flat demand matrix has the same volume in both directions.
+        # The inter-block demand should be 153 Mbps (per-ToR) * 32 peer ToRs *
+        # 32 sister ToRs.
+        self.assertEqual(153*32*32, toy3_traffic.getDemand(TOY3_AGGR_BLOCK1,
+                                                           TOY3_AGGR_BLOCK2))
+        self.assertEqual(153*32*32, toy3_traffic.getDemand(TOY3_AGGR_BLOCK2,
+                                                           TOY3_AGGR_BLOCK1))
 
 if __name__ == "__main__":
     unittest.main()

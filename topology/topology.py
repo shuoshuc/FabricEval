@@ -414,6 +414,24 @@ class Topology:
             return None
         return tor.host_prefix
 
+    def findAggrBlockOfToR(self, tor_name):
+        '''
+        Looks up the parent AggrBlock of the given ToR.
+        Note: Strictly speaking, a ToR's parent is a cluster, not AggrBlock. But
+              for TE purposes, we just want to find the AggrBlock of that parent
+              cluster.
+        '''
+        if tor_name not in self._nodes:
+            print('[ERROR] {}: Node {} does not exist in this topology!'
+                  .format('Find host prefix', tor_name))
+            return None
+        tor = self._nodes[tor_name]
+        if tor.stage != 1:
+            print('[ERROR] {}: Node {} stage={} is not a ToR!'
+                  .format('Find host prefix', tor_name, tor.stage))
+            return None
+        return tor.getParentCluster()._member_aggr_blocks[0]
+
     def findOrigPathsOfAggrBlock(self, src):
         '''
         Returns a dict of {path_name: (src, dst)} such that all these paths

@@ -18,7 +18,7 @@ if __name__ == "__main__":
                           num_nodes=32,
                           model='gravity',
                           dist='exp')
-    toy3_traffic = Traffic('', traffic_proto)
+    toy3_traffic = Traffic(toy3, '', traffic_proto)
     global_te = GlobalTE(toy3, toy3_traffic)
     sol = global_te.solve()
     #print(text_format.MessageToString(sol))

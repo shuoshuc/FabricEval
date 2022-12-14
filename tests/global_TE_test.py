@@ -17,7 +17,7 @@ C3AB1 = 'toy2-c3-ab1'
 class TestGlobalTESolution(unittest.TestCase):
     def test_te_sol_toy2(self):
         toy2 = Topology(TOY2_PATH)
-        toy2_traffic = Traffic(TOY2_TRAFFIC_PATH)
+        toy2_traffic = Traffic(toy2, TOY2_TRAFFIC_PATH)
         global_te = GlobalTE(toy2, toy2_traffic)
         sol = global_te.solve()
         print(text_format.MessageToString(sol))
