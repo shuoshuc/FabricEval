@@ -40,16 +40,16 @@ class Traffic:
             vol = demand_entry.volume_mbps
             if vol <= 0:
                 print(f'[ERROR] Traffic parsing: encountered negative demand: '
-                      f'{vol} on s-t {src}-{dst}.')
+                      f'{vol} on {src} => {dst}.')
                 return
             # Sanity check: only expects one entry for each src-dst pair.
             if (src, dst) in self.demand:
                 print(f'[ERROR] Traffic parsing: found more than 1 entry for '
-                      f'pair {src}-{dst}: {self.demand[(src, dst)]} and {vol}')
+                      f'{src} => {dst}: {self.demand[(src, dst)]} and {vol}')
                 return
             if is_tor and (src, dst) in self.tor_demand:
                 print(f'[ERROR] Traffic parsing: found more than 1 entry for '
-                      f'ToR pair {src}-{dst}: {self.tor_demand[(src, dst)]} and'
+                      f'pair {src} => {dst}: {self.tor_demand[(src, dst)]} and'
                       f'{vol}')
                 return
             # If ToR demand matrix, finds the parent AggrBlocks so that we can
