@@ -104,6 +104,9 @@ def genProto(tor_level, num_clusters, num_nodes, TM):
                 # A ToR cannot send traffic to itself.
                 if i == j and u == v:
                     continue
+                # Skip zero entries for proto efficiency.
+                if floor(TM[(i - 1) * 32 + u - 1, (j - 1) * 32 + v - 1]) <= 0:
+                    continue
                 demand = tm_proto.demands.add()
                 demand.src = f'{NETNAME}-c{i}-ab1-s1i{u}'
                 demand.dst = f'{NETNAME}-c{j}-ab1-s1i{v}'
@@ -112,6 +115,9 @@ def genProto(tor_level, num_clusters, num_nodes, TM):
         else:
             # Populate AggrBlock-level demand matrix.
             if i == j:
+                continue
+            # Skip zero entries for proto efficiency.
+            if floor(TM[i-1, j-1]) <= 0:
                 continue
             demand = tm_proto.demands.add()
             demand.src = f'{NETNAME}-c{i}-ab1'
