@@ -38,6 +38,7 @@ class Port:
     def __init__(self, name, orig_link=None, term_link=None, speed=None,
                  dcn_facing=None):
         self.name = name
+        self.index = None
         self.orig_link = orig_link
         self.term_link = term_link
         self.port_speed = speed
@@ -347,6 +348,16 @@ class Topology:
         '''
         return self._aggr_blocks
 
+    def getPortByName(self, port_name):
+        '''
+        Looks up the port object of the given port name.
+        '''
+        if port_name not in self._ports:
+            print('[ERROR] {}: Input port {} does not exist in this topology!'
+                  .format('getPortByName', port_name))
+            return None
+        return self._ports[port_name]
+
     def findPeerPortOfPort(self, port_name):
         '''
         Looks up the peer port of the given port, returns the port object.
@@ -370,7 +381,7 @@ class Topology:
         '''
         if port_name not in self._ports:
             print('[ERROR] {}: Input port {} does not exist in this topology!'
-                  .format('Find aggr block', port_name))
+                  .format('findAggrBlockOfPort', port_name))
             return None
         port_obj = self._ports[port_name]
         return port_obj.getParent().getParentAggrBlock()
@@ -423,12 +434,12 @@ class Topology:
         '''
         if tor_name not in self._nodes:
             print('[ERROR] {}: Node {} does not exist in this topology!'
-                  .format('Find host prefix', tor_name))
+                  .format('findAggrBlockOfToR', tor_name))
             return None
         tor = self._nodes[tor_name]
         if tor.stage != 1:
             print('[ERROR] {}: Node {} stage={} is not a ToR!'
-                  .format('Find host prefix', tor_name, tor.stage))
+                  .format('findAggrBlockOfToR', tor_name, tor.stage))
             return None
         return tor.getParentCluster()._member_aggr_blocks[0]
 
