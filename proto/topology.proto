@@ -9,6 +9,8 @@ message Port {
     int64 port_speed_mbps = 2;
     // True if this port is facing the data-center network (DCN).
     bool dcn_facing = 3;
+    // Unique index among the ports of the same nodes.
+    int32 index = 4;
 }
 
 message Link {

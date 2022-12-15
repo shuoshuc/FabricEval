@@ -34,11 +34,12 @@ class Port:
     term_link: terminating link of which this port is a destination port.
     port_speed: speed the port is running at.
     dcn_facing: whether a port is facing the Data Center Network (DCN).
+    index: index of the port.
     '''
     def __init__(self, name, orig_link=None, term_link=None, speed=None,
-                 dcn_facing=None):
+                 dcn_facing=None, index=None):
         self.name = name
-        self.index = None
+        self.index = index
         self.orig_link = orig_link
         self.term_link = term_link
         self.port_speed = speed
@@ -234,7 +235,8 @@ class Topology:
                     node_obj.setParent(ag_block_obj, cluster_obj)
                     for port in node.ports:
                         port_obj = Port(port.name, speed=port.port_speed_mbps,
-                                        dcn_facing=port.dcn_facing)
+                                        dcn_facing=port.dcn_facing,
+                                        index=port.index)
                         self._ports[port.name] = port_obj
                         node_obj.addMember(port_obj)
                         port_obj.setParent(node_obj)
@@ -260,7 +262,8 @@ class Topology:
                 cluster_obj.addMemberToR(tor_obj)
                 for port in tor.ports:
                     port_obj = Port(port.name, speed=port.port_speed_mbps,
-                                    dcn_facing=port.dcn_facing)
+                                    dcn_facing=port.dcn_facing,
+                                    index=port.index)
                     self._ports[port.name] = port_obj
                     tor_obj.addMember(port_obj)
                     port_obj.setParent(tor_obj)

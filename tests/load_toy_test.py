@@ -186,12 +186,35 @@ class TestLoadToyNet(unittest.TestCase):
         # Verify S3-S3 port and peer.
         self.assertEqual(TOY3_PEER_PORT1,
                          toy3.findPeerPortOfPort(TOY3_PORT1).name)
+        # Verify that all DCN ports have odd port indices.
+        p1 = toy3.getPortByName(TOY3_PORT1)
+        self.assertTrue(p1.dcn_facing)
+        self.assertEqual(1, p1.index % 2)
+        pp1 = toy3.getPortByName(TOY3_PEER_PORT1)
+        self.assertTrue(pp1.dcn_facing)
+        self.assertEqual(1, pp1.index % 2)
         # Verify S2-S3 port and peer.
         self.assertEqual(TOY3_PEER_PORT2,
                          toy3.findPeerPortOfPort(TOY3_PORT2).name)
+        # Verify that S2-facing S3 ports have even indices.
+        p2 = toy3.getPortByName(TOY3_PORT2)
+        self.assertFalse(p2.dcn_facing)
+        self.assertEqual(0, p2.index % 2)
+        # Verify that S3-facing S2 ports have odd indices.
+        pp2 = toy3.getPortByName(TOY3_PEER_PORT2)
+        self.assertFalse(pp2.dcn_facing)
+        self.assertEqual(1, pp2.index % 2)
         # Verify S1-S2 port and peer.
         self.assertEqual(TOY3_PEER_PORT3,
                          toy3.findPeerPortOfPort(TOY3_PORT3).name)
+        # Verify that S1-facing S2 ports have even indices.
+        p3 = toy3.getPortByName(TOY3_PORT3)
+        self.assertFalse(p3.dcn_facing)
+        self.assertEqual(0, p3.index % 2)
+        # Verify that S2-facing S1 ports have odd indices.
+        pp3 = toy3.getPortByName(TOY3_PEER_PORT3)
+        self.assertFalse(pp3.dcn_facing)
+        self.assertEqual(1, pp3.index % 2)
         # Verify port and AggrBlock has correct child-parent relationship.
         self.assertEqual(TOY3_AGGR_BLOCK1,
                          toy3.findAggrBlockOfPort(TOY3_PORT1).name)

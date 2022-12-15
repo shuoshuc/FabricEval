@@ -82,6 +82,7 @@ def generateToy3():
                 s3_port.port_speed_mbps = PORT_SPEEDS[cluster_gen]
                 # Odd indices indicate DCN facing ports.
                 s3_port.dcn_facing = True if s3p_idx % 2 == 1 else False
+                s3_port.index = s3p_idx
             # TODO: assign mgmt prefixes.
         # Add S2 nodes under AggrBlock.
         for s2_idx in range(1, NS2 + 1):
@@ -98,6 +99,7 @@ def generateToy3():
                 s2_port.port_speed_mbps = PORT_SPEEDS[cluster_gen]
                 # S2 nodes have no DCN facing port.
                 s2_port.dcn_facing = False
+                s2_port.index = s2p_idx
             # TODO: assign mgmt prefixes.
 
         # Add S1 nodes (ToR) under cluster.
@@ -115,6 +117,7 @@ def generateToy3():
                 s1_port.port_speed_mbps = PORT_SPEEDS[cluster_gen]
                 # S1 nodes have no DCN facing port.
                 s1_port.dcn_facing = False
+                s1_port.index = s1p_idx
             # TODO: assign host and mgmt prefixes.
 
     # Add paths under network.
