@@ -18,8 +18,8 @@ py_test(
     srcs = ['wcmp_alloc_test.py'],
     deps = [
         '//topology:topology',
-        '//wcmp_alloc:wcmp_alloc',
-        '//wcmp_alloc:group_reduction',
+        '//localTE:wcmp_alloc',
+        '//localTE:group_reduction',
     ],
     data = glob(['data/*.textproto']),
     python_version = 'PY3',

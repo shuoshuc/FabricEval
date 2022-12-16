@@ -224,6 +224,11 @@ class TestLoadToyNet(unittest.TestCase):
                          toy3.findAggrBlockOfToR(TOY3_TOR1).name)
         self.assertEqual(TOY3_AGGR_BLOCK2,
                          toy3.findAggrBlockOfToR(TOY3_TOR2).name)
+        # Verify the stage and index of ToR1.
+        self.assertEqual(1,
+                         toy3.getNodeByName(TOY3_TOR1).stage)
+        self.assertEqual(1,
+                         toy3.getNodeByName(TOY3_TOR1).index)
 
     def test_toy3_traffic_construction1(self):
         toy3 = Topology('', input_proto=generateToy3())

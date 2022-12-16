@@ -361,6 +361,16 @@ class Topology:
             return None
         return self._ports[port_name]
 
+    def getNodeByName(self, node_name):
+        '''
+        Looks up the node object of the given node name.
+        '''
+        if node_name not in self._nodes:
+            print('[ERROR] {}: Input node {} does not exist in this topology!'
+                  .format('getNodeByName', node_name))
+            return None
+        return self._nodes[node_name]
+
     def findPeerPortOfPort(self, port_name):
         '''
         Looks up the peer port of the given port, returns the port object.

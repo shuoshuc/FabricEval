@@ -1,4 +1,5 @@
 import copy
+import itertools
 import os
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -126,7 +127,9 @@ class GroupReduction:
                      this does not have to be the physical limit, but can also
                      be the available headroom left.
         '''
-        self._orig_groups = copy.deepcopy(groups)
+        # De-duplicate input groups. Exactly identical groups can be shared.
+        g_dedup = [g for g, _ in itertools.groupby(groups)]
+        self._orig_groups = copy.deepcopy(g_dedup)
         self._int_groups = list(map(frac2int_round, copy.deepcopy(groups)))
         self._groups = self._int_groups if FLAG_USE_INT_INPUT_GROUPS else \
                                            self._orig_groups
