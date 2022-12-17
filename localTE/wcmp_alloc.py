@@ -1,3 +1,4 @@
+import itertools
 import os
 from concurrent.futures import ThreadPoolExecutor
 
@@ -47,21 +48,29 @@ class WCMPWorker:
         for prefix_intent in self._te_intent.prefix_intents:
             self.convertPrefixIntentToGroups(prefix_intent)
 
+        # `groups` may contain duplicates. Dedup and updates `self.groups_in`.
+        self.consolidateGroups()
+
         # Run group reduction for src and transit groups separately.
         for p_type, g_map in self.groups_in.items():
+            # Run group reduction for all groups on a node in one shot.
             for node, groups in g_map.items():
-                # Note that `groups` may contain duplicates. It is the reduction
-                # algorithm's job to de-duplicate.
-                gr = GroupReduction(groups,
+                weight_vec = [g[0] for g in groups]
+                gr = GroupReduction(weight_vec,
                                     self._topo.getNodeByName(node).ecmp_limit)
-                #reduced_groups = gr.table_fitting_ssmg()
-                reduced_groups = gr.solve_ssmg()
+                reduced_vec = gr.table_fitting_ssmg()
+                #reduced_vec = gr.solve_ssmg()
+                reduced_groups = []
+                for i, vec in enumerate(reduced_vec):
+                    reduced_groups.append((vec, groups[i][1]))
                 self.groups_out[p_type][node] = reduced_groups
 
         if self._target_block == 'toy3-c1-ab1':
+            '''
             print(f'===== TEIntent for {self._target_block} begins =====')
             print(text_format.MessageToString(self._te_intent))
             print(f'===== TEIntent for {self._target_block} ends =====')
+            '''
             for k, v in self.groups_in.items():
                 if k == 1:
                     print('[SRC]')
@@ -96,7 +105,23 @@ class WCMPWorker:
                                       [0] * len(port.getParent()._member_ports))
             group[port.index - 1] = ne.weight
         for node, g in groups.items():
-            self.groups_in[prefix_intent.type].setdefault(node, []).append(g)
+            self.groups_in[prefix_intent.type].setdefault(node, []).append(
+                (g, sum(g)))
+
+    def consolidateGroups(self):
+        '''
+        Consolidates groups in `self.groups_in`: de-duplicates groups on the
+        same node, and accumulates total traffic carried by a shared group.
+        '''
+        for p_type, g_map in self.groups_in.items():
+            for node, groups in g_map.items():
+                g_vol = {}
+                # Each `group` is a tuple of (weight vector, volume).
+                for group in groups:
+                    g_vol.setdefault(tuple(group[0]), 0)
+                    g_vol[tuple(group[0])] += group[1]
+                self.groups_in[p_type][node] = [(list(k), v) \
+                                                for k, v in g_vol.items()]
 
 class WCMPAllocation:
     '''

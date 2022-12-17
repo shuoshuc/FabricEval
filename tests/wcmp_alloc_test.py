@@ -1,13 +1,18 @@
-from topology.topology import loadTopo, Topology
-from wcmp_alloc.wcmp_alloc import loadTESolution, WCMPAllocation
-from wcmp_alloc.group_reduction import GroupReduction
-import unittest
 import ipaddress
+import unittest
+
+from localTE.group_reduction import GroupReduction
+from localTE.wcmp_alloc import WCMPAllocation, loadTESolution
+from topology.topogen import generateToy3
+from topology.topology import Topology, loadTopo
 
 TOY2_TOPO_PATH = 'tests/data/toy2.textproto'
 TOY2_SOL_PATH = 'tests/data/te_sol_toy2.textproto'
 C1AB1 = 'toy2-c1-ab1'
 C3AB1 = 'toy2-c3-ab1'
+# Toy3
+TOY3_SOL_PATH = 'tests/data/toy3_te_sol.textproto'
+TOY3_C1 = 'toy3-c1-ab1'
 
 class TestWCMPAlloc(unittest.TestCase):
     def test_load_invalid_te_solution(self):
@@ -41,44 +46,55 @@ class TestWCMPAlloc(unittest.TestCase):
                 for nexthop in prefix_intent.nexthop_entries:
                     self.assertGreater(nexthop.weight, 0.0)
 
-    def test_wcmp_alloc_intent_distribution(self):
-        toy2_topo = Topology(TOY2_TOPO_PATH)
-        wcmp_alloc = WCMPAllocation(toy2_topo, TOY2_SOL_PATH)
-        wcmp_alloc.run()
+    def test_toy3_intent_distribution(self):
+        toy3 = Topology('', input_proto=generateToy3())
+        wcmp_alloc = WCMPAllocation(toy3, TOY3_SOL_PATH)
+        self.assertEqual(65, len(wcmp_alloc._worker_map.keys()))
+        c1_worker = wcmp_alloc._worker_map[TOY3_C1]
+        self.assertEqual(TOY3_C1, c1_worker._target_block)
+        self.assertEqual(TOY3_C1, c1_worker._te_intent.target_block)
 
 class TestGroupReduction(unittest.TestCase):
     def test_single_switch_single_group_1(self):
         group_reduction = GroupReduction([[1, 2, 3, 4]], 16*1024)
         self.assertEqual([[1, 2, 3, 4]], group_reduction.solve_sssg())
+        self.assertEqual([[1, 2, 3, 4]], group_reduction.table_fitting_sssg())
 
     def test_single_switch_single_group_2(self):
         group_reduction = GroupReduction([[20, 40, 60, 80]], 16*1024)
         self.assertEqual([[1, 2, 3, 4]], group_reduction.solve_sssg())
+        # EuroSys heuristic does not perform lossless reduction if groups fit.
+        self.assertEqual([[20, 40, 60, 80]],
+                         group_reduction.table_fitting_sssg())
 
     def test_single_switch_single_group_3(self):
         group_reduction = GroupReduction([[10.5, 20.1, 31.0, 39.7]], 10)
         self.assertEqual([[1, 2, 3, 4]], group_reduction.solve_sssg())
+        self.assertEqual([[1, 2, 3, 4]], group_reduction.table_fitting_sssg())
 
     def test_single_switch_single_group_4(self):
         group_reduction = GroupReduction([[i + 0.1 for i in range(1, 17)]],
                                          16*1024)
         self.assertEqual([[(i + 0.1) * 10 for i in range(1, 17)]],
                          group_reduction.solve_sssg())
+        self.assertEqual([list(range(1, 17))],
+                         group_reduction.table_fitting_sssg())
 
     def test_single_switch_multi_group_1(self):
         group_reduction = GroupReduction([[1, 2], [3, 4]], 16*1024)
         self.assertEqual([[1, 2], [3, 4]], group_reduction.solve_ssmg())
+        self.assertEqual([[1, 2], [3, 4]], group_reduction.table_fitting_ssmg())
 
     def test_single_switch_multi_group_2(self):
         group_reduction = GroupReduction([[1.1, 2.1], [3.1, 4.1]], 16*1024)
-        self.assertEqual([[11, 21], [6277, 8302]], group_reduction.solve_ssmg())
+        self.assertEqual([[11, 21], [31, 41]], group_reduction.solve_ssmg())
+        self.assertEqual([[1, 2], [3, 4]], group_reduction.table_fitting_ssmg())
 
     def test_single_switch_multi_group_3(self):
-        group_reduction = GroupReduction([[7.784, 67.785], [10.753, 14.765]],
-                                         16*1024)
-        self.assertEqual([[24, 209], [729, 1001]],
-                         group_reduction.solve_ssmg())
-
+        group_reduction = GroupReduction([[1, 0, 0], [0, 2, 4]], 5)
+        # Verify that zeroes are correctly stripped and unstripped.
+        self.assertEqual([[1, 0, 0], [0, 1, 2]],
+                         group_reduction.table_fitting_ssmg())
 
 if __name__ == "__main__":
     unittest.main()

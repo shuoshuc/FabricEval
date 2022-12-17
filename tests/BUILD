@@ -18,6 +18,7 @@ py_test(
     srcs = ['wcmp_alloc_test.py'],
     deps = [
         '//topology:topology',
+        '//topology:topogen',
         '//localTE:wcmp_alloc',
         '//localTE:group_reduction',
     ],

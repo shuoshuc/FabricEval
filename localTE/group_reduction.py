@@ -1,5 +1,4 @@
 import copy
-import itertools
 import os
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -127,20 +126,30 @@ class GroupReduction:
                      this does not have to be the physical limit, but can also
                      be the available headroom left.
         '''
-        # De-duplicate input groups. Exactly identical groups can be shared.
-        g_dedup = [g for g, _ in itertools.groupby(groups)]
-        self._orig_groups = copy.deepcopy(g_dedup)
-        self._int_groups = list(map(frac2int_round, copy.deepcopy(groups)))
+        # Strips all the zeroes in each group, they can cause division errors
+        # when computing port oversub.
+        self._orig_groups = copy.deepcopy([[w for w in g if w != 0] \
+                                           for g in groups])
+        self._int_groups = list(map(frac2int_round,
+                                    copy.deepcopy(self._orig_groups)))
         self._groups = self._int_groups if FLAG_USE_INT_INPUT_GROUPS else \
                                            self._orig_groups
         self._table_limit = table_limit
         self._final_groups = None
+        self._unstripped_groups = copy.deepcopy(groups)
+        # Auxiliary map to store the pre-sort location of each int group in the
+        # input. This is used for re-constructing the unstripped groups.
+        self._presort_group_loc = {}
+        # The order of pre-sort `self._int_groups` stays the same as unstripped
+        # groups.
+        for idx, g_int in enumerate(self._int_groups):
+            self._presort_group_loc[tuple(g_int)] = idx
 
     def get_input_groups(self):
         '''
-        Returns the input groups.
+        Returns the unstripped input groups.
         '''
-        return self._orig_groups
+        return self._unstripped_groups
 
     def get_output_groups(self):
         '''
@@ -167,14 +176,36 @@ class GroupReduction:
         sum_entries = sum([sum(g) for g in final_G])
         return sum_entries / self._table_limit if percentage else sum_entries
 
-    def cache(self, final_groups):
+    def sanitize_and_cache(self, final_groups):
         '''
-        Caches the final groups and returns the same input.
+        Sanitizes the final groups: (1) singleton groups should just be [1], (2)
+        make sure all weights are integers, (3) unstrip final_groups and reorder
+        them so that they correspond to the original groups in the same order.
+        Also caches the sanitized groups and returns them.
 
-        final_groups: the final integer groups to be cached.
+        final_groups: the final integer groups to be sanitized.
         '''
-        self._final_groups = final_groups
-        return final_groups
+        sanitized_groups = [[]] * len(final_groups)
+        for idx, final_group in enumerate(final_groups):
+            # From the final_group, find its corresponding int_group, and looks
+            # up the location of this group pre-sorting. The location is where
+            # the unstripped group is.
+            loc = self._presort_group_loc[tuple(self._int_groups[idx])]
+            sanitized_group = [0] * len(self._unstripped_groups[loc])
+            nz_indices = np.nonzero(np.array(self._unstripped_groups[loc]))[0]
+            if nz_indices.size != len(final_group):
+                print(f'[ERROR] sanitize_and_cache: group size '
+                      f'{len(final_group)} mismatches num of non-zero weights '
+                      f'in original group {self._unstripped_groups[idx]}')
+                return None
+            if len(final_group) == 1:
+                sanitized_group[nz_indices[0]] = 1
+            else:
+                for idx, w in enumerate(final_group):
+                    sanitized_group[nz_indices[idx]] = int(w)
+            sanitized_groups[loc] = sanitized_group
+        self._final_groups = sanitized_groups
+        return sanitized_groups
 
     def _choose_port_to_update(self, group_to_reduce, group_under_reduction):
         '''
@@ -265,7 +296,7 @@ class GroupReduction:
                 final_group_2 = copy.deepcopy(final_group)
                 min_oversub = curr_oversub
 
-        return self.cache([final_group_2])
+        return self.sanitize_and_cache([final_group_2])
 
     def table_fitting_ssmg(self):
         '''
@@ -283,6 +314,9 @@ class GroupReduction:
         S = self._table_limit
         # Sort groups in descending order of size.
         groups_in = sorted(self._int_groups, key=sum, reverse=True)
+        # The order of post-sort `self._int_groups` stays the same as
+        # `groups_out`.
+        self._int_groups = groups_in
         groups_out = copy.deepcopy(groups_in)
         total_size = sum([sum(g) for g in groups_in])
 
@@ -292,12 +326,12 @@ class GroupReduction:
                                                         enforced_oversub)
                 total_size = sum([sum(g) for g in groups_out])
                 if total_size <= S:
-                    return groups_out
+                    return self.sanitize_and_cache(groups_out)
             # Relaxes oversub limit if we fail to fit all groups with the same
             # oversub.
             enforced_oversub += step_size
 
-        return self.cache(groups_out)
+        return self.sanitize_and_cache(groups_out)
 
     def solve_sssg(self, formulation='L1NORM2', groups_in=None, C=None):
         '''
@@ -356,7 +390,7 @@ class GroupReduction:
             # Applies a final GCD reduction just in case.
             final_groups.append(frac2int_lossless(group))
 
-            return self.cache(final_groups)
+            return self.sanitize_and_cache(final_groups)
 
         except gp.GurobiError as e:
             print('Error code ' + str(e.errno) + ': ' + str(e))
@@ -488,7 +522,7 @@ class GroupReduction:
             # Applies a final GCD reduction just in case.
             final_groups = list(map(frac2int_lossless, final_groups))
 
-            return self.cache(final_groups)
+            return self.sanitize_and_cache(final_groups)
 
         except gp.GurobiError as e:
             print('Error code ' + str(e.errno) + ': ' + str(e))
@@ -652,7 +686,7 @@ class GroupReduction:
                         PRINTV(1, f'New worst group: {per_group_metric[0][0]}.')
                         break
 
-            return self.cache(final_groups)
+            return self.sanitize_and_cache(final_groups)
 
         except gp.GurobiError as e:
             print('Error code ' + str(e.errno) + ': ' + str(e))
