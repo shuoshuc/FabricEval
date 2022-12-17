@@ -55,7 +55,7 @@ class WCMPWorker:
         for p_type, g_map in self.groups_in.items():
             # Run group reduction for all groups on a node in one shot.
             for node, groups in g_map.items():
-                weight_vec = [g[0] for g in groups]
+                weight_vec = [g for (g, _) in groups]
                 gr = GroupReduction(weight_vec,
                                     self._topo.getNodeByName(node).ecmp_limit)
                 reduced_vec = gr.table_fitting_ssmg()
@@ -65,25 +65,10 @@ class WCMPWorker:
                     reduced_groups.append((vec, groups[i][1]))
                 self.groups_out[p_type][node] = reduced_groups
 
-        if self._target_block == 'toy3-c1-ab1':
-            '''
-            print(f'===== TEIntent for {self._target_block} begins =====')
-            print(text_format.MessageToString(self._te_intent))
-            print(f'===== TEIntent for {self._target_block} ends =====')
-            '''
-            for k, v in self.groups_in.items():
-                if k == 1:
-                    print('[SRC]')
-                else:
-                    print('[TRANSIT]')
-                for n, gv in v.items():
-                    print(f'node {n}')
-                    print('Pre-reduction:')
-                    for g in gv:
-                        print(g)
-                    print('Post-reduction:')
-                    for g2 in self.groups_out[k][n]:
-                        print(g2)
+        # For each prefix type and each node, install all groups.
+        for g_type, g_map in self.groups_out.items():
+            for node, groups in g_map.items():
+                self._topo.installGroupsOnNode(node, groups, g_type)
 
     def convertPrefixIntentToGroups(self, prefix_intent):
         '''
@@ -117,9 +102,9 @@ class WCMPWorker:
             for node, groups in g_map.items():
                 g_vol = {}
                 # Each `group` is a tuple of (weight vector, volume).
-                for group in groups:
-                    g_vol.setdefault(tuple(group[0]), 0)
-                    g_vol[tuple(group[0])] += group[1]
+                for (group, vol) in groups:
+                    g_vol.setdefault(tuple(group), 0)
+                    g_vol[tuple(group)] += vol
                 self.groups_in[p_type][node] = [(list(k), v) \
                                                 for k, v in g_vol.items()]
 

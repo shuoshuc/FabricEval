@@ -13,6 +13,8 @@ C3AB1 = 'toy2-c3-ab1'
 # Toy3
 TOY3_SOL_PATH = 'tests/data/toy3_te_sol.textproto'
 TOY3_C1 = 'toy3-c1-ab1'
+TOY3_LINK1 = 'toy3-c64-ab1-s3i1-p29:toy3-c15-ab1-s3i1-p125'
+TOY3_LINK2 = 'toy3-c42-ab1-s3i4-p105:toy3-c54-ab1-s3i4-p83'
 
 class TestWCMPAlloc(unittest.TestCase):
     def test_load_invalid_te_solution(self):
@@ -53,6 +55,24 @@ class TestWCMPAlloc(unittest.TestCase):
         c1_worker = wcmp_alloc._worker_map[TOY3_C1]
         self.assertEqual(TOY3_C1, c1_worker._target_block)
         self.assertEqual(TOY3_C1, c1_worker._te_intent.target_block)
+
+    def test_toy3_generated_groups(self):
+        toy3 = Topology('', input_proto=generateToy3())
+        wcmp_alloc = WCMPAllocation(toy3, TOY3_SOL_PATH)
+        wcmp_alloc.run()
+        c1_worker = wcmp_alloc._worker_map[TOY3_C1]
+        # Verify both types SRC and TRANSIT exist.
+        self.assertEqual(2, len(c1_worker.groups_out.values()))
+        for g_map in c1_worker.groups_out.values():
+            # Verify all 4 nodes have groups.
+            self.assertEqual(4, len(g_map.keys()))
+            for node in g_map.keys():
+                # Verify node has non-zero ECMP utilization.
+                self.assertTrue(toy3.getNodeByName(node).getECMPUtil() > 0)
+        link_util = toy3.dumpRealLinkUtil()
+        # Verify real link utilization.
+        self.assertTrue(link_util[TOY3_LINK1] > 0.68)
+        self.assertTrue(link_util[TOY3_LINK2] > 0.36)
 
 class TestGroupReduction(unittest.TestCase):
     def test_single_switch_single_group_1(self):

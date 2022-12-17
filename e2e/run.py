@@ -29,8 +29,6 @@ if __name__ == "__main__":
     '''
     wcmp_alloc = WCMPAllocation(toy3, TOY3_TE_SOL_PATH)
     wcmp_alloc.run()
-    '''
-    LUs = toy3.dumpLinkUtil()
+    LUs = toy3.dumpRealLinkUtil()
     for k, v in LUs.items():
         print(f'{k}: {v}')
-    '''

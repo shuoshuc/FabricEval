@@ -5,6 +5,7 @@ py_library(
     srcs = ['topology.py'],
     deps = [
         "//proto:topology_proto",
+        "//proto:te_solution_proto",
     ],
 )
 

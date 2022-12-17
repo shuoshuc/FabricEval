@@ -1,5 +1,8 @@
+import copy
 import ipaddress
 
+import numpy as np
+import proto.te_solution_pb2 as te_sol
 import proto.topology_pb2 as topo
 from google.protobuf import text_format
 
@@ -77,12 +80,20 @@ class Link:
         self.dst_port = dst_port
         self.link_speed = speed
         self.dcn_facing = dcn_facing
-        # remaining available capacity on the link.
-        self._residual_capacity = speed
+        # Ideal (w/o precision loss) remaining available capacity on the link.
+        self._ideal_residual = speed
+        # Real (w/ precision loss) remaining available capacity on the link.
+        self._real_residual = speed
         self._parent_path = None
 
     def setParent(self, path):
         self._parent_path = path
+
+    def resetIdealResidual(self):
+        self._ideal_residual = 0
+
+    def resetRealResidual(self):
+        self._real_residual = 0
 
 
 class Node:
@@ -117,6 +128,13 @@ class Node:
         self._parent_aggr_block = None
         # parent cluster this node belongs to.
         self._parent_cluster = None
+        # All currently installed groups.
+        self._groups = {
+            te_sol.PrefixIntent.PrefixType.SRC: [],
+            te_sol.PrefixIntent.PrefixType.TRANSIT: []
+        }
+        # Current ECMP table usage, should equal sum of all groups.
+        self.ecmp_used = 0
 
     def setParent(self, aggr_block, cluster):
         self._parent_aggr_block = aggr_block
@@ -131,6 +149,17 @@ class Node:
     def getParentCluster(self):
         return self._parent_cluster
 
+    def getECMPUtil(self):
+        return self.ecmp_used / self.ecmp_limit
+
+    def installGroups(self, groups, group_type):
+        '''
+        Installs groups on node, and updates ECMP table space used. Groups
+        completely overwrites the old ones of the same type.
+        '''
+        self._groups[group_type] = copy.deepcopy(groups)
+        self.ecmp_used = sum([sum(g) for G_by_type in self._groups.values() \
+                              for (g, _) in G_by_type])
 
 class AggregationBlock:
     '''
@@ -557,18 +586,56 @@ class Topology:
                 t_frac = traffic_vol / len(links)
                 for link in links:
                     # Accumulates flow on each link.
-                    link._residual_capacity -= t_frac
+                    link._ideal_residual -= t_frac
                     flow_dist.setdefault(seg, {})[link.src_port.name] = t_frac
         return flow_dist
 
-    def dumpLinkUtil(self):
+    def dumpIdealLinkUtil(self):
         '''
         Returns a map of all link utilizations normalized to 1. Returned dict is
         sorted from highest link util to lowest.
+        NB: returned link util is ideal utilization without precision loss.
         '''
         link_util_map = {}
         for link in self._links.values():
-            util = (link.link_speed - link._residual_capacity) / link.link_speed
-            link_util_map[link.name] = util
+            link_util_map[link.name] = \
+                (link.link_speed - link._ideal_residual) / link.link_speed
+        return dict(sorted(link_util_map.items(), key=lambda x: x[1],
+                           reverse=True))
+
+    def installGroupsOnNode(self, node_name, groups, group_type):
+        '''
+        Installs groups on node. Groups will be persisted in the node instance
+        until next installation. ECMP util will be updated as well. In addition,
+        each link will be updated with the traffic load according to the group
+        weights.
+
+        node_name: name of the node the groups belong to.
+        groups: a list of (group, volume) tuples.
+        group_type: SRC or TRANSIT, groups of different types cannot be shared.
+        '''
+        node = self.getNodeByName(node_name)
+        node.installGroups(groups, group_type)
+        for (group, vol) in groups:
+            # Finds all the ports that carry traffic in the group.
+            nz_indices = np.nonzero(np.array(group))[0]
+            for i in nz_indices:
+                port_name = f'{node_name}-p{i + 1}'
+                port = self.getPortByName(port_name)
+                # Places traffic fraction of the group on the outgoing link of
+                # port (since traffic is outgoing). `_real_residual` can be
+                # negative due to oversubscription.
+                port.orig_link._real_residual -= group[i] / sum(group) * vol
+
+    def dumpRealLinkUtil(self):
+        '''
+        Returns a map of all link utilizations normalized to 1. Returned dict is
+        sorted from highest link util to lowest.
+        NB: returned link util is real utilization with precision loss.
+        '''
+        link_util_map = {}
+        for link in self._links.values():
+            link_util_map[link.name] = \
+                (link.link_speed - link._real_residual) / link.link_speed
         return dict(sorted(link_util_map.items(), key=lambda x: x[1],
                            reverse=True))
