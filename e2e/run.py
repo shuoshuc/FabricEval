@@ -1,4 +1,6 @@
 import numpy as np
+import sys
+import csv
 import proto.topology_pb2 as topo
 import proto.traffic_pb2 as traffic_pb2
 from google.protobuf import text_format
@@ -33,5 +35,14 @@ if __name__ == "__main__":
     print('[Step 4] local TE solution generated.')
     real_LUs = toy3.dumpRealLinkUtil()
     ideal_LUs = toy3.dumpIdealLinkUtil()
+    delta_LUs = {}
     for k, v in real_LUs.items():
-        print(f'{k}: {ideal_LUs[k]} => {v}')
+        delta_LUs[k] = v - ideal_LUs[k]
+
+    print(f'[Step 5] dumping link util to {sys.argv[1]}')
+    with open(sys.argv[1], 'w') as LU:
+        writer = csv.writer(LU)
+        writer.writerow(["link name", "ideal LU", "real LU", "delta"])
+        for k, v in dict(sorted(delta_LUs.items(), key=lambda x: x[1],
+                                reverse=True)).items():
+            writer.writerow([k, f'{ideal_LUs[k]}', f'{real_LUs[k]}', f'{v}'])
