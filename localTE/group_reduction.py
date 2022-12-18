@@ -46,9 +46,9 @@ def frac2int_lossless(frac_list):
 def frac2int_round(frac_list):
     '''
     Converts list of fractions to list of integers by simply rounding to the
-    nearest integer.
+    nearest integer. Exception is when the weight rounds to 0, it's forced to 1.
     '''
-    return list(map(round, frac_list))
+    return [1 if not round(frac) else round(frac) for frac in frac_list]
 
 def l1_norm_diff(GL1, GL2):
     '''
@@ -128,7 +128,7 @@ class GroupReduction:
         '''
         # Strips all the zeroes in each group, they can cause division errors
         # when computing port oversub.
-        self._orig_groups = copy.deepcopy([[w for w in g if w != 0] \
+        self._orig_groups = copy.deepcopy([[w for w in g if w > 0] \
                                            for g in groups])
         self._int_groups = list(map(frac2int_round,
                                     copy.deepcopy(self._orig_groups)))
