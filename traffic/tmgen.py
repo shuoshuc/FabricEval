@@ -8,7 +8,7 @@ from scipy.stats import truncexpon, uniform
 
 NETNAME = 'toy3'
 # True means the block total ingress should equal its total egress.
-EQUAL_INGRESS_EGRESS = False
+EQUAL_INGRESS_EGRESS = True
 
 def tmgen(tor_level, cluster_vector, num_nodes, model, dist='exp'):
     '''
