@@ -15,6 +15,7 @@ TOY3_TE_SOL_PATH = 'tests/data/toy3_te_sol.textproto'
 if __name__ == "__main__":
     net_proto = generateToy3()
     toy3 = Topology('', net_proto)
+    print('[Step 1] topology generated.')
     #print(text_format.MessageToString(net_proto))
     traffic_proto = tmgen(tor_level=False,
                           cluster_vector=np.array([1]*22 + [2.5]*22 + [5]*21),
@@ -22,11 +23,14 @@ if __name__ == "__main__":
                           model='flat',
                           dist='')
     toy3_traffic = Traffic(toy3, '', traffic_proto)
+    print('[Step 2] traffic demand generated.')
     global_te = GlobalTE(toy3, toy3_traffic)
     sol = global_te.solve()
+    print('[Step 3] global TE solution generated.')
     #print(text_format.MessageToString(sol))
     wcmp_alloc = WCMPAllocation(toy3, '', sol)
     wcmp_alloc.run()
+    print('[Step 4] local TE solution generated.')
     real_LUs = toy3.dumpRealLinkUtil()
     ideal_LUs = toy3.dumpIdealLinkUtil()
     for k, v in real_LUs.items():
