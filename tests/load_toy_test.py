@@ -274,7 +274,7 @@ class TestLoadToyNet(unittest.TestCase):
             dst_block_name = f'toy3-c{i}-ab1'
             tot_traffic += toy3_traffic.getDemand(TOY3_AGGR_BLOCK1,
                                                   dst_block_name)
-        self.assertTrue(tot_traffic < 40000*22*4 + 100*22*4 + 200*20*4)
+        self.assertTrue(tot_traffic < 40000*22*4 + 100000*22*4 + 200000*20*4)
 
     def test_toy3_traffic_construction3(self):
         toy3 = Topology('', input_proto=generateToy3())
