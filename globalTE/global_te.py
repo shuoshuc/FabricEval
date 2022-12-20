@@ -56,13 +56,11 @@ class GlobalTE:
             # Initialize a new model
             m = gp.Model("global_mcf")
             m.setParam("LogToConsole", 1 if VERBOSE >= 2 else 0)
-            m.setParam("FeasibilityTol", 1e-7)
-            m.setParam("IntFeasTol", 1e-8)
-            m.setParam("MIPGap", 1e-4)
+            m.setParam("FeasibilityTol", 1e-9)
             #m.setParam("NodefileStart", 0.5)
             m.setParam("NodefileDir", "/tmp")
             m.setParam("Threads", 0)
-            m.setParam("TimeLimit", 120)
+            #m.setParam("TimeLimit", 120)
             #m.setParam("LogFile", "gurobi.log")
 
             # Step 1: create decision variables.
