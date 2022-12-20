@@ -69,11 +69,14 @@ def tmgen(tor_level, cluster_vector, num_nodes, model, dist='exp'):
 
     return genProto(tor_level, num_clusters, num_nodes, tm)
 
-def genTotalDemand(tor_level, cluster_vector, num_nodes, dist):
+def genTotalDemand(tor_level, cluster_vector, num_nodes, dist, p_spike=0.0):
     '''
     Generates total ingress/egress demand for all end points.
     Returns a 1-D NumPy array.
+
+    p_spike: probability to generate a spike (spike = 80% max capacity).
     '''
+    rng = default_rng()
     # Step 1: Generates AggrBlock-level total demand.
     block_demand = np.array([])
     for i, f in enumerate(cluster_vector):
@@ -82,7 +85,8 @@ def genTotalDemand(tor_level, cluster_vector, num_nodes, dist):
             if i == j:
                 continue
             upper_bound += 40000 * 4 * min(f, g)
-        upper_bound *= 0.6
+        # With `p_spike` probability, generates a spike.
+        upper_bound *= 0.8 if rng.uniform(low=0, high=1) < p_spike else 0.5
         scale = upper_bound / 2
         if dist == 'exp':
             X = truncexpon(b=upper_bound/scale, loc=0, scale=scale)
