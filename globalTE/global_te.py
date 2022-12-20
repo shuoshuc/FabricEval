@@ -11,6 +11,13 @@ from traffic.traffic import Traffic
 # Gubrobi log.
 VERBOSE = 0
 
+def PRINTV(verbose, logstr):
+    '''
+    Print helper with verbosity control.
+    '''
+    if VERBOSE >= verbose:
+        print(logstr)
+
 def prettyPrint(verbose, te_sol):
     '''
     Pretty prints the TE solution.
@@ -128,6 +135,7 @@ class GlobalTE:
                     i, path = int(splits[1]), splits[2]
                     te_sol_by_commodity.setdefault(self.commodity_idx_std[i],
                                                    {})[path] = f.X
+            PRINTV(1, f'Solver obj MLU: {m.ObjVal}')
             prettyPrint(1, te_sol_by_commodity)
 
             for (s, t, _), path_map in te_sol_by_commodity.items():
