@@ -61,11 +61,8 @@ def tmgen(tor_level, cluster_vector, num_nodes, model, dist='exp'):
             ingress *= egress.sum() / ingress.sum()
         # `r` is row vector for src, `c` is column vector for dst.
         for r, c in np.ndindex(tm.shape):
-            # Self-loop demand is not allowed.
-            if r == c:
-                continue
             # Gravity model.
-            tm[r, c] = egress[r] * ingress[c] / (ingress.sum() - ingress[r])
+            tm[r, c] = egress[r] * ingress[c] / ingress.sum()
 
     return genProto(tor_level, num_clusters, num_nodes, tm)
 
