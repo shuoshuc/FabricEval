@@ -1,40 +1,20 @@
 import proto.topology_pb2 as topo
 from google.protobuf import text_format
 
-# Network name
-NETNAME = 'toy3'
-# Number of gen1/gen2/gen3 clusters.
-NGEN1, NGEN2, NGEN3 = 22, 22, 21
-# Number of S1/S2/S3 nodes in each cluster.
-NS1, NS2, NS3 = 32, 4, 4
-# ECMP table limits for each generation.
-ECMP_LIMITS = {
-    1: 4096,
-    2: 16384,
-    3: 32768
-}
-# Number of ports on S1/S2/S3 nodes.
-NPORTS1, NPORTS2, NPORTS3 = 32, 128, 128
-# Port speeds (in Mbps) for each generation.
-PORT_SPEEDS = {
-    1: 40000,
-    2: 100000,
-    3: 200000
-}
-
-def getClusterGenByIndex(idx):
+def getClusterGenByIndex(idx, genlist):
     '''
     Returns the generation of a cluster based on the cluster index.
+
+    idx: cluster index.
+    genlist: a list describing how many clusters exist for each generation,
+             e.g., [22, 22, 21]
     '''
-    if idx < 1 or idx > (NGEN1 + NGEN2 + NGEN3):
+    if idx < 1 or idx > sum(genlist):
         print(f'[ERROR] illegal cluster index {idx}')
         return -1
-    if idx <= NGEN1:
-        return 1
-    if idx <= (NGEN1 + NGEN2):
-        return 2
-    else:
-        return 3
+    for cursor in range(len(genlist)):
+        if idx <= sum(genlist[:cursor + 1]):
+            return cursor + 1
 
 def generateToy3():
     '''
@@ -57,11 +37,32 @@ def generateToy3():
 
     Returns a populated protobuf-format topology.
     '''
+    # Network name
+    NETNAME = 'toy3'
+    # Number of gen1/gen2/gen3 clusters.
+    NGEN1, NGEN2, NGEN3 = 22, 22, 21
+    # Number of S1/S2/S3 nodes in each cluster.
+    NS1, NS2, NS3 = 32, 4, 4
+    # ECMP table limits for each generation.
+    ECMP_LIMITS = {
+        1: 4096,
+        2: 16384,
+        3: 32768
+    }
+    # Number of ports on S1/S2/S3 nodes.
+    NPORTS1, NPORTS2, NPORTS3 = 32, 128, 128
+    # Port speeds (in Mbps) for each generation.
+    PORT_SPEEDS = {
+        1: 40000,
+        2: 100000,
+        3: 200000
+    }
+
     net = topo.Network()
     net.name = NETNAME
     # Add cluster under network.
     for c_idx in range(1, NGEN1 + NGEN2 + NGEN3 + 1):
-        cluster_gen = getClusterGenByIndex(c_idx)
+        cluster_gen = getClusterGenByIndex(c_idx, [NGEN1, NGEN2, NGEN3])
         cluster = net.clusters.add()
         cluster.name = f'{NETNAME}-c{c_idx}'
         # Add AggrBlock under cluster. Each cluster only has 1 AggrBlock.
@@ -130,15 +131,15 @@ def generateToy3():
             path.src_aggr_block = f'{NETNAME}-c{i}-ab1'
             path.dst_aggr_block = f'{NETNAME}-c{j}-ab1'
             path.name = f'{path.src_aggr_block}:{path.dst_aggr_block}'
-            i_gen = getClusterGenByIndex(i)
-            j_gen = getClusterGenByIndex(j)
+            i_gen = getClusterGenByIndex(i, [NGEN1, NGEN2, NGEN3])
+            j_gen = getClusterGenByIndex(j, [NGEN1, NGEN2, NGEN3])
             # Path capacity = 4 links * link speed. Link speed is
             # auto-negotiated to be the lower speed between src and dst.
             path.capacity_mbps = 4 * min(PORT_SPEEDS[i_gen], PORT_SPEEDS[j_gen])
 
     # Add links under network.
     for c_idx in range(1, NGEN1 + NGEN2 + NGEN3 + 1):
-        cluster_gen = getClusterGenByIndex(c_idx)
+        cluster_gen = getClusterGenByIndex(c_idx, [NGEN1, NGEN2, NGEN3])
         # Fetch the only AggrBlock in each cluster.
         aggr_block = net.clusters[c_idx - 1].aggr_blocks[0]
         for node in aggr_block.nodes:
@@ -225,7 +226,10 @@ def generateToy3():
                     peer_c_idx = int(port_idx // 2 + 2)
                     peer_aggr_block = f'{NETNAME}-c{peer_c_idx}-ab1'
                     speed = min(PORT_SPEEDS[cluster_gen],
-                                PORT_SPEEDS[getClusterGenByIndex(peer_c_idx)])
+                                PORT_SPEEDS[getClusterGenByIndex(peer_c_idx,
+                                                                 [NGEN1,
+                                                                  NGEN2,
+                                                                  NGEN3])])
                     # Add current S3 to peer S3 link.
                     link_away = net.links.add()
                     src_port_id = f'{node.name}-p{port_idx}'
