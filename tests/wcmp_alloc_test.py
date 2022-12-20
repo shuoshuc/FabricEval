@@ -107,7 +107,6 @@ class TestGroupReduction(unittest.TestCase):
 
     def test_single_switch_multi_group_2(self):
         group_reduction = GroupReduction([[1.1, 2.1], [3.1, 4.1]], 16*1024)
-        self.assertEqual([[11, 21], [31, 41]], group_reduction.solve_ssmg())
         self.assertEqual([[1, 2], [3, 4]], group_reduction.table_fitting_ssmg())
 
     def test_single_switch_multi_group_3(self):

@@ -1,6 +1,7 @@
-import numpy as np
-import sys
 import csv
+import sys
+
+import numpy as np
 import proto.topology_pb2 as topo
 import proto.traffic_pb2 as traffic_pb2
 from google.protobuf import text_format
@@ -20,7 +21,7 @@ if __name__ == "__main__":
     print('[Step 1] topology generated.')
     #print(text_format.MessageToString(net_proto))
     traffic_proto = tmgen(tor_level=True,
-                          cluster_vector=np.array([1]*22 + [2.5]*22 + [5]*21),
+                          cluster_vector=np.array([1]*22+[1.984]*22+[2.765]*21),
                           num_nodes=32,
                           model='gravity',
                           dist='exp')

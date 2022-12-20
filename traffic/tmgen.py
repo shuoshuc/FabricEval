@@ -51,6 +51,9 @@ def tmgen(tor_level, cluster_vector, num_nodes, model, dist='exp'):
         egress, ingress = np.array([]), np.array([])
         factors, counts = np.unique(cluster_vector, return_counts=True)
         for f, count in zip(factors, counts):
+            # TODO: ToR-level demand does not directly face speed auto-notiation
+            # limits, so `f` could be too conservative. Need to relax it while
+            # making sure the demand does not exceed total capacity.
             upper_bound = (40000 * 8 if tor_level else 40000 * 256) * 0.7 * f
             scale = upper_bound / 2
             if dist == 'exp':

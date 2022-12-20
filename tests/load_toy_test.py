@@ -233,7 +233,7 @@ class TestLoadToyNet(unittest.TestCase):
     def test_toy3_traffic_construction1(self):
         toy3 = Topology('', input_proto=generateToy3())
         traffic_proto = tmgen(tor_level=False,
-                              cluster_vector=np.array([1]*22+[2.5]*22+[5]*21),
+                              cluster_vector=np.array([1]*22+[1.984]*22+[2.765]*21),
                               num_nodes=32,
                               model='flat',
                               dist='')
@@ -250,7 +250,7 @@ class TestLoadToyNet(unittest.TestCase):
     def test_toy3_traffic_construction2(self):
         toy3 = Topology('', input_proto=generateToy3())
         traffic_proto = tmgen(tor_level=False,
-                              cluster_vector=np.array([1]*22+[2.5]*22+[5]*21),
+                              cluster_vector=np.array([1]*22+[1.984]*22+[2.765]*21),
                               num_nodes=32,
                               model='gravity',
                               dist='exp')
@@ -258,7 +258,7 @@ class TestLoadToyNet(unittest.TestCase):
         self.assertEqual(traffic_pb2.TrafficDemand.DemandType.LEVEL_AGGR_BLOCK,
                          toy3_traffic.getDemandType())
         self.assertEqual(64 * 65, len(toy3_traffic.getAllDemands()))
-        # Verify the sum of all demands from AggrBlock1 does not exceed its
+        # Verify the sum of all demands from AggrBlock2 does not exceed its
         # total capacity.
         tot_traffic = 0
         for i in range(2, 66):
@@ -266,11 +266,20 @@ class TestLoadToyNet(unittest.TestCase):
             tot_traffic += toy3_traffic.getDemand(TOY3_AGGR_BLOCK2,
                                                   dst_block_name)
         self.assertTrue(tot_traffic < 40000 * 256)
+        # Verify the sum of all demands from AggrBlock1 does not exceed its
+        # total capacity. The effective total capacity is not 200G * 256, but
+        # a function of the peer block speed due to speed auto-negotiation.
+        tot_traffic = 0
+        for i in range(1, 65):
+            dst_block_name = f'toy3-c{i}-ab1'
+            tot_traffic += toy3_traffic.getDemand(TOY3_AGGR_BLOCK1,
+                                                  dst_block_name)
+        self.assertTrue(tot_traffic < 40000*22*4 + 100*22*4 + 200*20*4)
 
     def test_toy3_traffic_construction3(self):
         toy3 = Topology('', input_proto=generateToy3())
         traffic_proto = tmgen(tor_level=True,
-                              cluster_vector=np.array([1]*22+[2.5]*22+[5]*21),
+                              cluster_vector=np.array([1]*22+[1.984]*22+[2.765]*21),
                               num_nodes=32,
                               model='flat',
                               dist='')
