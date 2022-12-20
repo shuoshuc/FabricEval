@@ -233,7 +233,7 @@ class TestLoadToyNet(unittest.TestCase):
     def test_toy3_traffic_construction1(self):
         toy3 = Topology('', input_proto=generateToy3())
         traffic_proto = tmgen(tor_level=False,
-                              cluster_vector=np.array([1]*22+[1.984]*22+[2.765]*21),
+                              cluster_vector=np.array([1]*22+[2.5]*22+[5]*21),
                               num_nodes=32,
                               model='flat',
                               dist='')
@@ -250,7 +250,7 @@ class TestLoadToyNet(unittest.TestCase):
     def test_toy3_traffic_construction2(self):
         toy3 = Topology('', input_proto=generateToy3())
         traffic_proto = tmgen(tor_level=False,
-                              cluster_vector=np.array([1]*22+[1.984]*22+[2.765]*21),
+                              cluster_vector=np.array([1]*22+[2.5]*22+[5]*21),
                               num_nodes=32,
                               model='gravity',
                               dist='exp')
@@ -279,7 +279,7 @@ class TestLoadToyNet(unittest.TestCase):
     def test_toy3_traffic_construction3(self):
         toy3 = Topology('', input_proto=generateToy3())
         traffic_proto = tmgen(tor_level=True,
-                              cluster_vector=np.array([1]*22+[1.984]*22+[2.765]*21),
+                              cluster_vector=np.array([1]*22+[2.5]*22+[5]*21),
                               num_nodes=32,
                               model='flat',
                               dist='')

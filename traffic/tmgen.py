@@ -8,7 +8,7 @@ from scipy.stats import truncexpon, uniform
 
 NETNAME = 'toy3'
 # True means the block total ingress should equal its total egress.
-EQUAL_INGRESS_EGRESS = True
+EQUAL_INGRESS_EGRESS = False
 
 def tmgen(tor_level, cluster_vector, num_nodes, model, dist='exp'):
     '''
@@ -49,34 +49,13 @@ def tmgen(tor_level, cluster_vector, num_nodes, model, dist='exp'):
         # from a uniform random/exponential/Pareto distribution, as specified by
         # `dist`.
         egress, ingress = np.array([]), np.array([])
-        factors, counts = np.unique(cluster_vector, return_counts=True)
-        for f, count in zip(factors, counts):
-            # TODO: ToR-level demand does not directly face speed auto-notiation
-            # limits, so `f` could be too conservative. Need to relax it while
-            # making sure the demand does not exceed total capacity.
-            upper_bound = (40000 * 8 if tor_level else 40000 * 256) * 0.7 * f
-            scale = upper_bound / 2
-            if dist == 'exp':
-                X = truncexpon(b=upper_bound/scale, loc=0, scale=scale)
-            elif dist == 'uniform':
-                X = uniform(loc=0, scale=upper_bound)
-            # Sample egress total volume for all src of the same speed factor.
-            sample_size = count * num_nodes if tor_level else count
-            egress = np.concatenate((egress, X.rvs(sample_size)))
+        egress = genTotalDemand(tor_level, cluster_vector, num_nodes, dist)
         # Set block total ingress to be the same as egress if flag is true.
         # Otherwise, sample another set of values from the same distribution.
         if EQUAL_INGRESS_EGRESS:
             ingress = egress
         else:
-            for f, count in zip(factors, counts):
-                up_bound = (40000 * 8 if tor_level else 40000 * 256) * 0.7 * f
-                scale = up_bound / 2
-                if dist == 'exp':
-                    X = truncexpon(b=upper_bound/scale, loc=0, scale=scale)
-                elif dist == 'uniform':
-                    X = uniform(loc=0, scale=upper_bound)
-                sample_size = count * num_nodes if tor_level else count
-                ingress = np.concatenate((ingress, X.rvs(sample_size)))
+            ingress = genTotalDemand(tor_level, cluster_vector, num_nodes, dist)
             # Rescale the ingress vector so that its sum equals egress. (Total
             # egress and ingress must match).
             ingress *= egress.sum() / ingress.sum()
@@ -89,6 +68,46 @@ def tmgen(tor_level, cluster_vector, num_nodes, model, dist='exp'):
             tm[r, c] = egress[r] * ingress[c] / (ingress.sum() - ingress[r])
 
     return genProto(tor_level, num_clusters, num_nodes, tm)
+
+def genTotalDemand(tor_level, cluster_vector, num_nodes, dist):
+    '''
+    Generates total ingress/egress demand for all end points.
+    Returns a 1-D NumPy array.
+    '''
+    # Step 1: Generates AggrBlock-level total demand.
+    block_demand = np.array([])
+    for i, f in enumerate(cluster_vector):
+        upper_bound = 0
+        for j, g in enumerate(cluster_vector):
+            if i == j:
+                continue
+            upper_bound += 40000 * 4 * min(f, g)
+        upper_bound *= 0.6
+        scale = upper_bound / 2
+        if dist == 'exp':
+            X = truncexpon(b=upper_bound/scale, loc=0, scale=scale)
+        elif dist == 'uniform':
+            X = uniform(loc=0, scale=upper_bound)
+        block_demand = np.concatenate((block_demand, X.rvs(1)))
+
+    # Only needs block demand, job done.
+    if not tor_level:
+        return block_demand
+
+    # Step 2: Generates ToR-level total demand.
+    tor_demand = np.array([])
+    for i in range(len(cluster_vector)):
+        upper_bound = block_demand[i]
+        scale = upper_bound / 2
+        if dist == 'exp':
+            X = truncexpon(b=upper_bound/scale, loc=0, scale=scale)
+        elif dist == 'uniform':
+            X = uniform(loc=0, scale=upper_bound)
+        tors_in_block = X.rvs(num_nodes)
+        # Rescales the tor vector so that it sums to upper_bound.
+        tor_demand = np.concatenate((tor_demand,
+            tors_in_block / tors_in_block.sum() * upper_bound))
+    return tor_demand
 
 def genProto(tor_level, num_clusters, num_nodes, TM):
     '''
