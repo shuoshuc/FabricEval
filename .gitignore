@@ -149,3 +149,5 @@ cython_debug/
 .bazelversion
 # User-specific .bazelrc
 user.bazelrc
+# csv output files.
+*.csv
