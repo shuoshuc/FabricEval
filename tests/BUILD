@@ -11,6 +11,7 @@ py_test(
     ],
     data = glob(['data/*.textproto']),
     python_version = 'PY3',
+    size = 'medium'
 )
 
 py_test(
@@ -24,6 +25,7 @@ py_test(
     ],
     data = glob(['data/*.textproto']),
     python_version = 'PY3',
+    size = 'medium'
 )
 
 py_test(
@@ -36,4 +38,5 @@ py_test(
     ],
     data = glob(['data/*.textproto']),
     python_version = 'PY3',
+    size = 'medium'
 )

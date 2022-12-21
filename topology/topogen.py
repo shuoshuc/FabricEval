@@ -254,8 +254,7 @@ def generateToy4():
     '''
     Generates fabric toy4. Toy4 is a 5-cluster spine-free fabric. It has the
     following spec:
-        # 40G (Gen 1) clusters: 2
-        # 100G (Gen 2) clusters: 3
+        # 40G (Gen 1) clusters: 5
         cluster radix: 16 links
         # AggrBlock per cluster: 1
         # S3 nodes per AggrBlock: 4
@@ -265,34 +264,31 @@ def generateToy4():
         # ports on S1 nodes: 16
         S1 over-subscription: 1:3
         ECMP table size (40G): 4K
-        ECMP table size (100G): 16K
 
     Returns a populated protobuf-format topology.
     '''
     # Network name
     NETNAME = 'toy4'
-    # Number of gen1/gen2 clusters.
-    NGEN1, NGEN2 = 2, 3
+    # Number of gen2 clusters.
+    NGEN1 = 5
     # Number of S1/S2/S3 nodes in each cluster.
     NS1, NS2, NS3 = 4, 4, 4
     # ECMP table limits for each generation.
     ECMP_LIMITS = {
         1: 4096,
-        2: 16384,
     }
     # Number of ports on S1/S2/S3 nodes.
     NPORTS1, NPORTS2, NPORTS3 = 16, 8, 8
     # Port speeds (in Mbps) for each generation.
     PORT_SPEEDS = {
         1: 40000,
-        2: 100000,
     }
 
     net = topo.Network()
     net.name = NETNAME
     # Add cluster under network.
-    for c_idx in range(1, NGEN1 + NGEN2 + 1):
-        cluster_gen = getClusterGenByIndex(c_idx, [NGEN1, NGEN2])
+    for c_idx in range(1, NGEN1 + 1):
+        cluster_gen = getClusterGenByIndex(c_idx, [NGEN1])
         cluster = net.clusters.add()
         cluster.name = f'{NETNAME}-c{c_idx}'
         # Add AggrBlock under cluster. Each cluster only has 1 AggrBlock.
@@ -352,8 +348,8 @@ def generateToy4():
             # TODO: assign host and mgmt prefixes.
 
     # Add paths under network.
-    for i in range(1, NGEN1 + NGEN2 + 1):
-        for j in range(1, NGEN1 + NGEN2 + 1):
+    for i in range(1, NGEN1 + 1):
+        for j in range(1, NGEN1 + 1):
             # A cluster cannot have a path to itself.
             if i == j:
                 continue
@@ -361,15 +357,15 @@ def generateToy4():
             path.src_aggr_block = f'{NETNAME}-c{i}-ab1'
             path.dst_aggr_block = f'{NETNAME}-c{j}-ab1'
             path.name = f'{path.src_aggr_block}:{path.dst_aggr_block}'
-            i_gen = getClusterGenByIndex(i, [NGEN1, NGEN2])
-            j_gen = getClusterGenByIndex(j, [NGEN1, NGEN2])
+            i_gen = getClusterGenByIndex(i, [NGEN1])
+            j_gen = getClusterGenByIndex(j, [NGEN1])
             # Path capacity = 4 links * link speed. Link speed is
             # auto-negotiated to be the lower speed between src and dst.
             path.capacity_mbps = 4 * min(PORT_SPEEDS[i_gen], PORT_SPEEDS[j_gen])
 
     # Add links under network.
-    for c_idx in range(1, NGEN1 + NGEN2 + 1):
-        cluster_gen = getClusterGenByIndex(c_idx, [NGEN1, NGEN2])
+    for c_idx in range(1, NGEN1 + 1):
+        cluster_gen = getClusterGenByIndex(c_idx, [NGEN1])
         # Fetch the only AggrBlock in each cluster.
         aggr_block = net.clusters[c_idx - 1].aggr_blocks[0]
         for node in aggr_block.nodes:
@@ -428,8 +424,7 @@ def generateToy4():
                     peer_aggr_block = f'{NETNAME}-c{peer_c_idx}-ab1'
                     speed = min(PORT_SPEEDS[cluster_gen],
                                 PORT_SPEEDS[getClusterGenByIndex(peer_c_idx,
-                                                                 [NGEN1,
-                                                                  NGEN2])])
+                                                                 [NGEN1])])
                     # Add current S3 to peer S3 link.
                     link_away = net.links.add()
                     src_port_id = f'{node.name}-p{port_idx}'

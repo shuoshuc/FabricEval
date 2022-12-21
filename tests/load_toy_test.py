@@ -4,7 +4,7 @@ import unittest
 import numpy as np
 import proto.traffic_pb2 as traffic_pb2
 
-from topology.topogen import generateToy3
+from topology.topogen import generateToy3, generateToy4
 from topology.topology import Topology, filterPathSetWithSeg, loadTopo
 from traffic.tmgen import tmgen
 from traffic.traffic import Traffic, loadTraffic
@@ -50,6 +50,17 @@ TOY3_AGGR_BLOCK1 = 'toy3-c65-ab1'
 TOY3_AGGR_BLOCK2 = 'toy3-c1-ab1'
 TOY3_TOR1 = 'toy3-c65-ab1-s1i1'
 TOY3_TOR2 = 'toy3-c1-ab1-s1i1'
+# Toy4 entities.
+TOY4_PATH1 = 'toy4-c1-ab1:toy4-c2-ab1'
+TOY4_LINK1 = 'toy4-c1-ab1-s3i1-p1:toy4-c2-ab1-s3i1-p1'
+TOY4_PORT1 = 'toy4-c1-ab1-s3i1-p1'
+TOY4_PEER_PORT1 = 'toy4-c2-ab1-s3i1-p1'
+TOY4_PORT2 = 'toy4-c1-ab1-s3i1-p2'
+TOY4_PEER_PORT2 = 'toy4-c1-ab1-s2i1-p1'
+TOY4_PORT3 = 'toy4-c1-ab1-s2i1-p2'
+TOY4_PEER_PORT3 = 'toy4-c1-ab1-s1i1-p1'
+TOY4_AGGR_BLOCK1 = 'toy4-c1-ab1'
+TOY4_TOR1 = 'toy4-c1-ab1-s1i1'
 
 class TestLoadToyNet(unittest.TestCase):
     def test_load_invalid_topo(self):
@@ -164,6 +175,7 @@ class TestLoadToyNet(unittest.TestCase):
                           ('toy2-c3-ab1', 'toy2-c1-ab1'): 100000},
                          toy2_traffic.getAllDemands())
 
+class TestLoadToy3Net(unittest.TestCase):
     def test_toy3_topology_construction(self):
         toy3 = Topology('', input_proto=generateToy3())
         self.assertEqual(65, toy3.numClusters())
@@ -294,6 +306,57 @@ class TestLoadToyNet(unittest.TestCase):
                                                            TOY3_AGGR_BLOCK2))
         self.assertEqual(153*32*32, toy3_traffic.getDemand(TOY3_AGGR_BLOCK2,
                                                            TOY3_AGGR_BLOCK1))
+
+class TestLoadToy4Net(unittest.TestCase):
+    def test_toy4_topology_construction(self):
+        toy4 = Topology('', input_proto=generateToy4())
+        self.assertEqual(5, toy4.numClusters())
+        # 8 + 32 nodes per cluster
+        self.assertEqual(5 * 12, toy4.numNodes())
+        self.assertEqual(5*4, len(toy4.getAllPaths()))
+        # All paths in Toy4 have 160G capacity.
+        for path in toy4.getAllPaths().values():
+            self.assertEqual(160000, path.capacity)
+        links = [l.name for l in toy4.findLinksOfPath(TOY4_PATH1)]
+        self.assertTrue(TOY4_LINK1 in links)
+        # Verify S3-S3 port and peer.
+        self.assertEqual(TOY4_PEER_PORT1,
+                         toy4.findPeerPortOfPort(TOY4_PORT1).name)
+        # Verify that all DCN ports have odd port indices.
+        p1 = toy4.getPortByName(TOY4_PORT1)
+        self.assertEqual(TOY4_PORT1, p1.name)
+        self.assertTrue(p1.dcn_facing)
+        self.assertEqual(1, p1.index % 2)
+        pp1 = toy4.getPortByName(TOY4_PEER_PORT1)
+        self.assertTrue(pp1.dcn_facing)
+        self.assertEqual(1, pp1.index % 2)
+        # Verify S2-S3 port and peer.
+        self.assertEqual(TOY4_PEER_PORT2,
+                         toy4.findPeerPortOfPort(TOY4_PORT2).name)
+        # Verify that S2-facing S3 ports have even indices.
+        p2 = toy4.getPortByName(TOY4_PORT2)
+        self.assertFalse(p2.dcn_facing)
+        self.assertEqual(0, p2.index % 2)
+        # Verify that S3-facing S2 ports have odd indices.
+        pp2 = toy4.getPortByName(TOY4_PEER_PORT2)
+        self.assertFalse(pp2.dcn_facing)
+        self.assertEqual(1, pp2.index % 2)
+        # Verify S1-S2 port and peer.
+        self.assertEqual(TOY4_PEER_PORT3,
+                         toy4.findPeerPortOfPort(TOY4_PORT3).name)
+        # Verify that S1-facing S2 ports have even indices.
+        p3 = toy4.getPortByName(TOY4_PORT3)
+        self.assertFalse(p3.dcn_facing)
+        self.assertEqual(0, p3.index % 2)
+        # Verify that S2-facing S1 ports have odd indices.
+        pp3 = toy4.getPortByName(TOY4_PEER_PORT3)
+        self.assertFalse(pp3.dcn_facing)
+        self.assertEqual(1, pp3.index % 2)
+        # Verify the 'virutal' parent of ToRs.
+        self.assertEqual(TOY4_AGGR_BLOCK1,
+                         toy4.findAggrBlockOfToR(TOY4_TOR1).name)
+        # Verify the stage and index of ToR1.
+        self.assertEqual(1, toy4.getNodeByName(TOY4_TOR1).stage)
 
 if __name__ == "__main__":
     unittest.main()
