@@ -20,10 +20,10 @@ if __name__ == "__main__":
     toy3 = Topology('', net_proto)
     print('[Step 1] topology generated.')
     #print(text_format.MessageToString(net_proto))
-    traffic_proto = tmgen(tor_level=True,
+    traffic_proto = tmgen(tor_level=False,
                           cluster_vector=np.array([1]*22 + [2.5]*22 + [5]*21),
                           num_nodes=32,
-                          model='gravity',
+                          model='hot',
                           dist='exp')
     toy3_traffic = Traffic(toy3, '', traffic_proto)
     print('[Step 2] traffic demand generated.')

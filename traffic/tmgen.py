@@ -42,6 +42,8 @@ def tmgen(tor_level, cluster_vector, num_nodes, model, dist='exp'):
             else 40000 * 256 / (num_clusters - 1)
         for r, c in np.ndindex(tm.shape):
             tm[r, c] = rng.uniform(low=0, high=upper_bound)
+    elif model == 'hot':
+        tm[63, 64] = (40000 * 22 * 4 + 100000 * 22 * 4 + 200000 * 20 * 4) * 0.5
     elif model == 'gravity':
         # Generates a traffic demand matrix following the gravity model. Each
         # src-dst pair has a demand proportional to the product of their egress

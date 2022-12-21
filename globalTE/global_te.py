@@ -25,7 +25,8 @@ def prettyPrint(verbose, te_sol):
     if VERBOSE >= verbose:
         print('\n===== TE solution starts =====')
         for c, sol in te_sol.items():
-            print(f'Demand: [{c[0]}] => [{c[1]}], {c[2]} Mbps')
+            # Raw solution has flows in Tbps, converts back to Mbps.
+            print(f'Demand: [{c[0]}] => [{c[1]}], {c[2] * 1000000} Mbps')
             for path_name, flow in sol.items():
                 print(f'    {flow} Mbps on {path_name}')
         print('===== TE solution ends =====\n')
@@ -44,7 +45,8 @@ class GlobalTE:
         # Map from the integer index of a commodity to its (src, dst, demand).
         self.commodity_idx_std = {}
         for idx, ((s, t), d) in enumerate(traffic_obj.getAllDemands().items()):
-            self.commodity_idx_std[idx] = (s, t, d)
+            # Stores demand in Tbps instead of Mbps.
+            self.commodity_idx_std[idx] = (s, t, d / 1000000)
             path_set = topo_obj.findPathSetOfAggrBlockPair(s, t)
             self.commodity_path_sets[idx] = path_set
 
@@ -76,7 +78,8 @@ class GlobalTE:
                 s, t = link.src_aggr_block.name, link.dst_aggr_block.name
                 u[(s, t)] = m.addVar(vtype=GRB.CONTINUOUS, lb=0, ub=1,
                                      name="u_" + link_name)
-                c[(s, t)] = link.capacity
+                # Converts capacity from Mbps to Tbps.
+                c[(s, t)] = link.capacity / 1000000
             # fip is the amount of flow in commodity i assigned on path p.
             # f is a map of a map: {commodity index: {(s, m, t): fip}} 
             f = {}
@@ -130,9 +133,11 @@ class GlobalTE:
                     if f.X == 0.0:
                         continue
                     splits = f.VarName.split('_')
-                    i, path = int(splits[1]), splits[2]
+                    # Extracts commodity and path from variable name.
+                    # Also converts flow from Tbps back to Mbps.
+                    i, path, flow = int(splits[1]), splits[2], f.X * 1000000
                     te_sol_by_commodity.setdefault(self.commodity_idx_std[i],
-                                                   {})[path] = f.X
+                                                   {})[path] = flow
             PRINTV(1, f'Solver obj MLU: {m.ObjVal}')
             prettyPrint(1, te_sol_by_commodity)
 
