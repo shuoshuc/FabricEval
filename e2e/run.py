@@ -20,7 +20,8 @@ if __name__ == "__main__":
                           cluster_vector=np.array([1]*22 + [2.5]*22 + [5]*21),
                           num_nodes=32,
                           model='gravity',
-                          dist='exp')
+                          dist='exp',
+                          netname='toy3')
     toy3_traffic = Traffic(toy3, '', traffic_proto)
     print('[Step 2] traffic demand generated.')
     global_te = GlobalTE(toy3, toy3_traffic)

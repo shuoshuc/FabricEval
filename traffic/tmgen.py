@@ -6,11 +6,10 @@ import proto.traffic_pb2 as traffic
 from numpy.random import default_rng
 from scipy.stats import truncexpon, uniform
 
-NETNAME = 'toy3'
 # True means the block total ingress should equal its total egress.
 EQUAL_INGRESS_EGRESS = False
 
-def tmgen(tor_level, cluster_vector, num_nodes, model, dist='exp'):
+def tmgen(tor_level, cluster_vector, num_nodes, model, dist='exp', netname=''):
     '''
     Generates a traffic demand matrix according to `model`.
 
@@ -24,6 +23,7 @@ def tmgen(tor_level, cluster_vector, num_nodes, model, dist='exp'):
     model: the type of TM to use, can be flat/uniform/gravity.
     dist: what distribution to use for sampling ingress/egress total demand, can
           be exp/uniform/pareto.
+    netname: name of the fabric.
     '''
     rng = default_rng()
     num_clusters = cluster_vector.size
@@ -42,6 +42,11 @@ def tmgen(tor_level, cluster_vector, num_nodes, model, dist='exp'):
             else 40000 * 256 / (num_clusters - 1)
         for r, c in np.ndindex(tm.shape):
             tm[r, c] = rng.uniform(low=0, high=upper_bound)
+    elif model == 'single':
+        # Send from the first node to the last node at a low load. There must
+        # be at least 2 nodes in the TM.
+        # Note: only generates 1 commodity, this is for debugging.
+        tm[0, -1] = 40000 * 4 * 0.5
     elif model == 'gravity':
         # Generates a traffic demand matrix following the gravity model. Each
         # src-dst pair has a demand proportional to the product of their egress
@@ -64,7 +69,7 @@ def tmgen(tor_level, cluster_vector, num_nodes, model, dist='exp'):
             # Gravity model.
             tm[r, c] = egress[r] * ingress[c] / ingress.sum()
 
-    return genProto(tor_level, num_clusters, num_nodes, tm)
+    return genProto(tor_level, num_clusters, num_nodes, tm, netname)
 
 def genTotalDemand(tor_level, cluster_vector, num_nodes, dist, p_spike=0.0):
     '''
@@ -110,7 +115,7 @@ def genTotalDemand(tor_level, cluster_vector, num_nodes, dist, p_spike=0.0):
             tors_in_block / tors_in_block.sum() * upper_bound))
     return tor_demand
 
-def genProto(tor_level, num_clusters, num_nodes, TM):
+def genProto(tor_level, num_clusters, num_nodes, TM, netname):
     '''
     Returns a traffic proto using the given traffic matrix `TM`.
     '''
@@ -131,8 +136,8 @@ def genProto(tor_level, num_clusters, num_nodes, TM):
                 if floor(TM[(i - 1) * 32 + u - 1, (j - 1) * 32 + v - 1]) <= 0:
                     continue
                 demand = tm_proto.demands.add()
-                demand.src = f'{NETNAME}-c{i}-ab1-s1i{u}'
-                demand.dst = f'{NETNAME}-c{j}-ab1-s1i{v}'
+                demand.src = f'{netname}-c{i}-ab1-s1i{u}'
+                demand.dst = f'{netname}-c{j}-ab1-s1i{v}'
                 demand.volume_mbps = floor(TM[(i - 1) * 32 + u - 1,
                                               (j - 1) * 32 + v - 1])
         else:
@@ -143,8 +148,8 @@ def genProto(tor_level, num_clusters, num_nodes, TM):
             if floor(TM[i-1, j-1]) <= 0:
                 continue
             demand = tm_proto.demands.add()
-            demand.src = f'{NETNAME}-c{i}-ab1'
-            demand.dst = f'{NETNAME}-c{j}-ab1'
+            demand.src = f'{netname}-c{i}-ab1'
+            demand.dst = f'{netname}-c{j}-ab1'
             demand.volume_mbps = floor(TM[i-1, j-1])
 
     return tm_proto

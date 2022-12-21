@@ -60,6 +60,7 @@ TOY4_PEER_PORT2 = 'toy4-c1-ab1-s2i1-p1'
 TOY4_PORT3 = 'toy4-c1-ab1-s2i1-p2'
 TOY4_PEER_PORT3 = 'toy4-c1-ab1-s1i1-p1'
 TOY4_AGGR_BLOCK1 = 'toy4-c1-ab1'
+TOY4_AGGR_BLOCK2 = 'toy4-c5-ab1'
 TOY4_TOR1 = 'toy4-c1-ab1-s1i1'
 
 class TestLoadToyNet(unittest.TestCase):
@@ -248,7 +249,8 @@ class TestLoadToy3Net(unittest.TestCase):
                               cluster_vector=np.array([1]*22+[2.5]*22+[5]*21),
                               num_nodes=32,
                               model='flat',
-                              dist='')
+                              dist='',
+                              netname='toy3')
         toy3_traffic = Traffic(toy3, '', traffic_proto)
         self.assertEqual(traffic_pb2.TrafficDemand.DemandType.LEVEL_AGGR_BLOCK,
                          toy3_traffic.getDemandType())
@@ -265,7 +267,8 @@ class TestLoadToy3Net(unittest.TestCase):
                               cluster_vector=np.array([1]*22+[2.5]*22+[5]*21),
                               num_nodes=32,
                               model='gravity',
-                              dist='exp')
+                              dist='exp',
+                              netname='toy3')
         toy3_traffic = Traffic(toy3, '', traffic_proto)
         self.assertEqual(traffic_pb2.TrafficDemand.DemandType.LEVEL_AGGR_BLOCK,
                          toy3_traffic.getDemandType())
@@ -294,7 +297,8 @@ class TestLoadToy3Net(unittest.TestCase):
                               cluster_vector=np.array([1]*22+[2.5]*22+[5]*21),
                               num_nodes=32,
                               model='flat',
-                              dist='')
+                              dist='',
+                              netname='toy3')
         toy3_traffic = Traffic(toy3, '', traffic_proto)
         self.assertEqual(traffic_pb2.TrafficDemand.DemandType.LEVEL_TOR,
                          toy3_traffic.getDemandType())
@@ -357,6 +361,26 @@ class TestLoadToy4Net(unittest.TestCase):
                          toy4.findAggrBlockOfToR(TOY4_TOR1).name)
         # Verify the stage and index of ToR1.
         self.assertEqual(1, toy4.getNodeByName(TOY4_TOR1).stage)
+
+    def test_toy4_traffic_construction(self):
+        toy4 = Topology('', input_proto=generateToy4())
+        traffic_proto = tmgen(tor_level=False,
+                              cluster_vector=np.array([1]*5),
+                              num_nodes=4,
+                              model='single',
+                              dist='',
+                              netname='toy4')
+        toy4_traffic = Traffic(toy4, '', traffic_proto)
+        self.assertEqual(traffic_pb2.TrafficDemand.DemandType.LEVEL_AGGR_BLOCK,
+                         toy4_traffic.getDemandType())
+        # There should be only 1 demand.
+        self.assertEqual(1, len(toy4_traffic.getAllDemands()))
+        print(toy4_traffic.getAllDemands())
+        self.assertTrue((TOY4_AGGR_BLOCK1, TOY4_AGGR_BLOCK2) in \
+                        toy4_traffic.getAllDemands())
+        self.assertEqual(40000 * 4 * 0.5,
+                         toy4_traffic.getAllDemands()[(TOY4_AGGR_BLOCK1,
+                                                       TOY4_AGGR_BLOCK2)])
 
 if __name__ == "__main__":
     unittest.main()
