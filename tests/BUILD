@@ -33,7 +33,9 @@ py_test(
     srcs = ['global_TE_test.py'],
     deps = [
         '//topology:topology',
+        '//topology:topogen',
         '//traffic:traffic',
+        '//traffic:tmgen',
         '//globalTE:global_te',
     ],
     data = glob(['data/*.textproto']),
