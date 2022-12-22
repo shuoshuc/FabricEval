@@ -150,7 +150,16 @@ class Node:
         return self._parent_cluster
 
     def getECMPUtil(self):
+        '''
+        Returns the ECMP table util on this node.
+        '''
         return self.ecmp_used / self.ecmp_limit
+
+    def getNumGroups(self):
+        '''
+        Returns the total number of groups installed on this node.
+        '''
+        return sum([len(G_by_type) for G_by_type in self._groups.values()])
 
     def installGroups(self, groups, group_type):
         '''
@@ -659,4 +668,16 @@ class Topology:
             link_util_map[link.name] = \
                 (link.link_speed - link._real_residual) / link.link_speed
         return dict(sorted(link_util_map.items(), key=lambda x: x[1],
+                           reverse=True))
+
+    def dumpECMPUtil(self):
+        '''
+        Returns a map of all node ECMP utilizations and number of groups.
+        Returned dict is sorted from highest node table util to lowest.
+        {node name: (ECMP util, # groups)}
+        '''
+        ecmp_util_map = {}
+        for node in self._nodes.values():
+            ecmp_util_map[node.name] = (node.getECMPUtil(), node.getNumGroups())
+        return dict(sorted(ecmp_util_map.items(), key=lambda x: x[1][0],
                            reverse=True))

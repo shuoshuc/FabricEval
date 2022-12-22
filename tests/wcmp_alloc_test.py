@@ -15,6 +15,7 @@ TOY3_SOL_PATH = 'tests/data/toy3_te_sol.textproto'
 TOY3_C1 = 'toy3-c1-ab1'
 TOY3_LINK1 = 'toy3-c64-ab1-s3i1-p29:toy3-c15-ab1-s3i1-p125'
 TOY3_LINK2 = 'toy3-c42-ab1-s3i4-p105:toy3-c54-ab1-s3i4-p83'
+TOY3_NODE1 = 'toy3-c1-ab1-s3i1'
 
 class TestWCMPAlloc(unittest.TestCase):
     def test_load_invalid_te_solution(self):
@@ -69,10 +70,15 @@ class TestWCMPAlloc(unittest.TestCase):
             for node in g_map.keys():
                 # Verify node has non-zero ECMP utilization.
                 self.assertTrue(toy3.getNodeByName(node).getECMPUtil() > 0)
+                self.assertTrue(toy3.getNodeByName(node).getNumGroups() > 0)
         link_util = toy3.dumpRealLinkUtil()
         # Verify real link utilization.
         self.assertTrue(link_util[TOY3_LINK1] > 0.68)
         self.assertTrue(link_util[TOY3_LINK2] > 0.36)
+        ecmp_util = toy3.dumpECMPUtil()
+        # Verify node ECMP utilization.
+        self.assertTrue(ecmp_util[TOY3_NODE1][0] > 0.028)
+        self.assertEqual(86, ecmp_util[TOY3_NODE1][1])
 
 class TestGroupReduction(unittest.TestCase):
     def test_single_switch_single_group_1(self):

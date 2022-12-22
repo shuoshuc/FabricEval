@@ -49,3 +49,11 @@ if __name__ == "__main__":
         for k, v in dict(sorted(delta_LUs.items(), key=lambda x: x[1],
                                 reverse=True)).items():
             writer.writerow([k, f'{ideal_LUs[k]}', f'{real_LUs[k]}', f'{v}'])
+
+    print(f'[Step 6] dumping node table util to {sys.argv[1]}')
+    ecmp_util = toy3.dumpECMPUtil()
+    with open(f'{logpath}/node_ecmp.csv', 'w') as ecmp:
+        writer = csv.writer(ecmp)
+        writer.writerow(["node name", "ECMP util", "# groups"])
+        for k, (util, num_g) in ecmp_util.items():
+            writer.writerow([k, f'{util}', f'{num_g}'])
