@@ -431,13 +431,34 @@ class Topology:
     def findCapacityOfPath(self, path_name):
         '''
         Looks up the available capacity of the given path, returns an integer
-        in bps. Note that paths are uni-directional.
+        in Mbps. Note that paths are uni-directional.
         '''
         if path_name not in self._paths:
             print('[ERROR] {}: Path {} does not exist in this topology!'
                   .format('Find path capacity', path_name))
             return -1
         return self._paths[path_name].available_capacity
+
+    def findCapacityOfPathTuple(self, path_tuple):
+        '''
+        Looks up the available capacity of the given path, returns an integer
+        in Mbps. This version works with 2-segment transit paths as well as
+        direct path. len(path_tuple) == 2 means direct path.
+        '''
+        capacity = float("inf")
+        path_list = []
+        if len(path_tuple) == 2:
+            path_list = [f'{path_tuple[0]}:{path_tuple[1]}']
+        elif len(path_tuple) == 3:
+            path_list = [f'{path_tuple[0]}:{path_tuple[1]}',
+                         f'{path_tuple[1]}:{path_tuple[2]}']
+        else:
+            print(f'[ERROR] findCapacityOfPath: Path {path_tuple} is illegal!')
+            return -1
+
+        for path_name in path_list:
+            capacity = min(capacity, self.findCapacityOfPath(path_name))
+        return capacity
 
     def hasAggrBlock(self, aggr_block_name):
         '''

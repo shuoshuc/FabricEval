@@ -151,3 +151,5 @@ cython_debug/
 user.bazelrc
 # csv output files.
 *.csv
+# protobuf dumps.
+*.textproto
