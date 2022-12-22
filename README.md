@@ -26,7 +26,8 @@ Run the following command to run all unit tests.
 ```bash
 bazel test //tests:all
 ```
-Run the following command to invoke the e2e pipeline, and dump link utilization stats to a csv file:
+Run the following command to invoke the e2e pipeline, and dump generated traffic matrix,
+globalTE solution, and link utilization stats to the current path:
 ```bash
-bazel run //e2e:run -- $(pwd)/LU.csv
+bazel run //e2e:run -- $(pwd)
 ```

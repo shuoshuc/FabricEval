@@ -12,6 +12,7 @@ from traffic.tmgen import tmgen
 from traffic.traffic import Traffic
 
 if __name__ == "__main__":
+    logpath = sys.argv[1]
     net_proto = generateToy3()
     toy3 = Topology('', net_proto)
     print('[Step 1] topology generated.')
@@ -22,10 +23,14 @@ if __name__ == "__main__":
                           model='gravity',
                           dist='exp',
                           netname='toy3')
+    with open(f'{logpath}/TM.textproto', 'w') as tm:
+        tm.write(text_format.MessageToString(traffic_proto))
     toy3_traffic = Traffic(toy3, '', traffic_proto)
     print('[Step 2] traffic demand generated.')
     global_te = GlobalTE(toy3, toy3_traffic)
     sol = global_te.solve()
+    with open(f'{logpath}/te_sol.textproto', 'w') as te_sol:
+        te_sol.write(text_format.MessageToString(sol))
     print('[Step 3] global TE solution generated.')
     #print(text_format.MessageToString(sol))
     wcmp_alloc = WCMPAllocation(toy3, '', sol)
@@ -38,7 +43,7 @@ if __name__ == "__main__":
         delta_LUs[k] = v - ideal_LUs[k]
 
     print(f'[Step 5] dumping link util to {sys.argv[1]}')
-    with open(sys.argv[1], 'w') as LU:
+    with open(f'{logpath}/LU.csv', 'w') as LU:
         writer = csv.writer(LU)
         writer.writerow(["link name", "ideal LU", "real LU", "delta"])
         for k, v in dict(sorted(delta_LUs.items(), key=lambda x: x[1],
