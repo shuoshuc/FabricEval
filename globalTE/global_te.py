@@ -58,9 +58,9 @@ class GlobalTE:
             # Initialize a new model
             m = gp.Model("global_mcf")
             m.setParam("LogToConsole", 1 if VERBOSE >= 2 else 0)
-            m.setParam("FeasibilityTol", 1e-9)
+            #m.setParam("FeasibilityTol", 1e-9)
             #m.setParam("NodefileStart", 0.5)
-            m.setParam("NodefileDir", "/tmp")
+            #m.setParam("NodefileDir", "/tmp")
             m.setParam("Threads", 0)
             #m.setParam("TimeLimit", 120)
             #m.setParam("LogFile", "gurobi.log")
