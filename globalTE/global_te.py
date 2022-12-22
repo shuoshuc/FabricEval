@@ -1,4 +1,5 @@
 import gurobipy as gp
+import math
 import numpy as np
 import proto.te_solution_pb2 as TESolution
 from google.protobuf import text_format
@@ -11,6 +12,8 @@ from traffic.traffic import Traffic
 # Gubrobi log.
 VERBOSE = 0
 
+# Flag to control whether to enable hedging.
+ENABLE_HEDGING = True
 # Spread in (0, 1] used by the hedging constraint.
 S = 0.2
 
@@ -123,10 +126,16 @@ class GlobalTE:
                 _, _, demand = self.commodity_idx_std[idx]
                 # For each commodity i, sum_p(fip) == demand_i.
                 m.addConstr(gp.quicksum(list(f[idx].values())) == demand)
+                # Hedging constraint below.
+                if not ENABLE_HEDGING:
+                    continue
+                # Spread S of 0 is illegal, should not add hedging constraint.
+                if math.isclose(S, 0.0, rel_tol=1e-10):
+                    print(f'[ERROR] hedging spread {S} cannot be 0!')
+                    continue
                 # Obtains the capacity of every path in the path_set.
                 cp_list = [self._topo.findCapacityOfPathTuple(p) \
                            for p in path_set.keys()]
-                # Hedging constraint.
                 # For each path in a commodity, the flow assigned to the path
                 # cannot exceed a fraction S of the total bisection capacity.
                 for k, p in enumerate(path_set.keys()):
