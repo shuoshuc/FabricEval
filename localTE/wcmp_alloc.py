@@ -1,6 +1,5 @@
 import itertools
 import os
-import time
 from concurrent.futures import ProcessPoolExecutor, as_completed
 
 import proto.te_solution_pb2 as te_sol
@@ -30,7 +29,6 @@ def reduceGroups(node, g_type, limit, groups):
     Returns a tuple of the same structure as the input, except groups are
     post-reduction.
     '''
-    start = time.time()
     weight_vec = [g for (g, _) in groups]
     gr = GroupReduction(weight_vec, limit)
     reduced_vec = gr.table_fitting_ssmg()
@@ -51,38 +49,27 @@ class WCMPWorker:
         self._te_intent = te_sol.TEIntent()
         # Persists a local copy of the slice.
         self._te_intent.CopyFrom(te_intent)
-        # groups_in holds pre-reduction groups. groups_out holds post-reduction
-        # groups. Each is keyed by PrefixType because groups of different types
-        # cannot merge. Example format:
+        # groups holds pre-reduction groups. Each is keyed by PrefixType
+        # because groups of different types cannot merge. Example format:
         # {
         #   (node, prefix_type, ecmp_limit): [([w1, w2, w3], vol), ...],
         #   ...
         # }
-        self.groups_in = {}
-        self.groups_out = {}
+        self.groups = {}
 
-    def run(self):
+    def populateGroups(self):
         '''
-        Translates the high level TE intents to programmed flows and groups.
+        Translates the high level TE intents to pre-reduction groups.
+
+        Returns `self.groups` for caller to run group reduction.
         '''
         for prefix_intent in self._te_intent.prefix_intents:
             self.convertPrefixIntentToGroups(prefix_intent)
 
-        # `groups` may contain duplicates. Dedup and updates `self.groups_in`.
+        # `groups` may contain duplicates. Dedup and updates `self.groups`.
         self.consolidateGroups()
 
-        # Run group reduction for each node in parallel.
-        with ProcessPoolExecutor(max_workers=os.cpu_count()) as exe:
-            futures = {exe.submit(reduceGroups, node, g_type, limit, groups)
-                       for (node, g_type, limit), groups \
-                       in self.groups_in.items()}
-        for fut in as_completed(futures):
-            node, g_type, limit, reduced_groups = fut.result()
-            self.groups_out[(node, g_type, limit)] = reduced_groups
-
-        # For each prefix type and each node, install all groups.
-        for (node, g_type, _), groups in self.groups_out.items():
-            self._topo.installGroupsOnNode(node, groups, g_type)
+        return self.groups
 
     def convertPrefixIntentToGroups(self, prefix_intent):
         '''
@@ -97,29 +84,29 @@ class WCMPWorker:
                   f'{prefix_intent.type}!')
             return
 
-        groups = {}
+        tmp_g = {}
         for ne in prefix_intent.nexthop_entries:
             port = self._topo.getPortByName(ne.nexthop_port)
             node, limit = port.getParent().name, port.getParent().ecmp_limit
-            group = groups.setdefault((node, prefix_intent.type, limit),
-                                      [0] * len(port.getParent()._member_ports))
+            group = tmp_g.setdefault((node, prefix_intent.type, limit),
+                                     [0] * len(port.getParent()._member_ports))
             group[port.index - 1] = ne.weight
-        for node_type_limit, g in groups.items():
-            self.groups_in.setdefault(node_type_limit, []).append((g, sum(g)))
+        for node_type_limit, g in tmp_g.items():
+            self.groups.setdefault(node_type_limit, []).append((g, sum(g)))
 
     def consolidateGroups(self):
         '''
-        Consolidates groups in `self.groups_in`: de-duplicates groups on the
+        Consolidates groups in `self.groups`: de-duplicates groups on the
         same node, and accumulates total traffic carried by a shared group.
         '''
-        for node_type_limit, groups in self.groups_in.items():
+        for node_type_limit, groups in self.groups.items():
             g_vol = {}
             # Each `group` is a tuple of (weight vector, volume).
             for (group, vol) in groups:
                 g_vol.setdefault(tuple(group), 0)
                 g_vol[tuple(group)] += vol
-            self.groups_in[node_type_limit] = [(list(k), v) \
-                                               for k, v in g_vol.items()]
+            self.groups[node_type_limit] = [(list(k), v) \
+                                            for k, v in g_vol.items()]
 
 class WCMPAllocation:
     '''
@@ -130,6 +117,8 @@ class WCMPAllocation:
     def __init__(self, topo_obj, input_path, input_proto=None):
         # A map from AggrBlock name to the corresponding WCMP worker instance.
         self._worker_map = {}
+        self.groups_in = {}
+        self.groups_out = {}
         # Stores the topology object in case we need to look up an element.
         self._topo = topo_obj
         # Loads the full network TE solution.
@@ -150,5 +139,20 @@ class WCMPAllocation:
         '''
         Launches all WCMP workers in parallel to speed up the computation.
         '''
+        # Collect groups to be reduced from each WCMPWorker and merge them into
+        # a unified map.
         for worker in self._worker_map.values():
-            worker.run()
+            self.groups_in.update(worker.populateGroups())
+
+        # Run group reduction for each node in parallel.
+        with ProcessPoolExecutor(max_workers=os.cpu_count()) as exe:
+            futures = {exe.submit(reduceGroups, node, g_type, limit, groups)
+                       for (node, g_type, limit), groups \
+                       in self.groups_in.items()}
+        for fut in as_completed(futures):
+            node, g_type, limit, reduced_groups = fut.result()
+            self.groups_out[(node, g_type, limit)] = reduced_groups
+
+        # For each prefix type and each node, install all groups.
+        for (node, g_type, _), groups in self.groups_out.items():
+            self._topo.installGroupsOnNode(node, groups, g_type)
