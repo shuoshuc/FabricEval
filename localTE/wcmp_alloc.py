@@ -1,6 +1,7 @@
 import itertools
 import os
-from concurrent.futures import ThreadPoolExecutor
+import time
+from concurrent.futures import ProcessPoolExecutor, as_completed
 
 import proto.te_solution_pb2 as te_sol
 from google.protobuf import text_format
@@ -16,6 +17,28 @@ def loadTESolution(filepath):
         text_format.Parse(f.read(), sol)
     return sol
 
+def reduceGroups(node, g_type, limit, groups):
+    '''
+    A helper function that wraps around the GroupReduction class to invoke
+    group reduction on each node.
+
+    node: node name.
+    g_type: group type, SRC/TRANSIT.
+    limit: ECMP table limit.
+    groups: a list of pre-reduction groups.
+
+    Returns a tuple of the same structure as the input, except groups are
+    post-reduction.
+    '''
+    start = time.time()
+    weight_vec = [g for (g, _) in groups]
+    gr = GroupReduction(weight_vec, limit)
+    reduced_vec = gr.table_fitting_ssmg()
+    #reduced_vec = gr.solve_ssmg()
+    reduced_groups = []
+    for i, vec in enumerate(reduced_vec):
+        reduced_groups.append((vec, groups[i][1]))
+    return (node, g_type, limit, reduced_groups)
 
 class WCMPWorker:
     '''
@@ -48,16 +71,14 @@ class WCMPWorker:
         # `groups` may contain duplicates. Dedup and updates `self.groups_in`.
         self.consolidateGroups()
 
-        # Run group reduction for groups on each node separately.
-        for (node, p_type, limit), groups in self.groups_in.items():
-            weight_vec = [g for (g, _) in groups]
-            gr = GroupReduction(weight_vec, limit)
-            reduced_vec = gr.table_fitting_ssmg()
-            #reduced_vec = gr.solve_ssmg()
-            reduced_groups = []
-            for i, vec in enumerate(reduced_vec):
-                reduced_groups.append((vec, groups[i][1]))
-            self.groups_out[(node, p_type, limit)] = reduced_groups
+        # Run group reduction for each node in parallel.
+        with ProcessPoolExecutor(max_workers=os.cpu_count()) as exe:
+            futures = {exe.submit(reduceGroups, node, g_type, limit, groups)
+                       for (node, g_type, limit), groups \
+                       in self.groups_in.items()}
+        for fut in as_completed(futures):
+            node, g_type, limit, reduced_groups = fut.result()
+            self.groups_out[(node, g_type, limit)] = reduced_groups
 
         # For each prefix type and each node, install all groups.
         for (node, g_type, _), groups in self.groups_out.items():
