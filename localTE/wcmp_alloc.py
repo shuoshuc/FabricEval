@@ -1,12 +1,21 @@
-import itertools
 import os
+import time
 from concurrent.futures import ProcessPoolExecutor, as_completed
+from itertools import islice
 
 import proto.te_solution_pb2 as te_sol
 from google.protobuf import text_format
 
 from localTE.group_reduction import GroupReduction
 
+VERBOSE = 0
+
+def PRINTV(verbose, logstr):
+    '''
+    Print helper with verbosity control.
+    '''
+    if VERBOSE >= verbose:
+        print(logstr, flush=True)
 
 def loadTESolution(filepath):
     if not filepath:
@@ -46,9 +55,7 @@ class WCMPWorker:
     def __init__(self, topo_obj, te_intent):
         self._target_block = te_intent.target_block
         self._topo = topo_obj
-        self._te_intent = te_sol.TEIntent()
-        # Persists a local copy of the slice.
-        self._te_intent.CopyFrom(te_intent)
+        self._te_intent = te_intent
         # groups holds pre-reduction groups. Each is keyed by PrefixType
         # because groups of different types cannot merge. Example format:
         # {
@@ -135,23 +142,38 @@ class WCMPAllocation:
             # this case, it only manages one aggregation block.
             self._worker_map[aggr_block] = WCMPWorker(topo_obj, te_intent)
 
+    def chunkGroupsIn(self, size):
+        '''
+        Chunks `self.groups_in` to multiple sub-dicts, each of size `size`.
+        Returns a generator.
+        '''
+        it = iter(self.groups_in)
+        for i in range(0, len(self.groups_in), size):
+            yield {k: self.groups_in[k] for k in islice(it, size)}
+
     def run(self):
         '''
-        Launches all WCMP workers in parallel to speed up the computation.
+        Launches all WCMP workers to reduce groups.
         '''
         # Collect groups to be reduced from each WCMPWorker and merge them into
         # a unified map.
         for worker in self._worker_map.values():
             self.groups_in.update(worker.populateGroups())
 
-        # Run group reduction for each node in parallel.
-        with ProcessPoolExecutor(max_workers=os.cpu_count()) as exe:
-            futures = {exe.submit(reduceGroups, node, g_type, limit, groups)
-                       for (node, g_type, limit), groups \
-                       in self.groups_in.items()}
-        for fut in as_completed(futures):
-            node, g_type, limit, reduced_groups = fut.result()
-            self.groups_out[(node, g_type, limit)] = reduced_groups
+        # Run group reduction for each node in parallel. Limit parallelism up to
+        # the number of CPU cores. This avoids queueing too much jobs and
+        # filling up the internal job queue/message pipe.
+        parallelism = os.cpu_count()
+        for group_slice in self.chunkGroupsIn(parallelism):
+            t = time.time()
+            with ProcessPoolExecutor(max_workers=parallelism) as exe:
+                futures = {exe.submit(reduceGroups, node, g_type, limit, groups)
+                           for (node, g_type, limit), groups \
+                           in group_slice.items()}
+            for fut in as_completed(futures):
+                node, g_type, limit, reduced_groups = fut.result()
+                self.groups_out[(node, g_type, limit)] = reduced_groups
+            PRINTV(1, f'[reduceGroup] batch complete in {time.time() - t} sec.')
 
         # For each prefix type and each node, install all groups.
         for (node, g_type, _), groups in self.groups_out.items():
