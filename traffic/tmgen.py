@@ -88,7 +88,7 @@ def genTotalDemand(tor_level, cluster_vector, num_nodes, dist, p_spike=0.0):
                 continue
             upper_bound += 40000 * 4 * min(f, g)
         # With `p_spike` probability, generates a spike.
-        upper_bound *= 0.8 if rng.uniform(low=0, high=1) < p_spike else 0.5
+        upper_bound *= 0.8 if rng.uniform(low=0, high=1) < p_spike else 0.4
         scale = upper_bound / 2
         if dist == 'exp':
             X = truncexpon(b=upper_bound/scale, loc=0, scale=scale)
