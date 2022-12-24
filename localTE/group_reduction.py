@@ -241,8 +241,6 @@ class GroupReduction:
             index = self._choose_port_to_update(group_to_reduce, final_group)
             final_group[index] += 1
             if sum(final_group) >= sum(group_to_reduce):
-                print('[%s] I give up!!' %
-                      GroupReduction._reduce_wcmp_group.__name__)
                 return group_to_reduce
 
         return final_group.tolist()
