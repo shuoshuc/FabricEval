@@ -6,8 +6,8 @@ import proto.traffic_pb2 as traffic
 from numpy.random import default_rng
 from scipy.stats import truncexpon, uniform
 
-# True means the block total ingress should equal its total egress.
-EQUAL_INGRESS_EGRESS = False
+from common.flags import EQUAL_INGRESS_EGRESS
+
 
 def tmgen(tor_level, cluster_vector, num_nodes, model, dist='exp', netname=''):
     '''

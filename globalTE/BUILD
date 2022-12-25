@@ -9,5 +9,7 @@ py_library(
         "//proto:te_solution_proto",
         '//topology:topology',
         '//traffic:traffic',
+        '//common:common',
+        '//common:flags',
     ],
 )

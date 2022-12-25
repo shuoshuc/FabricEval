@@ -13,5 +13,6 @@ py_library(
     srcs = ['tmgen.py'],
     deps = [
         "//proto:traffic_proto",
+        "//common:flags",
     ],
 )

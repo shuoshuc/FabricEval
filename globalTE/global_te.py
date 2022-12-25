@@ -1,28 +1,16 @@
-import gurobipy as gp
 import math
+
+import gurobipy as gp
 import numpy as np
 import proto.te_solution_pb2 as TESolution
 from google.protobuf import text_format
 from gurobipy import GRB
 
+from common.common import PRINTV
+from common.flags import *
 from topology.topology import Topology, filterPathSetWithSeg
 from traffic.traffic import Traffic
 
-# VERBOSE=0: no Gurobi log. VERBOSE=1: Gurobi final log only. VERBOSE=2: full
-# Gubrobi log.
-VERBOSE = 0
-
-# Flag to control whether to enable hedging.
-ENABLE_HEDGING = True
-# Spread in (0, 1] used by the hedging constraint.
-S = 0.2
-
-def PRINTV(verbose, logstr):
-    '''
-    Print helper with verbosity control.
-    '''
-    if VERBOSE >= verbose:
-        print(logstr)
 
 def prettyPrint(verbose, te_sol):
     '''

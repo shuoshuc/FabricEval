@@ -10,22 +10,9 @@ import gurobipy as gp
 import numpy as np
 from gurobipy import GRB
 
-# If True, feeds solver with scaled up integer groups.
-FLAG_USE_INT_INPUT_GROUPS = False
+from common.common import PRINTV
+from common.flags import *
 
-# Broadcom Tomahawk 2 ECMP table limit.
-TABLE_LIMIT = 16 * 1024
-
-# VERBOSE=0: no Gurobi log. VERBOSE=1: Gurobi final log only. VERBOSE=2: full
-# Gubrobi log.
-VERBOSE = 0
-
-def PRINTV(verbose, logstr):
-    '''
-    Print helper with verbosity control.
-    '''
-    if VERBOSE >= verbose:
-        print(logstr)
 
 def gcd_reduce(vector):
     '''
@@ -132,7 +119,7 @@ class GroupReduction:
                                            for g in groups])
         self._int_groups = list(map(frac2int_round,
                                     copy.deepcopy(self._orig_groups)))
-        self._groups = self._int_groups if FLAG_USE_INT_INPUT_GROUPS else \
+        self._groups = self._int_groups if USE_INT_INPUT_GROUPS else \
                                            self._orig_groups
         self._table_limit = table_limit
         self._final_groups = None
@@ -331,6 +318,20 @@ class GroupReduction:
 
         return self.sanitize_and_cache(groups_out)
 
+    def google_ssmg(self):
+        '''
+        WCMP weight reduction for table fitting a set of WCMP groups H into
+        size S. Algorithm 3 + 4 in the EuroSys WCMP paper. This is Google's
+        implementation.
+        '''
+        if len(self._int_groups) <= 0:
+            print('[ERROR] %s: unexpected number of input groups %s' %
+                  GroupReduction.google_ssmg.__name__,
+                  len(self._int_groups))
+            return []
+
+        pass
+
     def solve_sssg(self, formulation='L1NORM2', groups_in=None, C=None):
         '''
         Given the input groups and table limit, solve the single switch single
@@ -428,7 +429,7 @@ class GroupReduction:
             m.addConstr(wf[i] / wf_sum - w[i] / C <= u[i])
             # Add constraint only if inputs are already scaled up to integers:
             # w[i] <= wf[i]
-            if FLAG_USE_INT_INPUT_GROUPS:
+            if USE_INT_INPUT_GROUPS:
                 m.addConstr(w[i] <= wf[i], "no_scale_up_" + str(1+i))
 
         return m
@@ -467,7 +468,7 @@ class GroupReduction:
             m.addConstr(wf[i] / wf_sum - w[i] * z <= u[i])
             # Add constraint only if inputs are already scaled up to integers:
             # w[i] <= wf[i]
-            if FLAG_USE_INT_INPUT_GROUPS:
+            if USE_INT_INPUT_GROUPS:
                 m.addConstr(w[i] <= wf[i], "no_scale_up_" + str(1+i))
 
         return m
@@ -578,7 +579,7 @@ class GroupReduction:
                 model.addConstr(wf[m][i] / wf_sum[m] - w[m][i] * z[m] <= u[m][i])
                 # Add constraint only if inputs are already scaled up to
                 # integers: w[m][i] <= wf[m][i]
-                if FLAG_USE_INT_INPUT_GROUPS:
+                if USE_INT_INPUT_GROUPS:
                     model.addConstr(w[m][i] <= wf[m][i],
                                     "no_scale_up_{}_{}".format(m+1, i+1))
 

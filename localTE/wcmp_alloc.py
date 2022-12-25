@@ -6,16 +6,9 @@ from itertools import islice
 import proto.te_solution_pb2 as te_sol
 from google.protobuf import text_format
 
+from common.common import PRINTV
 from localTE.group_reduction import GroupReduction
 
-VERBOSE = 0
-
-def PRINTV(verbose, logstr):
-    '''
-    Print helper with verbosity control.
-    '''
-    if VERBOSE >= verbose:
-        print(logstr, flush=True)
 
 def loadTESolution(filepath):
     if not filepath:
