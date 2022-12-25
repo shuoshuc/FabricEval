@@ -181,9 +181,10 @@ class GroupReduction:
             sanitized_group = [0] * len(self._unstripped_groups[loc])
             nz_indices = np.nonzero(np.array(self._unstripped_groups[loc]))[0]
             if nz_indices.size != len(final_group):
-                print(f'[ERROR] sanitize_and_cache: group size '
-                      f'{len(final_group)} mismatches num of non-zero weights '
-                      f'in original group {self._unstripped_groups[idx]}')
+                print(f'[ERROR] sanitize_and_cache: final group size of '
+                      f'{final_group} mismatches num of non-zero weights '
+                      f'{nz_indices.size} in original group '
+                      f'{self._unstripped_groups[idx]}')
                 return None
             if len(final_group) == 1:
                 sanitized_group[nz_indices[0]] = 1
