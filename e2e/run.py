@@ -18,7 +18,7 @@ if __name__ == "__main__":
     toy3 = Topology('', net_proto)
     print(f'{datetime.now()} [Step 1] topology generated.', flush=True)
     #print(text_format.MessageToString(net_proto))
-    traffic_proto = tmgen(tor_level=True,
+    traffic_proto = tmgen(tor_level=False,
                           cluster_vector=np.array([1]*22 + [2.5]*22 + [5]*21),
                           num_nodes=32,
                           model='gravity',
