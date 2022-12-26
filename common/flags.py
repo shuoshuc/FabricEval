@@ -17,3 +17,6 @@ USE_INT_INPUT_GROUPS = False
 
 # Broadcom Tomahawk 2 ECMP table limit.
 TABLE_LIMIT = 16 * 1024
+
+# Number of parallel group reductions allowed to run.
+PARALLELISM = 16
