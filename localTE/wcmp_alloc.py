@@ -7,6 +7,7 @@ import proto.te_solution_pb2 as te_sol
 from google.protobuf import text_format
 
 from common.common import PRINTV
+from common.flags import *
 from localTE.group_reduction import GroupReduction
 
 
