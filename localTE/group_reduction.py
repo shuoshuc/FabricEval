@@ -2,9 +2,11 @@ import copy
 import os
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from dataclasses import dataclass, field
 from functools import reduce
 from itertools import chain
 from math import ceil, floor, gcd, isclose, sqrt
+from typing import List
 
 import gurobipy as gp
 import numpy as np
@@ -37,21 +39,22 @@ def frac2int_round(frac_list):
     '''
     return [1 if not round(frac) else round(frac) for frac in frac_list]
 
-def l1_norm_diff(GL1, GL2):
+def l1_norm_diff(FG, IG):
     '''
-    Computes the L1 norm between group list GL1 and GL2. They must be of the
+    Computes the L1 norm between group list FG and IG. They must be of the
     same size both in terms of the list and each individual group.
-    Assume GL1 is the original group list and GL2 is the reduced one.
+    Assume FG is the original fractional group list and IG is the reduced one.
     '''
-    assert len(GL1) == len(GL2) and GL1 and GL2, 'GL1 and GL2 must be ' \
-                                                 'non-empty equal size.'
-    for i in range(len(GL1)):
-        assert len(GL1[i]) == len(GL2[i]), 'Groups should be equal size.'
+    assert len(FG) == len(IG) and FG and IG, 'FG and IG must be ' \
+                                             'non-empty equal size.'
+    for i in range(len(FG)):
+        assert len(FG[i].weights()) == len(IG[i].integer), 'Groups must be ' \
+                                                           'equal size.'
 
     l1_norm = 0
-    for i in range(len(GL1)):
-        G1, G2 = np.array(GL1[i]), np.array(GL2[i])
-        traffic_vol = sum(G1) if len(GL1) > 1 else 1
+    for i in range(len(FG)):
+        G1, G2 = np.array(FG[i].weights()), np.array(IG[i].integer)
+        traffic_vol = sum(G1) if len(FG) > 1 else 1
         l1_norm += traffic_vol * np.linalg.norm((G2 / sum(G2) - G1 / sum(G1)),
                                                 ord=1)
     return l1_norm
@@ -79,10 +82,10 @@ def calc_group_oversub(G, G_prime, mode='max'):
           of max to find the group oversub. Must be one of 'max', 'avg', 'p50'.
     Return: group oversub.
     '''
-    G_sum = sum(G)
-    G_prime_sum = sum(G_prime)
-    numerator = np.asarray(G_prime) * G_sum
-    demominator = np.asarray(G) * G_prime_sum
+    G_sum = sum(G.integer)
+    G_prime_sum = sum(G_prime.integer)
+    numerator = np.asarray(G_prime.integer) * G_sum
+    demominator = np.asarray(G.integer) * G_prime_sum
 
     if mode == 'max':
         return np.max(numerator / demominator)
@@ -95,6 +98,28 @@ def calc_group_oversub(G, G_prime, mode='max'):
         return None
 
 
+@dataclass
+class Group:
+    '''
+    A data structure that stores different forms of a group.
+    '''
+    gid: int
+    # Original unstripped weights with 0.
+    unstrip: List[float]
+    # Stripped weights without 0.
+    strip: List[float] = field(init=False)
+    # Integer weights without 0.
+    integer: List[int] = field(init=False)
+
+    def __post_init__(self):
+        # Strips all the zeroes in each group, they can cause division errors
+        # when computing port oversub.
+        self.strip = [w for w in self.unstrip if w > 0]
+        self.integer = frac2int_round(self.strip)
+
+    def weights(self):
+        return self.integer if USE_INT_INPUT_GROUPS else self.strip
+
 class GroupReduction:
     '''
     GroupReduction runs various solvers to reduce input groups to acceptable
@@ -103,46 +128,20 @@ class GroupReduction:
     '''
     def __init__(self, groups, table_limit=TABLE_LIMIT):
         '''
-        groups: input groups of intended weights reflecting desired traffic
-                distribution.
+        Initializes internal fields. In this class and all helper functions,
+        all the groups are represented as instances of the Group dataclass.
 
-        orig_groups: a list of lists, where each element list is a set of
-                     weights for the corresponding group.
-        int_groups: original groups after rounding to integers.
+        groups: input groups of intended weights reflecting desired traffic
+                distribution. This is a list of lists.
+
         table_limit: upper bound of the group entries on the switch. Note that
                      this does not have to be the physical limit, but can also
                      be the available headroom left.
         '''
-        # Strips all the zeroes in each group, they can cause division errors
-        # when computing port oversub.
-        self._orig_groups = copy.deepcopy([[w for w in g if w > 0] \
-                                           for g in groups])
-        self._int_groups = list(map(frac2int_round,
-                                    copy.deepcopy(self._orig_groups)))
-        self._groups = self._int_groups if USE_INT_INPUT_GROUPS else \
-                                           self._orig_groups
+        # Converts the input weight vectors to a list of Group() objects.
+        self.groups = [Group(gid=i, unstrip=g) for i, g in enumerate(groups)]
+
         self._table_limit = table_limit
-        self._final_groups = None
-        self._unstripped_groups = copy.deepcopy(groups)
-        # Auxiliary map to store the pre-sort location of each int group in the
-        # input. This is used for re-constructing the unstripped groups.
-        self._presort_group_loc = {}
-        # The order of pre-sort `self._int_groups` stays the same as unstripped
-        # groups.
-        for idx, g_int in enumerate(self._int_groups):
-            self._presort_group_loc[tuple(g_int)] = idx
-
-    def get_input_groups(self):
-        '''
-        Returns the unstripped input groups.
-        '''
-        return self._unstripped_groups
-
-    def get_output_groups(self):
-        '''
-        Returns the output groups.
-        '''
-        return self._final_groups
 
     def get_table_limit(self):
         '''
@@ -150,49 +149,49 @@ class GroupReduction:
         '''
         return self._table_limit
 
-    def get_table_util(self, percentage=False, final_groups=None):
+    def get_table_util(self, final_groups, percentage=False):
         '''
         Returns the group table utilization.
 
-        percentage: If true, returns utilization in percentage, otherwise
-                    returns raw entries consumed.
-        final_groups: directly provided final groups instead of the one stored
-                      as a member variable.
+        final_groups: a list of Group dataclass instances.
+        percentage (optional): If true, returns utilization in percentage,
+                               otherwise returns raw entries consumed.
         '''
-        final_G = final_groups if final_groups else self._final_groups
-        sum_entries = sum([sum(g) for g in final_G])
+        sum_entries = sum([sum(g.integer) for g in final_groups])
         return sum_entries / self._table_limit if percentage else sum_entries
 
-    def sanitize_and_cache(self, final_groups):
+    def sanitize(self, final_groups):
         '''
         Sanitizes the final groups: (1) singleton groups should just be [1], (2)
         make sure all weights are integers, (3) unstrip final_groups and reorder
         them so that they correspond to the original groups in the same order.
-        Also caches the sanitized groups and returns them.
 
-        final_groups: the final integer groups to be sanitized.
+        final_groups: a list of Group dataclass instances.
+
+        Returns a list of lists, where the reduced group vectors corresponds to
+        the input groups in position and dimension.
         '''
         sanitized_groups = [[]] * len(final_groups)
-        for idx, final_group in enumerate(final_groups):
-            # From the final_group, find its corresponding int_group, and looks
-            # up the location of this group pre-sorting. The location is where
-            # the unstripped group is.
-            loc = self._presort_group_loc[tuple(self._int_groups[idx])]
-            sanitized_group = [0] * len(self._unstripped_groups[loc])
-            nz_indices = np.nonzero(np.array(self._unstripped_groups[loc]))[0]
-            if nz_indices.size != len(final_group):
-                print(f'[ERROR] sanitize_and_cache: final group size of '
-                      f'{final_group} mismatches num of non-zero weights '
-                      f'{nz_indices.size} in original group '
-                      f'{self._unstripped_groups[idx]}')
+        for final_group in final_groups:
+            # Starts each sanitized group from an all-zero vector of the same
+            # dimension as the unstripped version.
+            sanitized_group = [0] * len(final_group.unstrip)
+            nz_indices = np.nonzero(np.array(final_group.unstrip))[0]
+            if nz_indices.size != len(final_group.integer):
+                print(f'[ERROR] sanitize: final integer group size of'
+                      f' {len(final_group.integer)} mismatches num of non-zero '
+                      f'weights {nz_indices.size} in unstripped group '
+                      f'{final_group.unstrip}')
                 return None
-            if len(final_group) == 1:
+            if len(final_group.integer) == 1:
                 sanitized_group[nz_indices[0]] = 1
             else:
-                for idx, w in enumerate(final_group):
+                # Replaces 0 at the location where unstripped group has a
+                # non-zero weight with the reduced weight.
+                for idx, w in enumerate(final_group.integer):
                     sanitized_group[nz_indices[idx]] = int(w)
-            sanitized_groups[loc] = sanitized_group
-        self._final_groups = sanitized_groups
+            # Reorders the sanitized groups using each group's gid.
+            sanitized_groups[final_group.gid] = sanitized_group
         return sanitized_groups
 
     def _choose_port_to_update(self, group_to_reduce, group_under_reduction):
@@ -202,16 +201,18 @@ class GroupReduction:
         returns the index of member port whose weight should be incremented to
         result in least maximum oversub.
         '''
-        if len(group_to_reduce) != len(group_under_reduction):
-            print('[ERROR] %s: group dimension mismatch %s %s' %
-                  GroupReduction._choose_port_to_update.__name__,
-                  len(group_to_reduce), len(group_under_reduction))
+        if len(group_to_reduce.integer) != len(group_under_reduction.integer):
+            print(f'[ERROR] {GroupReduction._choose_port_to_update.__name__}: '
+                  f'group dimension mismatch {len(group_to_reduce.integer)} '
+                  f'{len(group_under_reduction.integer)}.')
             return -1
 
-        min_oversub, index, P = float('inf'), -1, len(group_to_reduce)
+        min_oversub, index, P = float('inf'), -1, len(group_to_reduce.integer)
         for i in range(P):
-            oversub = ((group_under_reduction[i] + 1) * sum(group_to_reduce)) \
-                      / ((sum(group_under_reduction) + 1) * group_to_reduce[i])
+            oversub = ((group_under_reduction.integer[i] + 1)
+                       * sum(group_to_reduce.integer)) \
+                      / ((sum(group_under_reduction.integer) + 1)
+                         * group_to_reduce.integer[i])
             if min_oversub > oversub:
                 min_oversub = oversub
                 index = i
@@ -222,38 +223,39 @@ class GroupReduction:
         '''
         Single group weight reduction algoritm with an oversub limit.
         This is algorithm 1 in the EuroSys WCMP paper.
+
+        group_to_reduce: an instance of Group dataclass.
         '''
         # First initializes final group to ECMP.
-        final_group = np.ones(len(group_to_reduce))
+        final_group = copy.deepcopy(group_to_reduce)
+        final_group.integer = np.ones(len(group_to_reduce.integer)).tolist()
         while calc_group_oversub(group_to_reduce, final_group) > theta_max:
             index = self._choose_port_to_update(group_to_reduce, final_group)
-            final_group[index] += 1
-            if sum(final_group) >= sum(group_to_reduce):
+            final_group.integer[index] += 1
+            if sum(final_group.integer) >= sum(group_to_reduce.integer):
                 return group_to_reduce
 
-        return final_group.tolist()
+        return final_group
 
     def table_fitting_sssg(self):
         '''
         WCMP weight reduction for table fitting a single WCMP group into table
-        limit. Assuming that we are fitting self._int_groups, since
-        self._orig_groups do not necessarily have integer weights.
+        limit. Assuming that we are fitting the integer version of self.groups.
         '''
-        if len(self._int_groups) != 1:
-            print('[ERROR] %s: unexpected number of input groups %s' %
-                  GroupReduction.table_fitting_sssg.__name__,
-                  len(self._int_groups))
+        if len(self.groups) != 1:
+            print(f'[ERROR] {GroupReduction.table_fitting_sssg.__name__}: '
+                  f'unexpected number of input groups {len(self.groups)}.')
             return []
 
-        group_to_reduce = self._int_groups[0]
-        T, P = self._table_limit, len(group_to_reduce)
+        group_to_reduce = self.groups[0]
+        T, P = self._table_limit, len(group_to_reduce.integer)
         final_group = copy.deepcopy(group_to_reduce)
-        while sum(final_group) > T:
+        while sum(final_group.integer) > T:
             non_reducible_size = 0
             # Counts singleton ports, as they cannot be reduced any further.
             for i in range(P):
-                if final_group[i] == 1:
-                    non_reducible_size += final_group[i]
+                if final_group.integer[i] == 1:
+                    non_reducible_size += final_group.integer[i]
             # If the group is already ECMP, just give up.
             if non_reducible_size == P:
                 break
@@ -262,62 +264,62 @@ class GroupReduction:
             # technically be sum(group_to_reduce) - non_reducible_size since the
             # singleton ports should just be left out of reduction. But the
             # algorithm still reduces (to 0) and then always rounds up to 1.
-            reduction_ratio = (T - non_reducible_size) / sum(group_to_reduce)
+            reduction_ratio = (T - non_reducible_size) / \
+                sum(group_to_reduce.integer)
             for i in range(P):
-                final_group[i] = np.floor(group_to_reduce[i] * reduction_ratio)
-                if final_group[i] == 0:
-                    final_group[i] = 1
+                final_group.integer[i] = np.floor(group_to_reduce.integer[i] * \
+                                                  reduction_ratio)
+                if final_group.integer[i] == 0:
+                    final_group.integer[i] = 1
 
         # In case the previous round-down over-reduced groups, which leaves some
         # headroom in T, we make full use of the headroom while minimizing the
         # oversub.
-        remaining_size = int(T - sum(final_group))
+        remaining_size = int(T - sum(final_group.integer))
         min_oversub = calc_group_oversub(group_to_reduce, final_group)
         final_group_2 = copy.deepcopy(final_group)
         for _ in range(remaining_size):
             index = self._choose_port_to_update(group_to_reduce, final_group)
-            final_group[index] += 1
+            final_group.integer[index] += 1
             curr_oversub = calc_group_oversub(group_to_reduce, final_group)
             if min_oversub > curr_oversub:
-                final_group_2 = copy.deepcopy(final_group)
+                final_group_2.integer = copy.deepcopy(final_group.integer)
                 min_oversub = curr_oversub
 
-        return self.sanitize_and_cache([final_group_2])
+        return self.sanitize([final_group_2])
 
     def table_fitting_ssmg(self):
         '''
         WCMP weight reduction for table fitting a set of WCMP groups H into
         size S. Algorithm 4 in the EuroSys WCMP paper.
         '''
-        if len(self._int_groups) <= 0:
-            print('[ERROR] %s: unexpected number of input groups %s' %
-                  GroupReduction.table_fitting_ssmg.__name__,
-                  len(self._int_groups))
+        if len(self.groups) <= 0:
+            print(f'[ERROR] {GroupReduction.table_fitting_ssmg.__name__}: '
+                  f'unexpected number of input groups {len(self.groups)}.')
             return []
 
         enforced_oversub = 1.002
         step_size = 0.001
         S = self._table_limit
         # Sort groups in descending order of size.
-        groups_in = sorted(self._int_groups, key=sum, reverse=True)
-        # The order of post-sort `self._int_groups` stays the same as
-        # `groups_out`.
-        self._int_groups = groups_in
-        groups_out = copy.deepcopy(groups_in)
-        total_size = sum([sum(g) for g in groups_in])
+        self.groups.sort(key=lambda g: sum(g.integer), reverse=True)
+        # No need for a deep copy because each element group would be replaced
+        # with a copy if it gets reduced.
+        groups_out = self.groups.copy()
+        total_size = sum([sum(g.integer) for g in groups_out])
 
         while total_size > S:
-            for i in range(len(groups_in)):
-                groups_out[i] = self._reduce_wcmp_group(groups_in[i],
+            for i in range(len(self.groups)):
+                groups_out[i] = self._reduce_wcmp_group(self.groups[i],
                                                         enforced_oversub)
-                total_size = sum([sum(g) for g in groups_out])
+                total_size = sum([sum(g.integer) for g in groups_out])
                 if total_size <= S:
-                    return self.sanitize_and_cache(groups_out)
+                    return self.sanitize(groups_out)
             # Relaxes oversub limit if we fail to fit all groups with the same
             # oversub.
             enforced_oversub += step_size
 
-        return self.sanitize_and_cache(groups_out)
+        return self.sanitize(groups_out)
 
     def google_ssmg(self):
         '''
@@ -325,10 +327,9 @@ class GroupReduction:
         size S. Algorithm 3 + 4 in the EuroSys WCMP paper. This is Google's
         implementation.
         '''
-        if len(self._int_groups) <= 0:
-            print('[ERROR] %s: unexpected number of input groups %s' %
-                  GroupReduction.google_ssmg.__name__,
-                  len(self._int_groups))
+        if len(self.groups) <= 0:
+            print(f'[ERROR] {GroupReduction.google_ssmg.__name__}: unexpected '
+                  f'number of input groups {len(self.groups)}.')
             return []
 
         pass
@@ -338,15 +339,15 @@ class GroupReduction:
         Given the input groups and table limit, solve the single switch single
         group (SSSG) optimization problem.
 
-        group_in (optional): input groups to use instead.
+        groups_in (optional): input groups to use instead.
         C (optional): table limit to use instead.
         '''
-        input_groups = groups_in if groups_in else self._groups
+        input_groups = groups_in if groups_in else self.groups
         table_limit = C if C else self._table_limit
-        final_groups = []
+        final_group = copy.deepcopy(input_groups[0])
         if len(input_groups) != 1:
-            print('[ERROR] %s: unexpected number of input groups %s' %
-                  GroupReduction.solve_sssg.__name__, len(input_groups))
+            print(f'[ERROR] {GroupReduction.solve_sssg.__name__}: unexpected '
+                  f'number of input groups {len(input_groups)}.')
             return []
 
         try:
@@ -385,12 +386,12 @@ class GroupReduction:
                     group.append(round(v.X))
                     sol_w[v.VarName] = v.X
             PRINTV(1, f'Obj: {m.ObjVal}')
-            PRINTV(1, f'wf: {self._groups[0]}')
+            PRINTV(1, f'wf: {self.groups[0].weights()}')
             PRINTV(1, str(sol_w))
             # Applies a final GCD reduction just in case.
-            final_groups.append(frac2int_lossless(group))
+            final_group.integer = frac2int_lossless(group)
 
-            return self.sanitize_and_cache(final_groups)
+            return self.sanitize([final_group])
 
         except gp.GurobiError as e:
             print('Error code ' + str(e.errno) + ': ' + str(e))
@@ -406,12 +407,12 @@ class GroupReduction:
         be solved are normalized against the swtich table limit.
 
         m: pre-built empty model, needs decision vars and constraints.
-        group_in: the (single) input group to be reduced.
+        group_in: the (single) input group of Group dataclass to be reduced.
         C: table limit allowed to be used.
         '''
         # Create variables: wf[i] is the intended (fractional) weight, w[i] is
         # the actual (integral) weight.
-        wf, wf_sum, w, u = group_in, sum(group_in), [], []
+        wf, wf_sum, w, u = group_in.weights(), sum(group_in.weights()), [], []
         for n in range(len(wf)):
             w.append(m.addVar(vtype=GRB.INTEGER, lb=0, ub=C,
                               name="w_" + str(n+1)))
@@ -442,12 +443,12 @@ class GroupReduction:
         be solved are normalized against the sum of actual weights.
 
         m: pre-built empty model, needs decision vars and constraints.
-        group_in: the (single) input group to be reduced.
+        group_in: the (single) input group of Group dataclass to be reduced.
         C: table limit allowed to be used.
         '''
         # Create variables: wf[i] is the intended (fractional) weight, w[i] is
         # the actual (integral) weight.
-        wf, wf_sum, w, u = group_in, sum(group_in), [], []
+        wf, wf_sum, w, u = group_in.weights(), sum(group_in.weights()), [], []
         for n in range(len(wf)):
             w.append(m.addVar(vtype=GRB.INTEGER, lb=0, ub=C,
                               name="w_" + str(n+1)))
@@ -479,11 +480,11 @@ class GroupReduction:
         Given the input groups and table limit, solve the single switch multi 
         group (SSMG) optimization problem.
         '''
-        if len(self._groups) <= 0:
-            print('[ERROR] %s: unexpected number of input groups %s' %
-                  GroupReduction.solve_ssmg.__name__, len(self._groups))
+        if len(self.groups) <= 0:
+            print(f'[ERROR] {GroupReduction.solve_ssmg.__name__}: unexpected '
+                  f'number of input groups {len(self.groups)}.')
             return []
-        final_groups = copy.deepcopy(self._groups)
+        final_groups = copy.deepcopy(self.groups)
 
         try:
             # Initialize a new model
@@ -514,15 +515,20 @@ class GroupReduction:
             for v in m.getVars():
                 if 'w_' in v.VarName:
                     split = v.VarName.split('_')
-                    final_groups[int(split[1])-1][int(split[2])-1] = round(v.X)
+                    # gi is group index, pi is port index.
+                    gi, pi = int(split[1]) - 1, int(split[2]) - 1
+                    final_groups[gi].integer[pi] = round(v.X)
                     sol_w[v.VarName] = v.X
             PRINTV(1, 'Obj: %s' % m.ObjVal)
             PRINTV(1, str(sol_w))
-            PRINTV(1, 'wf: %s' % self._groups)
+            PRINTV(1, 'wf:')
+            for g in self.groups:
+                PRINTV(1, f'{g.integer}')
             # Applies a final GCD reduction just in case.
-            final_groups = list(map(frac2int_lossless, final_groups))
+            for final_group in final_groups:
+                final_group.integer = frac2int_lossless(final_group.integer)
 
-            return self.sanitize_and_cache(final_groups)
+            return self.sanitize(final_groups)
 
         except gp.GurobiError as e:
             print('Error code ' + str(e.errno) + ': ' + str(e))
@@ -539,9 +545,10 @@ class GroupReduction:
         model: pre-built empty model, needs decision vars and constraints.
         '''
         # Create variables: wf[m][i] is the intended (fractional) weight for
-        # port i of group m, w[i] is the actual (integral) weight.
+        # port i of group m, w[m][i] is the corresponding integer weight.
         C = self._table_limit
-        wf, wf_sum = copy.deepcopy(self._groups), [sum(g) for g in self._groups]
+        wf = [g.weights() for g in self.groups]
+        wf_sum = [sum(g) for g in wf]
         w, u, l1_norm, z = [], [], [], []
         # Iterates over group m.
         for m in range(len(wf)):
@@ -591,18 +598,18 @@ class GroupReduction:
         Carve the table limit into multiple smaller limits and solve the SSMG
         problem as individual SSSG.
 
-        parallel: True enables parallel solving, which uses all the CPU cores.
-                  False means sequential solving.
+        parallel: True enables parallel solving, which solves all SSSGs in
+                  parallel. False means sequential solving.
         '''
-        if len(self._groups) <= 0:
-            print('[ERROR] %s: unexpected number of input groups %s' %
-                  GroupReduction.table_carving_ssmg.__name__, len(self._groups))
+        if len(self.groups) <= 0:
+            print(f'[ERROR] {GroupReduction.table_carving_ssmg.__name__}: '
+                  f'unexpected number of input groups {len(self.groups)}.')
             return []
-        final_groups = copy.deepcopy(self._groups)
+        final_groups = copy.deepcopy(self.groups)
 
         # Computes per-group table limit. This is proportional to the group
         # traffic volume/weight sum.
-        C, wf = self._table_limit, copy.deepcopy(self._groups)
+        C, wf = self._table_limit, [g.weights() for g in self.groups]
         wf_sums = [sum(g) for g in wf]
         Cg = [floor(wf_sum / sum(wf_sums) * C) for wf_sum in wf_sums]
 
@@ -610,24 +617,17 @@ class GroupReduction:
             # Step 1: solve SSSG using table carving limits.
             # Not all groups would fully use up the allocated space, so there
             # will be unused entries at the end of this step.
-            parallelism = os.cpu_count() if parallel else 1
-            with ThreadPoolExecutor(max_workers=parallelism) as executor:
-                futures = {executor.submit(self.solve_sssg, formulation,
-                                           [G_in], Cg[i]): i
-                           for i, G_in in enumerate(wf)}
+            for i, G_in in enumerate(self.groups):
+                G_out = self.solve_sssg(formulation, [G_in], Cg[i])[0]
+                if not G_out:
+                    print(f'[ERROR] table_carving_ssmg: final group {i} is'
+                          f' invalid.\nG_in: {G_in.integer}\nG_out: {G_out}')
+                # Applies a final GCD reduction just in case.
+                final_groups[i].integer = frac2int_lossless(G_out)
 
-                for future in as_completed(futures):
-                    i = futures[future]
-                    group = future.result()
-                    if not group[0]:
-                        print('[ERROR] %s: final group %s is invalid - %s ' %
-                              GroupReduction.table_carving_ssmg.__name__, i,
-                              group[0])
-                    # Applies a final GCD reduction just in case.
-                    final_groups[i] = frac2int_lossless(group[0])
-
-            PRINTV(1, f'Intermediate metric: {l1_norm_diff(wf, final_groups)}')
-            PRINTV(1, f'Intermediate groups: {final_groups}')
+            PRINTV(2, f'Interm. metric: '
+                   f'{l1_norm_diff(self.groups, final_groups)}')
+            PRINTV(2, f'Interm. groups: {[g.integer for g in final_groups]}')
             PRINTV(1, 'Intermediate table util: %s / %s, unused %s' %
                    (self.get_table_util(final_groups=final_groups), C,
                    C - self.get_table_util(final_groups=final_groups)))
@@ -635,8 +635,9 @@ class GroupReduction:
             # Step 2: iteratively reclaim and redistribute unused entries.
             # Goal is to find the group with worst metric and improve it with
             # unused entries.
-            per_group_metric = sorted([
-                [i, sum(wf[i]) * l1_norm_diff([wf[i]], [final_groups[i]])]
+            per_group_metric = sorted([[i, wf_sums[i] * \
+                                        l1_norm_diff([self.groups[i]],
+                                                     [final_groups[i]])]
                 for i in range(len(wf))], key=lambda x: x[1], reverse=True)
             while len(per_group_metric) > 0:
                 # Group with worst metric is ranked first.
@@ -652,16 +653,18 @@ class GroupReduction:
                     # simply allowing an extra `unused` entries will lead to
                     # double counting. Therefore, only unused entries from other
                     # groups can be allocated to group i.
-                    Cg[i] += unused - (Cg[i] - sum(final_groups[i]))
-                    group = self.solve_sssg(formulation, [wf[i]], Cg[i])[0]
+                    Cg[i] += unused - (Cg[i] - sum(final_groups[i].integer))
+                    group = self.solve_sssg(formulation, [self.groups[i]],
+                                            Cg[i])[0]
                     # Applies a final GCD reduction just in case.
-                    group = frac2int_lossless(group)
+                    final_groups[i].integer = frac2int_lossless(group)
 
                     # Inner loop stop criteria 1: metric stops decreasing. Also
                     # pops head of `per_group_metric` and moves on to next. The
                     # worst group cannot be improved further, but the second
                     # worst might.
-                    if sum(wf[i]) * l1_norm_diff([wf[i]], [group]) \
+                    if wf_sums[i] * l1_norm_diff([self.groups[i]],
+                                                 [final_groups[i]]) \
                             >= last_metric:
                         per_group_metric.pop(0)
                         PRINTV(1, f'No metric improvement, skip group {i}.')
@@ -672,21 +675,20 @@ class GroupReduction:
                     # again, but the group that needs this most could be
                     # different now. So we sort the list again and see if we
                     # should continue on the same group.
-                    final_groups[i] = group
-                    last_metric = sum(wf[i]) * l1_norm_diff([wf[i]],
+                    last_metric = wf_sums[i] * l1_norm_diff([self.groups[i]],
                                                             [final_groups[i]])
                     per_group_metric[0][1] = last_metric
                     PRINTV(1, f'Group {i} new metric {last_metric}.')
                     per_group_metric = sorted(per_group_metric,
                                               key=lambda x: x[1],
                                               reverse=True)
-                    # Inner loop stop criteria 2: group with worst metric has
+                    # Inner loop stop criteria 2: group id with worst metric has
                     # changed, start over.
-                    if per_group_metric[0][1] != i:
+                    if per_group_metric[0][0] != i:
                         PRINTV(1, f'New worst group: {per_group_metric[0][0]}.')
                         break
 
-            return self.sanitize_and_cache(final_groups)
+            return self.sanitize(final_groups)
 
         except gp.GurobiError as e:
             print('Error code ' + str(e.errno) + ': ' + str(e))
@@ -708,11 +710,13 @@ if __name__ == "__main__":
         output_groups = gr.table_carving_ssmg(method)
         end = time.time_ns()
         print(f"===== Method: {method} =====")
-        print('Input: %s' % input_groups)
-        print('Output: %s' % output_groups)
-        print(f'L1 Norm: {l1_norm_diff(input_groups, output_groups)}')
-        print('Solving time (msec):', (end - start)/10**6)
-        print(f'Table util: {gr.get_table_util()} /'
+        print(f'Input: {input_groups}')
+        print(f'Output: {output_groups}')
+        G_in = [Group(gid=i, unstrip=g) for i, g in enumerate(input_groups)]
+        G_out = [Group(gid=i, unstrip=g) for i, g in enumerate(output_groups)]
+        print(f'L1 Norm: {l1_norm_diff(G_in, G_out)}')
+        print(f'Solving time (msec): {(end - start)/10**6}')
+        print(f'Table util: {sum([sum(g) for g in output_groups])} /'
               f' {gr.get_table_limit()}, headroom: '
-              f'{gr.get_table_limit() - gr.get_table_util()}')
+              f'{gr.get_table_limit() - sum([sum(g) for g in output_groups])}')
         print(f"===== End of method: {method} =====")

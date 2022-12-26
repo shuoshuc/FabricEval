@@ -62,15 +62,12 @@ class TestWCMPAlloc(unittest.TestCase):
         wcmp_alloc = WCMPAllocation(toy3, TOY3_SOL_PATH)
         wcmp_alloc.run()
         c1_worker = wcmp_alloc._worker_map[TOY3_C1]
-        # Verify both types SRC and TRANSIT exist.
-        self.assertEqual(2, len(c1_worker.groups_out.values()))
-        for g_map in c1_worker.groups_out.values():
-            # Verify all 4 nodes have groups.
-            self.assertEqual(4, len(g_map.keys()))
-            for node in g_map.keys():
-                # Verify node has non-zero ECMP utilization.
-                self.assertTrue(toy3.getNodeByName(node).getECMPUtil() > 0)
-                self.assertTrue(toy3.getNodeByName(node).getNumGroups() > 0)
+        # Verify there exist 4 nodes * (SRC and TRANSIT) = 8 sets of groups.
+        self.assertEqual(8, len(c1_worker.groups.values()))
+        for node, _, _ in c1_worker.groups.keys():
+            # Verify node has non-zero ECMP utilization.
+            self.assertTrue(toy3.getNodeByName(node).getECMPUtil() > 0)
+            self.assertTrue(toy3.getNodeByName(node).getNumGroups() > 0)
         link_util = toy3.dumpRealLinkUtil()
         # Verify real link utilization.
         self.assertTrue(link_util[TOY3_LINK1] > 0.68)
@@ -106,6 +103,11 @@ class TestGroupReduction(unittest.TestCase):
         self.assertEqual([list(range(1, 17))],
                          group_reduction.table_fitting_sssg())
 
+    def test_single_switch_single_group_5(self):
+        group_reduction = GroupReduction([[2000.01, 0, 0, 0]], 10)
+        self.assertEqual([[1, 0, 0, 0]], group_reduction.solve_sssg())
+        self.assertEqual([[1, 0, 0, 0]], group_reduction.table_fitting_sssg())
+
     def test_single_switch_multi_group_1(self):
         group_reduction = GroupReduction([[1, 2], [3, 4]], 16*1024)
         self.assertEqual([[1, 2], [3, 4]], group_reduction.solve_ssmg())
@@ -118,6 +120,8 @@ class TestGroupReduction(unittest.TestCase):
     def test_single_switch_multi_group_3(self):
         group_reduction = GroupReduction([[1, 0, 0], [0, 2, 4]], 5)
         # Verify that zeroes are correctly stripped and unstripped.
+        self.assertEqual([[1, 0, 0], [0, 1, 2]],
+                         group_reduction.solve_ssmg())
         self.assertEqual([[1, 0, 0], [0, 1, 2]],
                          group_reduction.table_fitting_ssmg())
 

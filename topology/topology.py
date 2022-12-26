@@ -153,22 +153,26 @@ class Node:
         '''
         Returns the ECMP table util on this node.
         '''
+        self.ecmp_used = sum([sum(g) for glist in self._groups.values() \
+                              for g in glist])
         return self.ecmp_used / self.ecmp_limit
 
     def getNumGroups(self):
         '''
         Returns the total number of groups installed on this node.
         '''
-        return sum([len(G_by_type) for G_by_type in self._groups.values()])
+        return len(self._groups[te_sol.PrefixIntent.PrefixType.SRC]) + \
+            len(self._groups[te_sol.PrefixIntent.PrefixType.TRANSIT])
 
     def installGroups(self, groups, group_type):
         '''
         Installs groups on node, and updates ECMP table space used. Groups
         completely overwrites the old ones of the same type.
         '''
-        self._groups[group_type] = copy.deepcopy(groups)
-        self.ecmp_used = sum([sum(g) for G_by_type in self._groups.values() \
-                              for (g, _) in G_by_type])
+        # Merges duplicate groups and drops the traffic volume associated.
+        # Groups can become duplicate after reduction.
+        self._groups[group_type] = [list(mg) for mg in \
+                                    set([tuple(g) for g, _ in groups])]
 
 class AggregationBlock:
     '''
