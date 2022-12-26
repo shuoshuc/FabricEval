@@ -93,7 +93,7 @@ class WCMPWorker:
             node, limit = port.getParent().name, port.getParent().ecmp_limit
             group = tmp_g.setdefault((node, prefix_intent.type, limit),
                                      [0] * len(port.getParent()._member_ports))
-            group[port.index - 1] = ne.weight
+            group[port.index - 1] = abs(ne.weight)
         for node_type_limit, g in tmp_g.items():
             self.groups.setdefault(node_type_limit, []).append((g, sum(g)))
 
