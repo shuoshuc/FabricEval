@@ -16,7 +16,7 @@ if __name__ == "__main__":
     logpath = sys.argv[1]
     net_proto = generateToy3()
     toy3 = Topology('', net_proto)
-    print(f'{datetime.now()} [Step 1] topology generated.')
+    print(f'{datetime.now()} [Step 1] topology generated.', flush=True)
     #print(text_format.MessageToString(net_proto))
     traffic_proto = tmgen(tor_level=True,
                           cluster_vector=np.array([1]*22 + [2.5]*22 + [5]*21),
@@ -27,23 +27,23 @@ if __name__ == "__main__":
     with open(f'{logpath}/TM.textproto', 'w') as tm:
         tm.write(text_format.MessageToString(traffic_proto))
     toy3_traffic = Traffic(toy3, '', traffic_proto)
-    print(f'{datetime.now()} [Step 2] traffic demand generated.')
+    print(f'{datetime.now()} [Step 2] traffic demand generated.', flush=True)
     global_te = GlobalTE(toy3, toy3_traffic)
     sol = global_te.solve()
     with open(f'{logpath}/te_sol.textproto', 'w') as te_sol:
         te_sol.write(text_format.MessageToString(sol))
-    print(f'{datetime.now()} [Step 3] global TE solution generated.')
+    print(f'{datetime.now()} [Step 3] global TE solution generated.', flush=True)
     #print(text_format.MessageToString(sol))
     wcmp_alloc = WCMPAllocation(toy3, '', sol)
     wcmp_alloc.run()
-    print(f'{datetime.now()} [Step 4] local TE solution generated.')
+    print(f'{datetime.now()} [Step 4] local TE solution generated.', flush=True)
     real_LUs = toy3.dumpRealLinkUtil()
     ideal_LUs = toy3.dumpIdealLinkUtil()
     delta_LUs = {}
     for k, v in real_LUs.items():
         delta_LUs[k] = v - ideal_LUs[k]
 
-    print(f'{datetime.now()} [Step 5] dump link util to LU.csv')
+    print(f'{datetime.now()} [Step 5] dump link util to LU.csv', flush=True)
     with open(f'{logpath}/LU.csv', 'w') as LU:
         writer = csv.writer(LU)
         writer.writerow(["link name", "ideal LU", "real LU", "delta"])
@@ -51,7 +51,8 @@ if __name__ == "__main__":
                                 reverse=True)).items():
             writer.writerow([k, f'{ideal_LUs[k]}', f'{real_LUs[k]}', f'{v}'])
 
-    print(f'{datetime.now()} [Step 6] dump node table util to node_ecmp.csv')
+    print(f'{datetime.now()} [Step 6] dump node table util to node_ecmp.csv',
+          flush=True)
     ecmp_util = toy3.dumpECMPUtil()
     with open(f'{logpath}/node_ecmp.csv', 'w') as ecmp:
         writer = csv.writer(ecmp)

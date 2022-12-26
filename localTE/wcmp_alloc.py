@@ -1,6 +1,7 @@
 import os
 import time
 from concurrent.futures import ProcessPoolExecutor, as_completed
+from datetime import datetime
 from itertools import islice
 
 import proto.te_solution_pb2 as te_sol
@@ -167,7 +168,8 @@ class WCMPAllocation:
             for fut in as_completed(futures):
                 node, g_type, limit, reduced_groups = fut.result()
                 self.groups_out[(node, g_type, limit)] = reduced_groups
-            PRINTV(1, f'[reduceGroup] batch complete in {time.time() - t} sec.')
+            PRINTV(1, f'{datetime.now()} [reduceGroup] batch complete in '
+                   f'{time.time() - t} sec.')
 
         # For each prefix type and each node, install all groups.
         for (node, g_type, _), groups in self.groups_out.items():
