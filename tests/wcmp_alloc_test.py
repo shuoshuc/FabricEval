@@ -74,8 +74,8 @@ class TestWCMPAlloc(unittest.TestCase):
         self.assertTrue(link_util[TOY3_LINK2] > 0.36)
         ecmp_util = toy3.dumpECMPUtil()
         # Verify node ECMP utilization.
-        self.assertTrue(ecmp_util[TOY3_NODE1][0] > 0.028)
-        self.assertEqual(86, ecmp_util[TOY3_NODE1][1])
+        self.assertTrue(ecmp_util[TOY3_NODE1][0] > 0.025)
+        self.assertEqual(73, ecmp_util[TOY3_NODE1][1])
 
 class TestGroupReduction(unittest.TestCase):
     def test_single_switch_single_group_1(self):
