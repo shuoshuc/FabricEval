@@ -97,6 +97,15 @@ def calc_group_oversub(G, G_prime, mode='max'):
         print('Mode %s not recognized!' % mode)
         return None
 
+@dataclass
+class Port:
+    '''
+    A data structure representing a group member port.
+    '''
+    # location of the port in the group.
+    loc: int
+    # Port WCMP weight.
+    w: int
 
 @dataclass
 class Group:
@@ -321,18 +330,103 @@ class GroupReduction:
 
         return self.sanitize(groups_out)
 
-    def google_ssmg(self):
+    def google_sssg(self, group, oversub_limit, max_group_size):
         '''
-        WCMP weight reduction for table fitting a set of WCMP groups H into
-        size S. Algorithm 3 + 4 in the EuroSys WCMP paper. This is Google's
-        implementation.
+        WCMP weight reduction for table fitting one group into group size S,
+        under a given oversub limit. This is Google's implementation.
+
+        group: input Group dataclass instance.
+        oversub_limit: maximum allowed oversub on the input group. Note that it
+                       could be possible that final group cannot meet the limit.
+        max_group_size: max group size allowed for the final group.
+        '''
+        # Constructs a weight vector with the location of each weight. The
+        # location is needed for later restoration. Not using Group dataclass
+        # to keep it lightweight.
+        old_weights = [Port(loc, w) for loc, w in enumerate(group.integer)]
+        old_weights.sort(key=lambda port: port.w, reverse=True)
+        old_weights_sum = sum(group.integer)
+        # Constructs an ECMP group out of `old_weights`.
+        new_weights = [Port(port.loc, 1) for port in old_weights]
+        # Ports are already sorted by their weights in descending order. With
+        # each element equal to 1 in `new_weights`, the max oversub of the ECMP
+        # group equals to the oversub on the last element.
+        max_oversub = old_weights_sum / (old_weights[-1].w * len(new_weights))
+
+        # If both oversub and group size are within limits, just return ECMP.
+        if max_oversub <= oversub_limit and len(new_weights) <= max_group_size:
+            group.integer = [1] * len(new_weights)
+            return self.sanitize([group])
+
+        smallest_max_oversub = max_oversub
+        new_weights_with_smallest_oversub = copy.deepcopy(new_weights)
+
+        max_weight_0 = old_weights[0].w
+        if old_weights_sum > max_group_size:
+            max_weight_0 = ceil(old_weights[0].w * max_group_size / \
+                                old_weights_sum)
+        else:
+            smallest_max_oversub = 1.0
+            new_weights_with_smallest_oversub = old_weights
+
+        # Sets upper limit on the number of loops to 16. Evaluation shows this
+        # yields reasonable accuracy.
+        MAX_NUM_ITER = 16
+        delta = round(max_weight_0 / (MAX_NUM_ITER - 1)) \
+            if max_weight_0 >= MAX_NUM_ITER else 1
+
+        # Increments the weight of member with largest weight by delta in each
+        # round.
+        while new_weights[0].w <= max_weight_0:
+            new_weights_sum = new_weights[0].w
+            weight_ratio = new_weights[0].w / old_weights[0].w
+            max_weight_ratio = weight_ratio
+            for i in range(1, len(new_weights)):
+                # Reduces the weight of other members proportionally.
+                new_weights[i].w = ceil(weight_ratio * old_weights[i].w)
+                max_weight_ratio = max(max_weight_ratio,
+                                       new_weights[i].w / old_weights[i].w)
+                new_weights_sum += new_weights[i].w
+            # No need to increment the weights further. Failed to fit.
+            if new_weights_sum > max_group_size:
+                break
+            max_oversub = max_weight_ratio * old_weights_sum / new_weights_sum
+            if max_oversub <= oversub_limit:
+                group.integer = [port.w for port in sorted(new_weights,
+                                                           key=lambda p: p.loc)]
+                return self.sanitize([group])
+            if max_oversub < smallest_max_oversub:
+                smallest_max_oversub = max_oversub
+                new_weights_with_smallest_oversub = copy.deepcopy(new_weights)
+            # Increments first member by delta, heading to next iteration.
+            new_weights[0].w += delta
+
+        # If we arrive here, it means we could not meet the oversub limit.
+        group.integer = [port.w for port in \
+                         sorted(new_weights_with_smallest_oversub,
+                                key=lambda port: port.loc)]
+        return self.sanitize([group])
+
+    def google_ssmg(self, oversub_limit, max_group_size):
+        '''
+        WCMP weight reduction for table fitting a set of groups into the table
+        limit. Internally, it calls google_sssg() to reduce each group
+        independently.
         '''
         if len(self.groups) <= 0:
             print(f'[ERROR] {GroupReduction.google_ssmg.__name__}: unexpected '
                   f'number of input groups {len(self.groups)}.')
             return []
 
-        pass
+        reduced = []
+        for group in self.groups:
+            # Resets each group gid to 0 so that self.sanitize() does not get
+            # confused, since SSSG should always be called with a group.gid = 0.
+            # Each group is reduced in the same order so wiping the gid does not
+            # cause any ordering problem.
+            group.gid = 0
+            reduced += self.google_sssg(group, oversub_limit, max_group_size)
+        return reduced
 
     def solve_sssg(self, formulation='L1NORM2', groups_in=None, C=None):
         '''
@@ -696,27 +790,3 @@ class GroupReduction:
         except AttributeError:
             print('Encountered an attribute error')
             return []
-
-if __name__ == "__main__":
-    table_limit = 16*1024
-    # groups, # port per group, lower bound, upper bound, fraction precision
-    g, p, lb, ub, frac_digits = 8, 16, 100, 100000, 3
-
-    #input_groups = [[1.1, 2.1], [3.1, 4.1]]
-    input_groups = input_groups_gen(g, p, lb, ub, frac_digits)
-    gr = GroupReduction(input_groups, table_limit)
-    for method in ['L1NORM1', 'L1NORM2']:
-        start = time.time_ns()
-        output_groups = gr.table_carving_ssmg(method)
-        end = time.time_ns()
-        print(f"===== Method: {method} =====")
-        print(f'Input: {input_groups}')
-        print(f'Output: {output_groups}')
-        G_in = [Group(gid=i, unstrip=g) for i, g in enumerate(input_groups)]
-        G_out = [Group(gid=i, unstrip=g) for i, g in enumerate(output_groups)]
-        print(f'L1 Norm: {l1_norm_diff(G_in, G_out)}')
-        print(f'Solving time (msec): {(end - start)/10**6}')
-        print(f'Table util: {sum([sum(g) for g in output_groups])} /'
-              f' {gr.get_table_limit()}, headroom: '
-              f'{gr.get_table_limit() - sum([sum(g) for g in output_groups])}')
-        print(f"===== End of method: {method} =====")
