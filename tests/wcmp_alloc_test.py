@@ -111,19 +111,28 @@ class TestGroupReduction(unittest.TestCase):
     def test_single_switch_multi_group_1(self):
         group_reduction = GroupReduction([[1, 2], [3, 4]], 16*1024)
         self.assertEqual([[1, 2], [3, 4]], group_reduction.solve_ssmg())
+        group_reduction.reset()
         self.assertEqual([[1, 2], [3, 4]], group_reduction.table_fitting_ssmg())
+        group_reduction.reset()
+        self.assertEqual([[1, 2], [3, 4]], group_reduction.google_ssmg())
 
     def test_single_switch_multi_group_2(self):
         group_reduction = GroupReduction([[1.1, 2.1], [3.1, 4.1]], 16*1024)
         self.assertEqual([[1, 2], [3, 4]], group_reduction.table_fitting_ssmg())
+        group_reduction.reset()
+        self.assertEqual([[1, 2], [3, 4]], group_reduction.google_ssmg())
 
     def test_single_switch_multi_group_3(self):
         group_reduction = GroupReduction([[1, 0, 0], [0, 2, 4]], 5)
         # Verify that zeroes are correctly stripped and unstripped.
         self.assertEqual([[1, 0, 0], [0, 1, 2]],
                          group_reduction.solve_ssmg())
+        group_reduction.reset()
         self.assertEqual([[1, 0, 0], [0, 1, 2]],
                          group_reduction.table_fitting_ssmg())
+        group_reduction.reset()
+        self.assertEqual([[1, 0, 0], [0, 1, 2]],
+                         group_reduction.google_ssmg())
 
 if __name__ == "__main__":
     unittest.main()

@@ -152,6 +152,16 @@ class GroupReduction:
 
         self._table_limit = table_limit
 
+    def reset(self):
+        '''
+        Resets the input groups to original state so that other reduction
+        algorithms can get a clean start. Resetting involes re-init the integer
+        weights and sorting the groups by gid.
+        '''
+        for g in self.groups:
+            g.integer = frac2int_round(g.strip)
+        self.groups.sort(key=lambda g: g.gid)
+
     def get_table_limit(self):
         '''
         Returns the group table limit.
@@ -330,15 +340,17 @@ class GroupReduction:
 
         return self.sanitize(groups_out)
 
-    def google_sssg(self, group, oversub_limit, max_group_size):
+    def _google_sssg(self, group, oversub_limit, max_group_size):
         '''
-        WCMP weight reduction for table fitting one group into group size S,
-        under a given oversub limit. This is Google's implementation.
+        WCMP weight reduction for table fitting one group into max group size,
+        under a given oversub limit. This is Google's SSSG implementation.
 
         group: input Group dataclass instance.
         oversub_limit: maximum allowed oversub on the input group. Note that it
                        could be possible that final group cannot meet the limit.
         max_group_size: max group size allowed for the final group.
+
+        Returns a reduced Group dataclass instance.
         '''
         # Constructs a weight vector with the location of each weight. The
         # location is needed for later restoration. Not using Group dataclass
@@ -356,7 +368,7 @@ class GroupReduction:
         # If both oversub and group size are within limits, just return ECMP.
         if max_oversub <= oversub_limit and len(new_weights) <= max_group_size:
             group.integer = [1] * len(new_weights)
-            return self.sanitize([group])
+            return group
 
         smallest_max_oversub = max_oversub
         new_weights_with_smallest_oversub = copy.deepcopy(new_weights)
@@ -394,7 +406,7 @@ class GroupReduction:
             if max_oversub <= oversub_limit:
                 group.integer = [port.w for port in sorted(new_weights,
                                                            key=lambda p: p.loc)]
-                return self.sanitize([group])
+                return group
             if max_oversub < smallest_max_oversub:
                 smallest_max_oversub = max_oversub
                 new_weights_with_smallest_oversub = copy.deepcopy(new_weights)
@@ -405,12 +417,12 @@ class GroupReduction:
         group.integer = [port.w for port in \
                          sorted(new_weights_with_smallest_oversub,
                                 key=lambda port: port.loc)]
-        return self.sanitize([group])
+        return group
 
-    def google_ssmg(self, oversub_limit, max_group_size):
+    def google_ssmg(self):
         '''
         WCMP weight reduction for table fitting a set of groups into the table
-        limit. Internally, it calls google_sssg() to reduce each group
+        limit. Internally, it calls _google_sssg() to reduce each group
         independently.
         '''
         if len(self.groups) <= 0:
@@ -418,15 +430,37 @@ class GroupReduction:
                   f'number of input groups {len(self.groups)}.')
             return []
 
-        reduced = []
-        for group in self.groups:
-            # Resets each group gid to 0 so that self.sanitize() does not get
-            # confused, since SSSG should always be called with a group.gid = 0.
-            # Each group is reduced in the same order so wiping the gid does not
-            # cause any ordering problem.
-            group.gid = 0
-            reduced += self.google_sssg(group, oversub_limit, max_group_size)
-        return reduced
+        enforced_oversub = 1.00
+        step_size = 0.01
+        S = self._table_limit
+        # Sort groups in descending order of size.
+        self.groups.sort(key=lambda g: sum(g.integer), reverse=True)
+        # No need for a deep copy because each element group would be replaced
+        # with a copy if it gets reduced.
+        groups_out = self.groups.copy()
+        group_sizes = np.array([sum(g.integer) for g in groups_out])
+
+        # If both total group size and per-group size are within limits, just
+        # return. Otherwise, run reduction.
+        while sum(group_sizes) > S or \
+                len(group_sizes[group_sizes > FLAG.MAX_GROUP_SIZE]):
+            for i in range(len(self.groups)):
+                groups_out[i] = self._google_sssg(self.groups[i],
+                                                  enforced_oversub,
+                                                  FLAG.MAX_GROUP_SIZE)
+                group_sizes = np.array([sum(g.integer) for g in groups_out])
+                if sum(group_sizes) <= S and \
+                        not len(group_sizes[group_sizes > FLAG.MAX_GROUP_SIZE]):
+                    return self.sanitize(groups_out)
+            # Relaxes oversub limit if we fail to fit all groups with the same
+            # oversub.
+            enforced_oversub += step_size
+            # Due to the per-group size limit, the previous largest group may
+            # not be the largest group any more, so sort again to make sure we
+            # always work on the largest group first.
+            groups_out.sort(key=lambda g: sum(g.integer), reverse=True)
+
+        return self.sanitize(groups_out)
 
     def solve_sssg(self, formulation='L1NORM2', groups_in=None, C=None):
         '''
