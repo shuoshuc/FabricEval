@@ -8,6 +8,7 @@ py_test(
         '//topology:topogen',
         '//traffic:traffic',
         '//traffic:tmgen',
+        '//common:flags',
     ],
     data = glob(['data/*.textproto']),
     python_version = 'PY3',

@@ -4,9 +4,9 @@ from math import floor
 import numpy as np
 import proto.traffic_pb2 as traffic
 from numpy.random import default_rng
-from scipy.stats import truncexpon, uniform
+from scipy.stats import bernoulli, truncexpon, uniform
 
-from common.flags import EQUAL_INGRESS_EGRESS
+import common.flags as FLAG
 
 
 def tmgen(tor_level, cluster_vector, num_nodes, model, dist='exp', netname=''):
@@ -57,15 +57,25 @@ def tmgen(tor_level, cluster_vector, num_nodes, model, dist='exp', netname=''):
         egress = genTotalDemand(tor_level, cluster_vector, num_nodes, dist)
         # Set block total ingress to be the same as egress if flag is true.
         # Otherwise, sample another set of values from the same distribution.
-        if EQUAL_INGRESS_EGRESS:
+        if FLAG.EQUAL_INGRESS_EGRESS:
             ingress = egress
         else:
             ingress = genTotalDemand(tor_level, cluster_vector, num_nodes, dist)
             # Rescale the ingress vector so that its sum equals egress. (Total
             # egress and ingress must match).
             ingress *= egress.sum() / ingress.sum()
+        # Designates P_SPARSE blocks to be empty. Stores their block indices.
+        # Note that if a block is empty, its egress and ingress demands are both
+        # set to 0, regardless of EQUAL_INGRESS_EGRESS.
+        empty_blocks = np.nonzero(bernoulli.rvs(1 - FLAG.P_SPARSE,
+                                                size=num_clusters) == 0)[0]
         # `r` is row vector for src, `c` is column vector for dst.
         for r, c in np.ndindex(tm.shape):
+            block_r = r // num_nodes if tor_level else r
+            block_c = c // num_nodes if tor_level else c
+            # If a block is designated empty, keep its row/column vector 0.
+            if block_r in empty_blocks or block_c in empty_blocks:
+                continue
             # Gravity model.
             tm[r, c] = egress[r] * ingress[c] / ingress.sum()
 

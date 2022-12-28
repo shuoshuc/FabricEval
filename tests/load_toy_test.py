@@ -4,6 +4,7 @@ import unittest
 import numpy as np
 import proto.traffic_pb2 as traffic_pb2
 
+import common.flags as FLAG
 from topology.topogen import generateToy3, generateToy4
 from topology.topology import Topology, filterPathSetWithSeg, loadTopo
 from traffic.tmgen import tmgen
@@ -262,6 +263,26 @@ class TestLoadToy3Net(unittest.TestCase):
                                                        TOY3_AGGR_BLOCK1))
 
     def test_toy3_traffic_construction2(self):
+        FLAG.P_SPARSE = 0.1
+        toy3 = Topology('', input_proto=generateToy3())
+        traffic_proto = tmgen(tor_level=False,
+                              cluster_vector=np.array([1]*22+[2.5]*22+[5]*21),
+                              num_nodes=32,
+                              model='gravity',
+                              dist='exp',
+                              netname='toy3')
+        toy3_traffic = Traffic(toy3, '', traffic_proto)
+        self.assertEqual(traffic_pb2.TrafficDemand.DemandType.LEVEL_AGGR_BLOCK,
+                         toy3_traffic.getDemandType())
+        self.assertTrue(64 * 65 >= len(toy3_traffic.getAllDemands()))
+        # Bernoulli distribution may not generate the exact same number as
+        # requested, so conservatively under-estimates by 20%.
+        non_empty_blocks = round((1 - FLAG.P_SPARSE) * 65 * 0.8)
+        num_demands = (non_empty_blocks - 1) * non_empty_blocks
+        self.assertTrue(num_demands <= len(toy3_traffic.getAllDemands()))
+
+    def test_toy3_traffic_construction3(self):
+        FLAG.P_SPARSE = 0.0
         toy3 = Topology('', input_proto=generateToy3())
         traffic_proto = tmgen(tor_level=False,
                               cluster_vector=np.array([1]*22+[2.5]*22+[5]*21),
@@ -291,7 +312,7 @@ class TestLoadToy3Net(unittest.TestCase):
                                                   dst_block_name)
         self.assertTrue(tot_traffic < 40000*22*4 + 100000*22*4 + 200000*20*4)
 
-    def test_toy3_traffic_construction3(self):
+    def test_toy3_traffic_construction4(self):
         toy3 = Topology('', input_proto=generateToy3())
         traffic_proto = tmgen(tor_level=True,
                               cluster_vector=np.array([1]*22+[2.5]*22+[5]*21),
@@ -375,7 +396,6 @@ class TestLoadToy4Net(unittest.TestCase):
                          toy4_traffic.getDemandType())
         # There should be only 1 demand.
         self.assertEqual(1, len(toy4_traffic.getAllDemands()))
-        print(toy4_traffic.getAllDemands())
         self.assertTrue((TOY4_AGGR_BLOCK1, TOY4_AGGR_BLOCK2) in \
                         toy4_traffic.getAllDemands())
         self.assertEqual(40000 * 4 * 0.5,

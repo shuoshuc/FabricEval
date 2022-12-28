@@ -6,6 +6,9 @@ VERBOSE = 1
 # True means the block total ingress should equal its total egress.
 EQUAL_INGRESS_EGRESS = False
 
+# Fraction of blocks with 0 demand.
+P_SPARSE = 0.1
+
 # Flag to control whether to enable hedging.
 ENABLE_HEDGING = True
 
