@@ -1,9 +1,9 @@
-from common.flags import VERBOSE
+import common.flags as FLAG
 
 
 def PRINTV(verbose, logstr):
     '''
     Print helper with verbosity control.
     '''
-    if VERBOSE >= verbose:
+    if FLAG.VERBOSE >= verbose:
         print(logstr, flush=True)

@@ -6,8 +6,8 @@ import proto.te_solution_pb2 as TESolution
 from google.protobuf import text_format
 from gurobipy import GRB
 
+import common.flags as FLAG
 from common.common import PRINTV
-from common.flags import *
 from topology.topology import Topology, filterPathSetWithSeg
 from traffic.traffic import Traffic
 
@@ -16,7 +16,7 @@ def prettyPrint(verbose, te_sol):
     '''
     Pretty prints the TE solution.
     '''
-    if VERBOSE >= verbose:
+    if FLAG.VERBOSE >= verbose:
         print('\n===== TE solution starts =====')
         for c, sol in te_sol.items():
             # Raw solution has flows in Tbps, converts back to Mbps.
@@ -51,7 +51,7 @@ class GlobalTE:
         try:
             # Initialize a new model
             m = gp.Model("global_mcf")
-            m.setParam("LogToConsole", 1 if VERBOSE >= 2 else 0)
+            m.setParam("LogToConsole", 1 if FLAG.VERBOSE >= 2 else 0)
             #m.setParam("FeasibilityTol", 1e-9)
             #m.setParam("NodefileStart", 0.5)
             #m.setParam("NodefileDir", "/tmp")
@@ -115,11 +115,11 @@ class GlobalTE:
                 # For each commodity i, sum_p(fip) == demand_i.
                 m.addConstr(gp.quicksum(list(f[idx].values())) == demand)
                 # Hedging constraint below.
-                if not ENABLE_HEDGING:
+                if not FLAG.ENABLE_HEDGING:
                     continue
                 # Spread S of 0 is illegal, should not add hedging constraint.
-                if math.isclose(S, 0.0, rel_tol=1e-10):
-                    print(f'[ERROR] hedging spread {S} cannot be 0!')
+                if math.isclose(FLAG.S, 0.0, rel_tol=1e-10):
+                    print(f'[ERROR] hedging spread {FLAG.S} cannot be 0!')
                     continue
                 # Obtains the capacity of every path in the path_set.
                 cp_list = [self._topo.findCapacityOfPathTuple(p) \
@@ -128,7 +128,7 @@ class GlobalTE:
                 # cannot exceed a fraction S of the total bisection capacity.
                 for k, p in enumerate(path_set.keys()):
                     m.addConstr(f[idx][p] <= demand *
-                                cp_list[k] / (sum(cp_list) * S))
+                                cp_list[k] / (sum(cp_list) * FLAG.S))
 
             # Optimize model
             m.optimize()

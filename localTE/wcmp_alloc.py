@@ -7,8 +7,8 @@ from itertools import islice
 import proto.te_solution_pb2 as te_sol
 from google.protobuf import text_format
 
+import common.flags as FLAG
 from common.common import PRINTV
-from common.flags import *
 from localTE.group_reduction import GroupReduction
 
 
@@ -159,9 +159,9 @@ class WCMPAllocation:
         # Run group reduction for each node in parallel. Limit parallelism up to
         # a relatively small number. This avoids queueing too much jobs and
         # filling up the internal job queue/message pipe.
-        for group_slice in self.chunkGroupsIn(PARALLELISM):
+        for group_slice in self.chunkGroupsIn(FLAG.PARALLELISM):
             t = time.time()
-            with ProcessPoolExecutor(max_workers=PARALLELISM) as exe:
+            with ProcessPoolExecutor(max_workers=FLAG.PARALLELISM) as exe:
                 futures = {exe.submit(reduceGroups, node, g_type, limit, groups)
                            for (node, g_type, limit), groups \
                            in group_slice.items()}

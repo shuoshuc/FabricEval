@@ -12,8 +12,8 @@ import gurobipy as gp
 import numpy as np
 from gurobipy import GRB
 
+import common.flags as FLAG
 from common.common import PRINTV
-from common.flags import *
 
 
 def gcd_reduce(vector):
@@ -127,7 +127,7 @@ class Group:
         self.integer = frac2int_round(self.strip)
 
     def weights(self):
-        return self.integer if USE_INT_INPUT_GROUPS else self.strip
+        return self.integer if FLAG.USE_INT_INPUT_GROUPS else self.strip
 
 class GroupReduction:
     '''
@@ -135,7 +135,7 @@ class GroupReduction:
     integer groups that can be directly implemented on switch hardware, based on
     defined problem formulation and constraints.
     '''
-    def __init__(self, groups, table_limit=TABLE_LIMIT):
+    def __init__(self, groups, table_limit=FLAG.TABLE_LIMIT):
         '''
         Initializes internal fields. In this class and all helper functions,
         all the groups are represented as instances of the Group dataclass.
@@ -447,7 +447,7 @@ class GroupReduction:
         try:
             # Initialize a new model
             m = gp.Model("single_switch_single_group")
-            m.setParam("LogToConsole", 1 if VERBOSE >= 2 else 0)
+            m.setParam("LogToConsole", 1 if FLAG.VERBOSE >= 2 else 0)
             m.setParam("FeasibilityTol", 1e-7)
             m.setParam("IntFeasTol", 1e-8)
             m.setParam("MIPGap", 1e-4)
@@ -525,7 +525,7 @@ class GroupReduction:
             m.addConstr(wf[i] / wf_sum - w[i] / C <= u[i])
             # Add constraint only if inputs are already scaled up to integers:
             # w[i] <= wf[i]
-            if USE_INT_INPUT_GROUPS:
+            if FLAG.USE_INT_INPUT_GROUPS:
                 m.addConstr(w[i] <= wf[i], "no_scale_up_" + str(1+i))
 
         return m
@@ -564,7 +564,7 @@ class GroupReduction:
             m.addConstr(wf[i] / wf_sum - w[i] * z <= u[i])
             # Add constraint only if inputs are already scaled up to integers:
             # w[i] <= wf[i]
-            if USE_INT_INPUT_GROUPS:
+            if FLAG.USE_INT_INPUT_GROUPS:
                 m.addConstr(w[i] <= wf[i], "no_scale_up_" + str(1+i))
 
         return m
@@ -583,7 +583,7 @@ class GroupReduction:
         try:
             # Initialize a new model
             m = gp.Model("single_switch_multi_group")
-            m.setParam("LogToConsole", 1 if VERBOSE >= 2 else 0)
+            m.setParam("LogToConsole", 1 if FLAG.VERBOSE >= 2 else 0)
             m.setParam("FeasibilityTol", 1e-7)
             m.setParam("IntFeasTol", 1e-8)
             m.setParam("MIPGap", 1e-4)
@@ -681,7 +681,7 @@ class GroupReduction:
                 model.addConstr(wf[m][i] / wf_sum[m] - w[m][i] * z[m] <= u[m][i])
                 # Add constraint only if inputs are already scaled up to
                 # integers: w[m][i] <= wf[m][i]
-                if USE_INT_INPUT_GROUPS:
+                if FLAG.USE_INT_INPUT_GROUPS:
                     model.addConstr(w[m][i] <= wf[m][i],
                                     "no_scale_up_{}_{}".format(m+1, i+1))
 
