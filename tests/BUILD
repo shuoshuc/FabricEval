@@ -1,5 +1,12 @@
 package(default_visibility = ["//visibility:public"])
 
+filegroup(
+    name = "testdata",
+    srcs = glob([
+        "data/*.textproto",
+    ]),
+)
+
 py_test(
     name = 'load_toy_test',
     srcs = ['load_toy_test.py'],

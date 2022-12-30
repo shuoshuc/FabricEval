@@ -12,6 +12,8 @@ from topology.topology import Topology, filterPathSetWithSeg, loadTopo
 from traffic.tmgen import tmgen
 from traffic.traffic import Traffic
 
+TOY3_SOL = 'tests/data/te_sol.textproto'
+
 if __name__ == "__main__":
     logpath = sys.argv[1]
     net_proto = generateToy3()

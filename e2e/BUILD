@@ -13,9 +13,7 @@ py_binary(
         '//localTE:group_reduction',
     ],
     data = [
-        "//tests:data/toy2.textproto",
-        "//tests:data/toy2_traffic.textproto",
-        "//tests:data/toy3_te_sol.textproto",
+        "//tests:testdata",
     ],
     python_version = 'PY3',
 )
