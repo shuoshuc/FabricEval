@@ -159,6 +159,7 @@ class WCMPAllocation:
         # Run group reduction for each node in parallel. Limit parallelism up to
         # a relatively small number. This avoids queueing too much jobs and
         # filling up the internal job queue/message pipe.
+        '''
         for group_slice in self.chunkGroupsIn(FLAG.PARALLELISM):
             t = time.time()
             with ProcessPoolExecutor(max_workers=FLAG.PARALLELISM) as exe:
@@ -170,6 +171,15 @@ class WCMPAllocation:
                 self.groups_out[(node, g_type, limit)] = reduced_groups
             PRINTV(1, f'{datetime.now()} [reduceGroup] batch complete in '
                    f'{time.time() - t} sec.')
+        '''
+        for (node, g_type, limit), groups in self.groups_in.items():
+            t = time.time()
+            self.groups_out[(node, g_type, limit)] = reduceGroups(node,
+                                                                  g_type,
+                                                                  limit,
+                                                                  groups)[3]
+            PRINTV(1, f'{datetime.now()} [reduceGroups] {node} type {g_type} '
+                   f'complete in {time.time() - t} sec.')
 
         # For each prefix type and each node, install all groups.
         for (node, g_type, _), groups in self.groups_out.items():
