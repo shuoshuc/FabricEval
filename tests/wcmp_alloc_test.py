@@ -1,6 +1,8 @@
 import ipaddress
 import unittest
 
+import proto.te_solution_pb2 as te_sol
+
 from localTE.group_reduction import GroupReduction
 from localTE.wcmp_alloc import WCMPAllocation, loadTESolution
 from topology.topogen import generateToy3
@@ -79,37 +81,53 @@ class TestWCMPAlloc(unittest.TestCase):
 
 class TestGroupReduction(unittest.TestCase):
     def test_single_switch_single_group_1(self):
-        group_reduction = GroupReduction([[1, 2, 3, 4]], 16*1024)
+        group_reduction = GroupReduction([[1, 2, 3, 4]],
+                                         te_sol.PrefixIntent.PrefixType.SRC,
+                                         16*1024)
         self.assertEqual([[1, 2, 3, 4]], group_reduction.solve_sssg())
+        group_reduction.reset()
         self.assertEqual([[1, 2, 3, 4]], group_reduction.table_fitting_sssg())
 
     def test_single_switch_single_group_2(self):
-        group_reduction = GroupReduction([[20, 40, 60, 80]], 16*1024)
+        group_reduction = GroupReduction([[20, 40, 60, 80]],
+                                         te_sol.PrefixIntent.PrefixType.SRC,
+                                         16*1024)
         self.assertEqual([[1, 2, 3, 4]], group_reduction.solve_sssg())
+        group_reduction.reset()
         # EuroSys heuristic does not perform lossless reduction if groups fit.
         self.assertEqual([[20, 40, 60, 80]],
                          group_reduction.table_fitting_sssg())
 
     def test_single_switch_single_group_3(self):
-        group_reduction = GroupReduction([[10.5, 20.1, 31.0, 39.7]], 10)
+        group_reduction = GroupReduction([[10.5, 20.1, 31.0, 39.7]],
+                                         te_sol.PrefixIntent.PrefixType.SRC,
+                                         10)
         self.assertEqual([[1, 2, 3, 4]], group_reduction.solve_sssg())
+        group_reduction.reset()
         self.assertEqual([[1, 2, 3, 4]], group_reduction.table_fitting_sssg())
 
     def test_single_switch_single_group_4(self):
         group_reduction = GroupReduction([[i + 0.1 for i in range(1, 17)]],
+                                         te_sol.PrefixIntent.PrefixType.SRC,
                                          16*1024)
         self.assertEqual([[(i + 0.1) * 10 for i in range(1, 17)]],
                          group_reduction.solve_sssg())
+        group_reduction.reset()
         self.assertEqual([list(range(1, 17))],
                          group_reduction.table_fitting_sssg())
 
     def test_single_switch_single_group_5(self):
-        group_reduction = GroupReduction([[2000.01, 0, 0, 0]], 10)
+        group_reduction = GroupReduction([[2000.01, 0, 0, 0]],
+                                         te_sol.PrefixIntent.PrefixType.SRC,
+                                         10)
         self.assertEqual([[1, 0, 0, 0]], group_reduction.solve_sssg())
+        group_reduction.reset()
         self.assertEqual([[1, 0, 0, 0]], group_reduction.table_fitting_sssg())
 
     def test_single_switch_multi_group_1(self):
-        group_reduction = GroupReduction([[1, 2], [3, 4]], 16*1024)
+        group_reduction = GroupReduction([[1, 2], [3, 4]],
+                                         te_sol.PrefixIntent.PrefixType.SRC,
+                                         16*1024)
         self.assertEqual([[1, 2], [3, 4]], group_reduction.solve_ssmg())
         group_reduction.reset()
         self.assertEqual([[1, 2], [3, 4]], group_reduction.table_fitting_ssmg())
@@ -117,13 +135,17 @@ class TestGroupReduction(unittest.TestCase):
         self.assertEqual([[1, 2], [3, 4]], group_reduction.google_ssmg())
 
     def test_single_switch_multi_group_2(self):
-        group_reduction = GroupReduction([[1.1, 2.1], [3.1, 4.1]], 16*1024)
+        group_reduction = GroupReduction([[1.1, 2.1], [3.1, 4.1]],
+                                         te_sol.PrefixIntent.PrefixType.SRC,
+                                         16*1024)
         self.assertEqual([[1, 2], [3, 4]], group_reduction.table_fitting_ssmg())
         group_reduction.reset()
         self.assertEqual([[1, 2], [3, 4]], group_reduction.google_ssmg())
 
     def test_single_switch_multi_group_3(self):
-        group_reduction = GroupReduction([[1, 0, 0], [0, 2, 4]], 5)
+        group_reduction = GroupReduction([[1, 0, 0], [0, 2, 4]],
+                                         te_sol.PrefixIntent.PrefixType.SRC,
+                                         5)
         # Verify that zeroes are correctly stripped and unstripped.
         self.assertEqual([[1, 0, 0], [0, 1, 2]],
                          group_reduction.solve_ssmg())
@@ -132,6 +154,14 @@ class TestGroupReduction(unittest.TestCase):
                          group_reduction.table_fitting_ssmg())
         group_reduction.reset()
         self.assertEqual([[1, 0, 0], [0, 1, 2]],
+                         group_reduction.google_ssmg())
+
+    def test_single_switch_multi_group_4(self):
+        group_reduction = GroupReduction([[6, 0, 0], [0, 2, 4], [2, 0, 0]],
+                                         te_sol.PrefixIntent.PrefixType.TRANSIT,
+                                         5)
+        # Google SSMG reduces transit groups to ECMP, does not de-duplicate.
+        self.assertEqual([[1, 0, 0], [0, 1, 1], [1, 0, 0]],
                          group_reduction.google_ssmg())
 
 if __name__ == "__main__":

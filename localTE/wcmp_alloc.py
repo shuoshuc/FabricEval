@@ -35,9 +35,10 @@ def reduceGroups(node, g_type, limit, groups):
     '''
     weight_vec = [g for (g, _) in groups]
     # ECMP table is split half and half, each half dedicated to a group type.
-    gr = GroupReduction(weight_vec, round(limit / 2))
-    reduced_vec = gr.table_fitting_ssmg()
+    gr = GroupReduction(weight_vec, g_type, round(limit / 2))
+    #reduced_vec = gr.table_fitting_ssmg()
     #reduced_vec = gr.solve_ssmg()
+    reduced_vec = gr.google_ssmg()
     reduced_groups = []
     for i, vec in enumerate(reduced_vec):
         reduced_groups.append((vec, groups[i][1]))

@@ -155,6 +155,9 @@ class Node:
         '''
         self.ecmp_used = sum([sum(g) for glist in self._groups.values() \
                               for g in glist])
+        if self.ecmp_used > self.ecmp_limit:
+            print(f'[ERROR] node {self.name} ECMP used {self.ecmp_used} exceed'
+                  f' limit {self.ecmp_limit}.')
         return self.ecmp_used / self.ecmp_limit
 
     def getNumGroups(self):

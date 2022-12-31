@@ -10,6 +10,7 @@ from typing import List
 
 import gurobipy as gp
 import numpy as np
+import proto.te_solution_pb2 as te_sol
 from gurobipy import GRB
 
 import common.flags as FLAG
@@ -129,13 +130,27 @@ class Group:
     def weights(self):
         return self.integer if FLAG.USE_INT_INPUT_GROUPS else self.strip
 
+    def prune(self):
+        '''
+        Prunes a port in group to reduce its size.
+        '''
+        # A group cannot be empty, so stop when its already a singleton.
+        if len(self.integer) <= 1:
+            return
+        # Prunes the first non-zero weight in the group.
+        # TODO: a more optimal policy: prune the smallest weight.
+        nz_idx = next((i for i, x in enumerate(self.unstrip) if x), None)
+        self.unstrip.pop(nz_idx)
+        self.strip.pop(0)
+        self.integer.pop(0)
+
 class GroupReduction:
     '''
     GroupReduction runs various solvers to reduce input groups to acceptable
     integer groups that can be directly implemented on switch hardware, based on
     defined problem formulation and constraints.
     '''
-    def __init__(self, groups, table_limit=FLAG.TABLE_LIMIT):
+    def __init__(self, groups, g_type, table_limit=FLAG.TABLE_LIMIT):
         '''
         Initializes internal fields. In this class and all helper functions,
         all the groups are represented as instances of the Group dataclass.
@@ -143,13 +158,15 @@ class GroupReduction:
         groups: input groups of intended weights reflecting desired traffic
                 distribution. This is a list of lists.
 
+        g_type: group type, an enum from te_sol.PrefixIntent.PrefixType.
+
         table_limit: upper bound of the group entries on the switch. Note that
                      this does not have to be the physical limit, but can also
                      be the available headroom left.
         '''
         # Converts the input weight vectors to a list of Group() objects.
         self.groups = [Group(gid=i, unstrip=g) for i, g in enumerate(groups)]
-
+        self.g_type = g_type
         self._table_limit = table_limit
 
     def reset(self):
@@ -212,6 +229,22 @@ class GroupReduction:
             # Reorders the sanitized groups using each group's gid.
             sanitized_groups[final_group.gid] = sanitized_group
         return sanitized_groups
+
+    def direct_ecmp(self):
+        '''
+        Directly reduces `self.groups` to ECMP form. This is a heuristic for
+        TRANSIT groups. Since they are always ECMP/singleton, there is no need
+        to go through the full reduction logic.
+        Note: we assume the ECMP groups will not exceed table limit after
+        de-duplication. But this function does not de-dup, so that the output
+        can have an 1-to-1 mapping with the input.
+        '''
+        ecmp_groups = [[]] * len(self.groups)
+        for group in self.groups:
+            raw_vec = np.array(group.unstrip)
+            raw_vec[raw_vec != 0] = 1
+            ecmp_groups[group.gid] = raw_vec.astype(np.int32).tolist()
+        return ecmp_groups
 
     def _choose_port_to_update(self, group_to_reduce, group_under_reduction):
         '''
@@ -367,8 +400,9 @@ class GroupReduction:
 
         # If both oversub and group size are within limits, just return ECMP.
         if max_oversub <= oversub_limit and len(new_weights) <= max_group_size:
-            group.integer = [1] * len(new_weights)
-            return group
+            new_group = copy.deepcopy(group)
+            new_group.integer = [1] * len(new_weights)
+            return new_group
 
         smallest_max_oversub = max_oversub
         new_weights_with_smallest_oversub = copy.deepcopy(new_weights)
@@ -404,9 +438,10 @@ class GroupReduction:
                 break
             max_oversub = max_weight_ratio * old_weights_sum / new_weights_sum
             if max_oversub <= oversub_limit:
-                group.integer = [port.w for port in sorted(new_weights,
-                                                           key=lambda p: p.loc)]
-                return group
+                new_group = copy.deepcopy(group)
+                new_group.integer = [port.w for port in \
+                                     sorted(new_weights, key=lambda p: p.loc)]
+                return new_group
             if max_oversub < smallest_max_oversub:
                 smallest_max_oversub = max_oversub
                 new_weights_with_smallest_oversub = copy.deepcopy(new_weights)
@@ -414,10 +449,11 @@ class GroupReduction:
             new_weights[0].w += delta
 
         # If we arrive here, it means we could not meet the oversub limit.
-        group.integer = [port.w for port in \
-                         sorted(new_weights_with_smallest_oversub,
-                                key=lambda port: port.loc)]
-        return group
+        new_group = copy.deepcopy(group)
+        new_group.integer = [port.w for port in \
+                             sorted(new_weights_with_smallest_oversub,
+                                    key=lambda port: port.loc)]
+        return new_group
 
     def google_ssmg(self):
         '''
@@ -430,8 +466,13 @@ class GroupReduction:
                   f'number of input groups {len(self.groups)}.')
             return []
 
+        # Heuristic: directly returns ECMP/singleton groups for TRANSIT type.
+        # No need to go through the full reduction process.
+        if self.g_type == te_sol.PrefixIntent.PrefixType.TRANSIT:
+            return self.direct_ecmp()
+
         enforced_oversub = 1.00
-        step_size = 0.01
+        step_size = 0.05
         S = self._table_limit
         # Sort groups in descending order of size.
         self.groups.sort(key=lambda g: sum(g.integer), reverse=True)
@@ -439,6 +480,9 @@ class GroupReduction:
         # with a copy if it gets reduced.
         groups_out = self.groups.copy()
         group_sizes = np.array([sum(g.integer) for g in groups_out])
+        curr_size = sum(group_sizes)
+        # Counts # continuous iterations with no progress in reduction.
+        stuck_iters = 0
 
         # If both total group size and per-group size are within limits, just
         # return. Otherwise, run reduction.
@@ -452,13 +496,30 @@ class GroupReduction:
                 if sum(group_sizes) <= S and \
                         not len(group_sizes[group_sizes > FLAG.MAX_GROUP_SIZE]):
                     return self.sanitize(groups_out)
+
             # Relaxes oversub limit if we fail to fit all groups with the same
             # oversub.
             enforced_oversub += step_size
-            # Due to the per-group size limit, the previous largest group may
-            # not be the largest group any more, so sort again to make sure we
-            # always work on the largest group first.
-            groups_out.sort(key=lambda g: sum(g.integer), reverse=True)
+            # Reduction is making progress, go to next iteration.
+            if sum(group_sizes) < curr_size:
+                curr_size = sum(group_sizes)
+                stuck_iters = 0
+                continue
+            # If after an iteration of reduction, total size did not decrease,
+            # it means no progress. If this happens 3 times in a row, we deem
+            # the reduction stuck and prune a port from the first group to
+            # reduce the total size.
+            stuck_iters += 1
+            if stuck_iters > 3:
+                self.groups[0].prune()
+                PRINTV(1, f'group {self.groups[0].gid} is pruned. Now has '
+                       f'{len(self.groups[0].integer)} members.')
+                # Group sizes could change after pruning, so sort again to
+                # keep the largest first.
+                self.groups.sort(key=lambda g: sum(g.integer), reverse=True)
+                # Resets stuck iteration counts after pruning so that we get a
+                # fresh start.
+                stuck_iters = 0
 
         return self.sanitize(groups_out)
 
