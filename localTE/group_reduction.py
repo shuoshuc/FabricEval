@@ -140,7 +140,7 @@ class Group:
         # Prunes the first non-zero weight in the group.
         # TODO: a more optimal policy: prune the smallest weight.
         nz_idx = next((i for i, x in enumerate(self.unstrip) if x), None)
-        self.unstrip.pop(nz_idx)
+        self.unstrip[nz_idx] = 0.0
         self.strip.pop(0)
         self.integer.pop(0)
 
@@ -517,6 +517,7 @@ class GroupReduction:
                 # Group sizes could change after pruning, so sort again to
                 # keep the largest first.
                 self.groups.sort(key=lambda g: sum(g.integer), reverse=True)
+                groups_out = self.groups.copy()
                 # Resets stuck iteration counts after pruning so that we get a
                 # fresh start.
                 stuck_iters = 0

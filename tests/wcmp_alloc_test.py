@@ -164,5 +164,14 @@ class TestGroupReduction(unittest.TestCase):
         self.assertEqual([[1, 0, 0], [0, 1, 1], [1, 0, 0]],
                          group_reduction.google_ssmg())
 
+    def test_single_switch_multi_group_5(self):
+        group_reduction = GroupReduction([[100, 1, 1], [0, 2, 4]],
+                                         te_sol.PrefixIntent.PrefixType.SRC,
+                                         4)
+        # Google SSMG prunes the first member of the largest group when simple
+        # reduction cannot fit the groups.
+        self.assertEqual([[0, 1, 1], [0, 1, 1]],
+                         group_reduction.google_ssmg())
+
 if __name__ == "__main__":
     unittest.main()
