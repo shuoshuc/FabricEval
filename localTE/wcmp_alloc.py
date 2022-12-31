@@ -11,6 +11,9 @@ import common.flags as FLAG
 from common.common import PRINTV
 from localTE.group_reduction import GroupReduction
 
+# Shorthand alias for SRC and TRANSIT type constants.
+SRC = te_sol.PrefixIntent.PrefixType.SRC
+TRANSIT = te_sol.PrefixIntent.PrefixType.TRANSIT
 
 def loadTESolution(filepath):
     if not filepath:
@@ -20,29 +23,53 @@ def loadTESolution(filepath):
         text_format.Parse(f.read(), sol)
     return sol
 
-def reduceGroups(node, g_type, limit, groups):
+def chunk(container, size):
+    '''
+    Chunks `container` to multiple pieces, each of size `size`.
+    Returns a generator.
+    '''
+    it = iter(container)
+    for i in range(0, len(container), size):
+        yield {k for k in islice(it, size)}
+
+def reduceGroups(node, limit, src_groups, transit_groups):
     '''
     A helper function that wraps around the GroupReduction class to invoke
     group reduction on each node.
 
     node: node name.
-    g_type: group type, SRC/TRANSIT.
     limit: ECMP table limit.
-    groups: a list of pre-reduction groups.
+    src_groups: a list of pre-reduction src groups. Can be None.
+    transit_groups: a list of pre-reduction transit groups. Can be None.
 
     Returns a tuple of the same structure as the input, except groups are
     post-reduction.
     '''
-    weight_vec = [g for (g, _) in groups]
-    # ECMP table is split half and half, each half dedicated to a group type.
-    gr = GroupReduction(weight_vec, g_type, round(limit / 2))
-    #reduced_vec = gr.table_fitting_ssmg()
-    #reduced_vec = gr.solve_ssmg()
-    reduced_vec = gr.google_ssmg()
-    reduced_groups = []
-    for i, vec in enumerate(reduced_vec):
-        reduced_groups.append((vec, groups[i][1]))
-    return (node, g_type, limit, reduced_groups)
+    reduced_src_groups, reduced_transit_groups = [], []
+
+    # Work on TRANSIT groups.
+    if transit_groups:
+        transit_vec = [g for (g, _) in transit_groups]
+        # ECMP table is split half and half between SRC and TRANSIT.
+        gr = GroupReduction(transit_vec, TRANSIT, round(limit / 2))
+        #reduced_transit = gr.table_fitting_ssmg()
+        #reduced_transit = gr.solve_ssmg()
+        reduced_transit = gr.google_ssmg()
+        for i, vec in enumerate(reduced_transit):
+            reduced_transit_groups.append((vec, transit_groups[i][1]))
+
+    # Work on SRC groups.
+    if src_groups:
+        src_vec = [g for (g, _) in src_groups]
+        # ECMP table is split half and half between SRC and TRANSIT.
+        gr = GroupReduction(src_vec, SRC, round(limit / 2))
+        #reduced_src = gr.table_fitting_ssmg()
+        #reduced_src = gr.solve_ssmg()
+        reduced_src = gr.google_ssmg()
+        for i, vec in enumerate(reduced_src):
+            reduced_src_groups.append((vec, src_groups[i][1]))
+
+    return (node, limit, reduced_src_groups, reduced_transit_groups)
 
 class WCMPWorker:
     '''
@@ -82,8 +109,7 @@ class WCMPWorker:
         same node together to form one group.
         No return, directly modifies class member variables.
         '''
-        if prefix_intent.type not in [te_sol.PrefixIntent.PrefixType.SRC,
-                                      te_sol.PrefixIntent.PrefixType.TRANSIT]:
+        if prefix_intent.type not in [SRC, TRANSIT]:
             print(f'[ERROR] PrefixIntentToGroups: unknown prefix type '
                   f'{prefix_intent.type}!')
             return
@@ -139,15 +165,6 @@ class WCMPAllocation:
             # this case, it only manages one aggregation block.
             self._worker_map[aggr_block] = WCMPWorker(topo_obj, te_intent)
 
-    def chunkGroupsIn(self, size):
-        '''
-        Chunks `self.groups_in` to multiple sub-dicts, each of size `size`.
-        Returns a generator.
-        '''
-        it = iter(self.groups_in)
-        for i in range(0, len(self.groups_in), size):
-            yield {k: self.groups_in[k] for k in islice(it, size)}
-
     def run(self):
         '''
         Launches all WCMP workers to reduce groups.
@@ -157,29 +174,42 @@ class WCMPAllocation:
         for worker in self._worker_map.values():
             self.groups_in.update(worker.populateGroups())
 
+        # Creates a set of (node, limit) so that we can later fetch both the SRC
+        # and TRANSIT groups to reduce together.
+        node_limit_set = set()
+        for node, _, limit in self.groups_in.keys():
+            node_limit_set.add((node, limit))
         # Run group reduction for each node in parallel. Limit parallelism up to
         # a relatively small number. This avoids queueing too much jobs and
         # filling up the internal job queue/message pipe.
         '''
-        for group_slice in self.chunkGroupsIn(FLAG.PARALLELISM):
+        for set_slice in chunk(node_limit_set, FLAG.PARALLELISM):
             t = time.time()
             with ProcessPoolExecutor(max_workers=FLAG.PARALLELISM) as exe:
-                futures = {exe.submit(reduceGroups, node, g_type, limit, groups)
-                           for (node, g_type, limit), groups \
-                           in group_slice.items()}
+                futures = {exe.submit(reduceGroups, node, limit,
+                                      self.groups_in.get((node, SRC, limit)),
+                                      self.groups_in.get((node, TRANSIT, limit)))
+                           for node, limit in set_slice}
             for fut in as_completed(futures):
-                node, g_type, limit, reduced_groups = fut.result()
-                self.groups_out[(node, g_type, limit)] = reduced_groups
-            PRINTV(1, f'{datetime.now()} [reduceGroup] batch complete in '
+                node, limit, reduced_src, reduced_transit = fut.result()
+                if len(reduced_src):
+                    self.groups_out[(node, SRC, limit)] = reduced_src
+                if len(reduced_transit):
+                    self.groups_out[(node, TRANSIT, limit)] = reduced_transit
+            PRINTV(1, f'{datetime.now()} [reduceGroups] batch complete in '
                    f'{time.time() - t} sec.')
         '''
-        for (node, g_type, limit), groups in self.groups_in.items():
+        for node, limit in node_limit_set:
             t = time.time()
-            self.groups_out[(node, g_type, limit)] = reduceGroups(node,
-                                                                  g_type,
-                                                                  limit,
-                                                                  groups)[3]
-            PRINTV(1, f'{datetime.now()} [reduceGroups] {node} type {g_type} '
+            _, _, reduced_src, reduced_transit = \
+                reduceGroups(node, limit,
+                             self.groups_in.get((node, SRC, limit)),
+                             self.groups_in.get((node, TRANSIT, limit)))
+            if len(reduced_src):
+                self.groups_out[(node, SRC, limit)] = reduced_src
+            if len(reduced_transit):
+                self.groups_out[(node, TRANSIT, limit)] = reduced_transit
+            PRINTV(1, f'{datetime.now()} [reduceGroups] {node} '
                    f'complete in {time.time() - t} sec.')
 
         # For each prefix type and each node, install all groups.
