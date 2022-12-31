@@ -512,7 +512,7 @@ class GroupReduction:
             stuck_iters += 1
             if stuck_iters > 3:
                 self.groups[0].prune()
-                PRINTV(1, f'group {self.groups[0].gid} is pruned. Now has '
+                PRINTV(2, f'group {self.groups[0].gid} is pruned. Now has '
                        f'{len(self.groups[0].integer)} members.')
                 # Group sizes could change after pruning, so sort again to
                 # keep the largest first.
