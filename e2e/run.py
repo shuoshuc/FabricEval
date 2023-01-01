@@ -61,3 +61,12 @@ if __name__ == "__main__":
         writer.writerow(["node name", "ECMP util", "# groups"])
         for k, (util, num_g) in ecmp_util.items():
             writer.writerow([k, f'{util}', f'{num_g}'])
+
+    print(f'{datetime.now()} [Step 7] dump node demand to node_demand.csv',
+          flush=True)
+    demand_admit = toy3.dumpDemandAdmission()
+    with open(f'{logpath}/node_demand.csv', 'w') as demand:
+        writer = csv.writer(demand)
+        writer.writerow(["node name", "total demand", "total admit", "ratio"])
+        for node, (tot_demand, tot_admit, f) in demand_admit.items():
+            writer.writerow([node, tot_demand, tot_admit, f])
