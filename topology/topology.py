@@ -185,14 +185,15 @@ class Node:
         Installs groups on node, and updates ECMP table space used. Groups
         completely overwrites the old ones of the same type.
         '''
+        ecmp_cnt = 0
         # Merges duplicate groups and drops the traffic volume associated.
         # Groups can become duplicate after reduction.
         dedup_groups = [list(mg) for mg in set([tuple(g) for g, _ in groups])]
         for dedup_group in dedup_groups:
             # Only install groups that can fit into the ECMP table.
-            if self.ecmp_used + sum(dedup_group) <= self.ecmp_limit:
+            if ecmp_cnt + sum(dedup_group) <= self.ecmp_limit / 2:
                 self._groups[group_type].append(dedup_group)
-                self.ecmp_used += sum(dedup_group)
+                ecmp_cnt += sum(dedup_group)
 
 
 class AggregationBlock:

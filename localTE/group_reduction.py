@@ -344,14 +344,17 @@ class GroupReduction:
         '''
         WCMP weight reduction for table fitting a set of WCMP groups H into
         size S. Algorithm 4 in the EuroSys WCMP paper.
+        This algorithm can be stuck if all groups in their ECMP form still
+        exceed table limit. Relaxing enforced_oversub does not help in this
+        case. It simply gives up and returns the best effort groups.
         '''
         if len(self.groups) <= 0:
             print(f'[ERROR] {GroupReduction.table_fitting_ssmg.__name__}: '
                   f'unexpected number of input groups {len(self.groups)}.')
             return []
 
-        enforced_oversub = 1.002
-        step_size = 0.001
+        enforced_oversub = 1.00
+        step_size = 0.05
         S = self._table_limit
         # Sort groups in descending order of size.
         self.groups.sort(key=lambda g: sum(g.integer), reverse=True)
@@ -359,13 +362,17 @@ class GroupReduction:
         # with a copy if it gets reduced.
         groups_out = self.groups.copy()
         total_size = sum([sum(g.integer) for g in groups_out])
+        # Total size when all groups are ECMP.
+        ecmp_size = sum([len(g.integer) for g in groups_out])
 
         while total_size > S:
             for i in range(len(self.groups)):
                 groups_out[i] = self._reduce_wcmp_group(self.groups[i],
                                                         enforced_oversub)
                 total_size = sum([sum(g.integer) for g in groups_out])
-                if total_size <= S:
+                # If total size fits into table limit or has already become
+                # ECMP, no need to keep trying.
+                if total_size <= S or total_size == ecmp_size:
                     return self.sanitize(groups_out)
             # Relaxes oversub limit if we fail to fit all groups with the same
             # oversub.
