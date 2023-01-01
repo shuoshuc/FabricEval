@@ -135,6 +135,10 @@ class Node:
         }
         # Current ECMP table usage, should equal sum of all groups.
         self.ecmp_used = 0
+        # Total traffic demand that is sent to this node.
+        self.tot_demand = 0
+        # Total traffic demand that is eventually admitted into this node.
+        self.tot_admit = 0
 
     def setParent(self, aggr_block, cluster):
         self._parent_aggr_block = aggr_block
@@ -149,12 +153,21 @@ class Node:
     def getParentCluster(self):
         return self._parent_cluster
 
+    def hasGroup(self, group, g_type):
+        '''
+        Returns whether `group` is installed on this node.
+        '''
+        return (group in self._groups[g_type])
+
+    def updateECMPUsage(self):
+        self.ecmp_used = sum([sum(g) for glist in self._groups.values() \
+                              for g in glist])
+
     def getECMPUtil(self):
         '''
         Returns the ECMP table util on this node.
         '''
-        self.ecmp_used = sum([sum(g) for glist in self._groups.values() \
-                              for g in glist])
+        self.updateECMPUsage()
         if self.ecmp_used > self.ecmp_limit:
             print(f'[ERROR] node {self.name} ECMP used {self.ecmp_used} exceed'
                   f' limit {self.ecmp_limit}.')
@@ -174,8 +187,13 @@ class Node:
         '''
         # Merges duplicate groups and drops the traffic volume associated.
         # Groups can become duplicate after reduction.
-        self._groups[group_type] = [list(mg) for mg in \
-                                    set([tuple(g) for g, _ in groups])]
+        dedup_groups = [list(mg) for mg in set([tuple(g) for g, _ in groups])]
+        for dedup_group in dedup_groups:
+            # Only install groups that can fit into the ECMP table.
+            if self.ecmp_used + sum(dedup_group) <= self.ecmp_limit:
+                self._groups[group_type].append(dedup_group)
+                self.ecmp_used += sum(dedup_group)
+
 
 class AggregationBlock:
     '''
@@ -652,8 +670,18 @@ class Topology:
         group_type: SRC or TRANSIT, groups of different types cannot be shared.
         '''
         node = self.getNodeByName(node_name)
+        # Note that not all groups are guaranteed to be installed due to table
+        # limit. We need to check to see if a group is indeed installed.
         node.installGroups(groups, group_type)
         for (group, vol) in groups:
+            # Keep track of the traffic landing on node and admitted. If a group
+            # is not installed, the corresponding traffic is completely dropped.
+            # This means, we count it in tot_demand but not tot_admit. We also
+            # do not count the traffic distributed on each link.
+            node.tot_demand += vol
+            if not node.hasGroup(group, group_type):
+                continue
+            node.tot_admit += vol
             # Finds all the ports that carry traffic in the group.
             nz_indices = np.nonzero(np.array(group))[0]
             for i in nz_indices:
@@ -688,3 +716,17 @@ class Topology:
             ecmp_util_map[node.name] = (node.getECMPUtil(), node.getNumGroups())
         return dict(sorted(ecmp_util_map.items(), key=lambda x: x[1][0],
                            reverse=True))
+
+    def dumpDemandAdmission(self):
+        '''
+        Returns a map of total demand and total admitted traffic for all nodes.
+        Returned dict is sorted from lowest fraction to highest. Zeros are
+        pushed to the end.
+        {node name: (tot_demand, tot_admit, tot_admit / tot_demand)}
+        '''
+        demand_admit = {}
+        for node in self._nodes.values():
+            f = node.tot_admit / node.tot_demand if node.tot_demand else 0
+            demand_admit[node.name] = (node.tot_demand, node.tot_admit, f)
+        return dict(sorted(demand_admit.items(),
+                           key=lambda x: (x[1][2] == 0, x[1][2])))
