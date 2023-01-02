@@ -6,6 +6,8 @@ import proto.te_solution_pb2 as te_sol
 import proto.topology_pb2 as topo
 from google.protobuf import text_format
 
+import common.flags as FLAG
+
 
 def loadTopo(filepath):
     if not filepath:
@@ -185,15 +187,18 @@ class Node:
         Installs groups on node, and updates ECMP table space used. Groups
         completely overwrites the old ones of the same type.
         '''
+        free_space = self.ecmp_limit - self.ecmp_used \
+            if FLAG.IMPROVED_HEURISTIC else self.ecmp_limit / 2
         ecmp_cnt = 0
         # Merges duplicate groups and drops the traffic volume associated.
         # Groups can become duplicate after reduction.
         dedup_groups = [list(mg) for mg in set([tuple(g) for g, _ in groups])]
         for dedup_group in dedup_groups:
             # Only install groups that can fit into the ECMP table.
-            if ecmp_cnt + sum(dedup_group) <= self.ecmp_limit / 2:
+            if ecmp_cnt + sum(dedup_group) <= free_space:
                 self._groups[group_type].append(dedup_group)
                 ecmp_cnt += sum(dedup_group)
+        self.updateECMPUsage()
 
 
 class AggregationBlock:

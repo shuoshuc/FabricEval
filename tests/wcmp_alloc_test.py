@@ -3,6 +3,7 @@ import unittest
 
 import proto.te_solution_pb2 as te_sol
 
+import common.flags as FLAG
 from localTE.group_reduction import GroupReduction
 from localTE.wcmp_alloc import WCMPAllocation, loadTESolution
 from topology.topogen import generateToy3
@@ -168,6 +169,7 @@ class TestGroupReduction(unittest.TestCase):
                          group_reduction.google_ssmg())
 
     def test_single_switch_multi_group_5(self):
+        FLAG.IMPROVED_HEURISTIC = False
         group_reduction = GroupReduction([[100, 1, 1], [0, 2, 4]],
                                          te_sol.PrefixIntent.PrefixType.SRC,
                                          4)

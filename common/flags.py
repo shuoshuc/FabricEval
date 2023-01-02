@@ -24,5 +24,8 @@ TABLE_LIMIT = 16 * 1024
 # Max ECMP entries a group is allowed to use.
 MAX_GROUP_SIZE = 256
 
+# True to enable a set of improved heuristics in group reduction.
+IMPROVED_HEURISTIC = True
+
 # Number of parallel group reductions allowed to run.
 PARALLELISM = 16

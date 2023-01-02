@@ -137,12 +137,20 @@ class Group:
         # A group cannot be empty, so stop when its already a singleton.
         if len(self.integer) <= 1:
             return
-        # Prunes the first non-zero weight in the group.
-        # TODO: a more optimal policy: prune the smallest weight.
-        nz_idx = next((i for i, x in enumerate(self.unstrip) if x), None)
-        self.unstrip[nz_idx] = 0.0
-        self.strip.pop(0)
-        self.integer.pop(0)
+
+        if FLAG.IMPROVED_HEURISTIC:
+            # Smart pruning policy:
+            np_unstrip = np.array(self.unstrip)
+            idx_min = np.argmin(np.ma.masked_where(self.unstrip==0,
+                                                   self.unstrip))
+            self.unstrip[idx_min] = 0.0
+            self.__post_init__()
+        else:
+            # Default policy: prunes the first non-zero weight in the group.
+            nz_idx = next((i for i, x in enumerate(self.unstrip) if x), None)
+            self.unstrip[nz_idx] = 0.0
+            self.strip.pop(0)
+            self.integer.pop(0)
 
 class GroupReduction:
     '''
@@ -481,6 +489,16 @@ class GroupReduction:
         enforced_oversub = 1.00
         step_size = 0.05
         S = self._table_limit
+        group_vol = np.array([sum(g.unstrip) for g in self.groups])
+        max_group_sizes = np.array([FLAG.MAX_GROUP_SIZE] * len(self.groups))
+        # Heuristic: max group size for each group is the larger of the
+        # pre-defined constant and the proportional carved space using group
+        # traffic volume.
+        if FLAG.IMPROVED_HEURISTIC:
+            max_group_sizes = np.maximum(np.floor(group_vol \
+                                                  / group_vol.sum() * S),
+                                         max_group_sizes)
+
         # Sort groups in descending order of size.
         self.groups.sort(key=lambda g: sum(g.integer), reverse=True)
         # No need for a deep copy because each element group would be replaced
@@ -494,14 +512,14 @@ class GroupReduction:
         # If both total group size and per-group size are within limits, just
         # return. Otherwise, run reduction.
         while sum(group_sizes) > S or \
-                len(group_sizes[group_sizes > FLAG.MAX_GROUP_SIZE]):
+                len(group_sizes[group_sizes > max_group_sizes]):
             for i in range(len(self.groups)):
                 groups_out[i] = self._google_sssg(self.groups[i],
                                                   enforced_oversub,
-                                                  FLAG.MAX_GROUP_SIZE)
+                                                  max_group_sizes[i])
                 group_sizes = np.array([sum(g.integer) for g in groups_out])
                 if sum(group_sizes) <= S and \
-                        not len(group_sizes[group_sizes > FLAG.MAX_GROUP_SIZE]):
+                        not len(group_sizes[group_sizes > max_group_sizes]):
                     return self.sanitize(groups_out)
 
             # Relaxes oversub limit if we fail to fit all groups with the same

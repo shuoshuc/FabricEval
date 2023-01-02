@@ -32,6 +32,14 @@ def chunk(container, size):
     for i in range(0, len(container), size):
         yield {k for k in islice(it, size)}
 
+def deDupSize(weight_vec):
+    '''
+    Returns the total size of weight_vec after de-duplication.
+
+    weight_vec: a list of lists, representing groups.
+    '''
+    return sum([sum(v) for v in set([tuple(vec) for vec in weight_vec])])
+
 def reduceGroups(node, limit, src_groups, transit_groups):
     '''
     A helper function that wraps around the GroupReduction class to invoke
@@ -46,23 +54,29 @@ def reduceGroups(node, limit, src_groups, transit_groups):
     post-reduction.
     '''
     reduced_src_groups, reduced_transit_groups = [], []
+    # # entries consumed by transit groups.
+    used = 0
 
     # Work on TRANSIT groups.
     if transit_groups:
         transit_vec = [g for (g, _) in transit_groups]
-        # ECMP table is split half and half between SRC and TRANSIT.
         gr = GroupReduction(transit_vec, TRANSIT, round(limit / 2))
         #reduced_transit = gr.table_fitting_ssmg()
         #reduced_transit = gr.solve_ssmg()
         reduced_transit = gr.google_ssmg()
+        used = deDupSize(reduced_transit)
         for i, vec in enumerate(reduced_transit):
             reduced_transit_groups.append((vec, transit_groups[i][1]))
 
     # Work on SRC groups.
     if src_groups:
         src_vec = [g for (g, _) in src_groups]
-        # ECMP table is split half and half between SRC and TRANSIT.
-        gr = GroupReduction(src_vec, SRC, round(limit / 2))
+        # ECMP table is by default split half and half between SRC and TRANSIT.
+        # With improved heuristic, SRC groups can use all the rest space after
+        # fitting TRANSIT groups. This is a relaxation because TRANSIT groups
+        # are usually ECMP.
+        gr = GroupReduction(src_vec, SRC, limit - used \
+                            if FLAG.IMPROVED_HEURISTIC else round(limit / 2))
         #reduced_src = gr.table_fitting_ssmg()
         #reduced_src = gr.solve_ssmg()
         reduced_src = gr.google_ssmg()
@@ -182,7 +196,6 @@ class WCMPAllocation:
         # Run group reduction for each node in parallel. Limit parallelism up to
         # a relatively small number. This avoids queueing too much jobs and
         # filling up the internal job queue/message pipe.
-        '''
         for set_slice in chunk(node_limit_set, FLAG.PARALLELISM):
             t = time.time()
             with ProcessPoolExecutor(max_workers=FLAG.PARALLELISM) as exe:
@@ -211,6 +224,7 @@ class WCMPAllocation:
                 self.groups_out[(node, TRANSIT, limit)] = reduced_transit
             PRINTV(1, f'{datetime.now()} [reduceGroups] {node} '
                    f'complete in {time.time() - t} sec.')
+        '''
 
         # For each prefix type and each node, install all groups.
         for (node, g_type, _), groups in self.groups_out.items():
