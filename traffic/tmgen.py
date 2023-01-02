@@ -64,11 +64,15 @@ def tmgen(tor_level, cluster_vector, num_nodes, model, dist='exp', netname=''):
             # Rescale the ingress vector so that its sum equals egress. (Total
             # egress and ingress must match).
             ingress *= egress.sum() / ingress.sum()
+        # Finds the number of latest generation blocks. We only set the latest
+        # generation blocks to empty.
+        num_latest = np.unique(cluster_vector, return_counts=True)[1][-1]
         # Designates P_SPARSE blocks to be empty. Stores their block indices.
         # Note that if a block is empty, its egress and ingress demands are both
         # set to 0, regardless of EQUAL_INGRESS_EGRESS.
         empty_blocks = np.nonzero(bernoulli.rvs(1 - FLAG.P_SPARSE,
-                                                size=num_clusters) == 0)[0]
+                                                size=num_latest) == 0)[0] \
+            + (len(cluster_vector) - num_latest)
         # `r` is row vector for src, `c` is column vector for dst.
         for r, c in np.ndindex(tm.shape):
             block_r = r // num_nodes if tor_level else r

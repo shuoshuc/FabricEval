@@ -7,7 +7,7 @@ VERBOSE = 1
 EQUAL_INGRESS_EGRESS = False
 
 # Fraction of blocks with 0 demand.
-P_SPARSE = 0.1
+P_SPARSE = 0.15
 
 # Flag to control whether to enable hedging.
 ENABLE_HEDGING = True
