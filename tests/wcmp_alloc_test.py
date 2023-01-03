@@ -170,6 +170,7 @@ class TestGroupReduction(unittest.TestCase):
 
     def test_single_switch_multi_group_5(self):
         FLAG.IMPROVED_HEURISTIC = False
+        FLAG.EUROSYS_MOD = False
         group_reduction = GroupReduction([[100, 1, 1], [0, 2, 4]],
                                          te_sol.PrefixIntent.PrefixType.SRC,
                                          4)
@@ -181,6 +182,17 @@ class TestGroupReduction(unittest.TestCase):
         # reduction cannot fit the groups.
         self.assertEqual([[0, 1, 1], [0, 1, 1]],
                          group_reduction.google_ssmg())
+
+    def test_single_switch_multi_group_6(self):
+        FLAG.IMPROVED_HEURISTIC = False
+        FLAG.EUROSYS_MOD = True
+        group_reduction = GroupReduction([[1, 3, 1], [0, 0, 4]],
+                                         te_sol.PrefixIntent.PrefixType.SRC,
+                                         3)
+        # Modified EuroSys SSMG (w/ pruning) will reduce to ECMP and prune the
+        # first port of the largest group [1, 1, 1].
+        self.assertEqual([[0, 1, 1], [0, 0, 1]],
+                         group_reduction.table_fitting_ssmg())
 
 if __name__ == "__main__":
     unittest.main()

@@ -25,7 +25,12 @@ TABLE_LIMIT = 16 * 1024
 MAX_GROUP_SIZE = 256
 
 # True to enable a set of improved heuristics in group reduction.
-IMPROVED_HEURISTIC = True
+# (1) pruning policy. (2) max group size. (3) table limit used. (4) group
+# admission policy.
+IMPROVED_HEURISTIC = False
+
+# True to enable modified EuroSys algorithm, i.e., perform pruning.
+EUROSYS_MOD = False
 
 # Number of parallel group reductions allowed to run.
 PARALLELISM = 16
