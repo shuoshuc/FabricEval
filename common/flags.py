@@ -37,3 +37,7 @@ PARALLELISM = 16
 
 # Timeout in seconds for a single Gurobi invocation.
 GUROBI_TIMEOUT = 120
+
+# The algorithm to use for group reduction.
+# Must be one of eurosys[_mod]/google[_new]/carving/gurobi.
+GR_ALGO = 'carving'

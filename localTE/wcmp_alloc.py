@@ -61,9 +61,7 @@ def reduceGroups(node, limit, src_groups, transit_groups):
     if transit_groups:
         transit_vec = [g for (g, _) in transit_groups]
         gr = GroupReduction(transit_vec, TRANSIT, round(limit / 2))
-        #reduced_transit = gr.table_fitting_ssmg()
-        #reduced_transit = gr.solve_ssmg()
-        reduced_transit = gr.google_ssmg()
+        reduced_transit = gr.solve(FLAG.GR_ALGO)
         used = deDupSize(reduced_transit)
         for i, vec in enumerate(reduced_transit):
             reduced_transit_groups.append((vec, transit_groups[i][1]))
@@ -77,9 +75,7 @@ def reduceGroups(node, limit, src_groups, transit_groups):
         # are usually ECMP.
         gr = GroupReduction(src_vec, SRC, limit - used \
                             if FLAG.IMPROVED_HEURISTIC else round(limit / 2))
-        #reduced_src = gr.table_fitting_ssmg()
-        #reduced_src = gr.solve_ssmg()
-        reduced_src = gr.google_ssmg()
+        reduced_src = gr.solve(FLAG.GR_ALGO)
         for i, vec in enumerate(reduced_src):
             reduced_src_groups.append((vec, src_groups[i][1]))
 

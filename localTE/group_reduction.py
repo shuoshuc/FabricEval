@@ -923,3 +923,31 @@ class GroupReduction:
         except AttributeError:
             print('Encountered an attribute error')
             return []
+
+    def solve(self, algorithm):
+        '''
+        Invokes corresponding group reduction method based on `algorithm`.
+
+        algorithm: one of eurosys[_mod]/google[_new]/carving/gurobi.
+        '''
+        if algorithm == 'eurosys':
+            FLAG.EUROSYS_MOD = False
+            return self.table_fitting_ssmg()
+        elif algorithm == 'eurosys_mod':
+            FLAG.EUROSYS_MOD = True
+            return self.table_fitting_ssmg()
+        elif algorithm == 'google':
+            FLAG.IMPROVED_HEURISTIC = False
+            return self.google_ssmg()
+        elif algorithm == 'google_new':
+            FLAG.IMPROVED_HEURISTIC = True
+            return self.google_ssmg()
+        elif algorithm == 'carving':
+            FLAG.IMPROVED_HEURISTIC = True
+            return self.table_carving_ssmg()
+        elif algorithm == 'gurobi':
+            FLAG.IMPROVED_HEURISTIC = True
+            return self.solve_ssmg()
+        else:
+            print(f'[ERROR] unknown group reduction algorithm {algorithm}.')
+            return None
