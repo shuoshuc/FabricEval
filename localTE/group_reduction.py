@@ -567,6 +567,7 @@ class GroupReduction:
         '''
         Given the input groups and table limit, solve the single switch single
         group (SSSG) optimization problem.
+        Returns an unsanitized group.
 
         groups_in (optional): input groups to use instead.
         C (optional): table limit to use instead.
@@ -614,13 +615,13 @@ class GroupReduction:
                 if 'w_' in v.VarName:
                     group.append(round(v.X))
                     sol_w[v.VarName] = v.X
-            PRINTV(1, f'Obj: {m.ObjVal}')
-            PRINTV(1, f'wf: {self.groups[0].weights()}')
-            PRINTV(1, str(sol_w))
+            PRINTV(2, f'Obj: {m.ObjVal}')
+            PRINTV(2, f'wf: {self.groups[0].weights()}')
+            PRINTV(2, str(sol_w))
             # Applies a final GCD reduction just in case.
             final_group.integer = frac2int_lossless(group)
 
-            return self.sanitize([final_group])
+            return final_group
 
         except gp.GurobiError as e:
             print('Error code ' + str(e.errno) + ': ' + str(e))
@@ -822,20 +823,22 @@ class GroupReduction:
 
         return model
 
-    def table_carving_ssmg(self, formulation="L1NORM1", parallel=True):
+    def table_carving_ssmg(self, formulation="L1NORM2"):
         '''
         Carve the table limit into multiple smaller limits and solve the SSMG
         problem as individual SSSG.
-
-        parallel: True enables parallel solving, which solves all SSSGs in
-                  parallel. False means sequential solving.
         '''
         if len(self.groups) <= 0:
             print(f'[ERROR] {GroupReduction.table_carving_ssmg.__name__}: '
                   f'unexpected number of input groups {len(self.groups)}.')
             return []
-        final_groups = copy.deepcopy(self.groups)
 
+        # Heuristic: directly returns ECMP/singleton groups for TRANSIT type.
+        # No need to go through the full reduction process.
+        if self.g_type == te_sol.PrefixIntent.PrefixType.TRANSIT:
+            return self.direct_ecmp()
+
+        final_groups = copy.deepcopy(self.groups)
         # Computes per-group table limit. This is proportional to the group
         # traffic volume/weight sum.
         C, wf = self._table_limit, [g.weights() for g in self.groups]
@@ -847,75 +850,44 @@ class GroupReduction:
             # Not all groups would fully use up the allocated space, so there
             # will be unused entries at the end of this step.
             for i, G_in in enumerate(self.groups):
-                G_out = self.solve_sssg(formulation, [G_in], Cg[i])[0]
-                if not G_out:
-                    print(f'[ERROR] table_carving_ssmg: final group {i} is'
-                          f' invalid.\nG_in: {G_in.integer}\nG_out: {G_out}')
-                # Applies a final GCD reduction just in case.
-                final_groups[i].integer = frac2int_lossless(G_out)
+                G_out = self.solve_sssg(formulation, [G_in], Cg[i])
+                final_groups[i] = G_out
 
             PRINTV(2, f'Interm. metric: '
                    f'{l1_norm_diff(self.groups, final_groups)}')
-            PRINTV(2, f'Interm. groups: {[g.integer for g in final_groups]}')
-            PRINTV(1, 'Intermediate table util: %s / %s, unused %s' %
+            PRINTV(2, 'Intermediate table util: %s / %s, unused %s' %
                    (self.get_table_util(final_groups=final_groups), C,
                    C - self.get_table_util(final_groups=final_groups)))
 
-            # Step 2: iteratively reclaim and redistribute unused entries.
-            # Goal is to find the group with worst metric and improve it with
-            # unused entries.
+            # Table is fully used, no need to proceed to step 2.
+            if self.get_table_util(final_groups=final_groups) >= C:
+                return self.sanitize(final_groups)
+
+            # Step 2: iteratively reclaims and redistributes unused entries.
+            # Sorts groups from worst metric to best, collects unused entries
+            # and allocates to the current group. Retries each group only once.
+            # Or stops early when all entries are used up.
             per_group_metric = sorted([[i, wf_sums[i] * \
                                         l1_norm_diff([self.groups[i]],
                                                      [final_groups[i]])]
                 for i in range(len(wf))], key=lambda x: x[1], reverse=True)
-            while len(per_group_metric) > 0:
-                # Group with worst metric is ranked first.
-                i, last_metric = per_group_metric[0]
+
+            for i, metric in per_group_metric:
                 unused = C - self.get_table_util(final_groups=final_groups)
-                PRINTV(1, f'Working on group {i} with metric {last_metric}, '
-                       f'unused entries {unused}.')
-                # Table is full, nothing to be done.
+                PRINTV(2, f'Working on group {i} with metric {metric}, unused'
+                       f' entries {unused}.')
+                # No more unused entries, stop and return.
                 if unused <= 0:
                     break
-                while True:
-                    # Group i might have not used up its allocated space. By
-                    # simply allowing an extra `unused` entries will lead to
-                    # double counting. Therefore, only unused entries from other
-                    # groups can be allocated to group i.
-                    Cg[i] += unused - (Cg[i] - sum(final_groups[i].integer))
-                    group = self.solve_sssg(formulation, [self.groups[i]],
-                                            Cg[i])[0]
-                    # Applies a final GCD reduction just in case.
-                    final_groups[i].integer = frac2int_lossless(group)
-
-                    # Inner loop stop criteria 1: metric stops decreasing. Also
-                    # pops head of `per_group_metric` and moves on to next. The
-                    # worst group cannot be improved further, but the second
-                    # worst might.
-                    if wf_sums[i] * l1_norm_diff([self.groups[i]],
-                                                 [final_groups[i]]) \
-                            >= last_metric:
-                        per_group_metric.pop(0)
-                        PRINTV(1, f'No metric improvement, skip group {i}.')
-                        break
-
-                    # Metric of worst group indeed improves. There might be some
-                    # leftover entries that can be used to improve the metric
-                    # again, but the group that needs this most could be
-                    # different now. So we sort the list again and see if we
-                    # should continue on the same group.
-                    last_metric = wf_sums[i] * l1_norm_diff([self.groups[i]],
-                                                            [final_groups[i]])
-                    per_group_metric[0][1] = last_metric
-                    PRINTV(1, f'Group {i} new metric {last_metric}.')
-                    per_group_metric = sorted(per_group_metric,
-                                              key=lambda x: x[1],
-                                              reverse=True)
-                    # Inner loop stop criteria 2: group id with worst metric has
-                    # changed, start over.
-                    if per_group_metric[0][0] != i:
-                        PRINTV(1, f'New worst group: {per_group_metric[0][0]}.')
-                        break
+                # Group i might have not used up its allocated space. By simply
+                # allowing an extra `unused` entries will lead to double
+                # counting. Therefore, only unused entries from other groups can
+                # be allocated to group i.
+                Cg[i] += unused - (Cg[i] - sum(final_groups[i].integer))
+                G = self.solve_sssg(formulation, [self.groups[i]], Cg[i])
+                # Updates final group if metric improves.
+                if wf_sums[i] * l1_norm_diff([self.groups[i]], [G]) < metric:
+                    final_groups[i] = G
 
             return self.sanitize(final_groups)
 

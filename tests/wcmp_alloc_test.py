@@ -85,48 +85,45 @@ class TestWCMPAlloc(unittest.TestCase):
 
 class TestGroupReduction(unittest.TestCase):
     def test_single_switch_single_group_1(self):
-        group_reduction = GroupReduction([[1, 2, 3, 4]],
-                                         te_sol.PrefixIntent.PrefixType.SRC,
-                                         16*1024)
-        self.assertEqual([[1, 2, 3, 4]], group_reduction.solve_sssg())
-        group_reduction.reset()
-        self.assertEqual([[1, 2, 3, 4]], group_reduction.table_fitting_sssg())
+        gr = GroupReduction([[1, 2, 3, 4]], te_sol.PrefixIntent.PrefixType.SRC,
+                            16*1024)
+        self.assertEqual([[1, 2, 3, 4]], gr.sanitize([gr.solve_sssg()]))
+        gr.reset()
+        self.assertEqual([[1, 2, 3, 4]], gr.table_fitting_sssg())
 
     def test_single_switch_single_group_2(self):
-        group_reduction = GroupReduction([[20, 40, 60, 80]],
-                                         te_sol.PrefixIntent.PrefixType.SRC,
-                                         16*1024)
-        self.assertEqual([[1, 2, 3, 4]], group_reduction.solve_sssg())
-        group_reduction.reset()
+        gr = GroupReduction([[20, 40, 60, 80]],
+                            te_sol.PrefixIntent.PrefixType.SRC,
+                            16*1024)
+        self.assertEqual([[1, 2, 3, 4]], gr.sanitize([gr.solve_sssg()]))
+        gr.reset()
         # EuroSys heuristic does not perform lossless reduction if groups fit.
-        self.assertEqual([[20, 40, 60, 80]],
-                         group_reduction.table_fitting_sssg())
+        self.assertEqual([[20, 40, 60, 80]], gr.table_fitting_sssg())
 
     def test_single_switch_single_group_3(self):
-        group_reduction = GroupReduction([[10.5, 20.1, 31.0, 39.7]],
-                                         te_sol.PrefixIntent.PrefixType.SRC,
-                                         10)
-        self.assertEqual([[1, 2, 3, 4]], group_reduction.solve_sssg())
-        group_reduction.reset()
-        self.assertEqual([[1, 2, 3, 4]], group_reduction.table_fitting_sssg())
+        gr = GroupReduction([[10.5, 20.1, 31.0, 39.7]],
+                            te_sol.PrefixIntent.PrefixType.SRC,
+                            10)
+        self.assertEqual([[1, 2, 3, 4]], gr.sanitize([gr.solve_sssg()]))
+        gr.reset()
+        self.assertEqual([[1, 2, 3, 4]], gr.table_fitting_sssg())
 
     def test_single_switch_single_group_4(self):
-        group_reduction = GroupReduction([[i + 0.1 for i in range(1, 17)]],
-                                         te_sol.PrefixIntent.PrefixType.SRC,
-                                         16*1024)
+        gr = GroupReduction([[i + 0.1 for i in range(1, 17)]],
+                            te_sol.PrefixIntent.PrefixType.SRC,
+                            16*1024)
         self.assertEqual([[(i + 0.1) * 10 for i in range(1, 17)]],
-                         group_reduction.solve_sssg())
-        group_reduction.reset()
-        self.assertEqual([list(range(1, 17))],
-                         group_reduction.table_fitting_sssg())
+                         gr.sanitize([gr.solve_sssg()]))
+        gr.reset()
+        self.assertEqual([list(range(1, 17))], gr.table_fitting_sssg())
 
     def test_single_switch_single_group_5(self):
-        group_reduction = GroupReduction([[2000.01, 0, 0, 0]],
-                                         te_sol.PrefixIntent.PrefixType.SRC,
-                                         10)
-        self.assertEqual([[1, 0, 0, 0]], group_reduction.solve_sssg())
-        group_reduction.reset()
-        self.assertEqual([[1, 0, 0, 0]], group_reduction.table_fitting_sssg())
+        gr = GroupReduction([[2000.01, 0, 0, 0]],
+                            te_sol.PrefixIntent.PrefixType.SRC,
+                            10)
+        self.assertEqual([[1, 0, 0, 0]], gr.sanitize([gr.solve_sssg()]))
+        gr.reset()
+        self.assertEqual([[1, 0, 0, 0]], gr.table_fitting_sssg())
 
     def test_single_switch_multi_group_1(self):
         group_reduction = GroupReduction([[1, 2], [3, 4]],
