@@ -34,3 +34,6 @@ EUROSYS_MOD = False
 
 # Number of parallel group reductions allowed to run.
 PARALLELISM = 16
+
+# Timeout in seconds for a single Gurobi invocation.
+GUROBI_TIMEOUT = 120
