@@ -843,7 +843,33 @@ class GroupReduction:
         # traffic volume/weight sum.
         C, wf = self._table_limit, [g.weights() for g in self.groups]
         wf_sums = [sum(g) for g in wf]
+        # Carves up the table proportionally, some group limits may be 0.
         Cg = [floor(wf_sum / sum(wf_sums) * C) for wf_sum in wf_sums]
+        if 0 in Cg:
+            # We rebalance the group limits to avoid 0 sizes, since these groups
+            # will never fit. First iterate over the group limits from smallest
+            # to largest, scale up 0 sizes to 1. These entries are borrowed from
+            # the largest groups.
+            Cg_ext = sorted([[i, cg] for i, cg in enumerate(Cg)],
+                            key=lambda x: x[1])
+            borrowed_entries = 0
+            for i, (_, cg) in enumerate(Cg_ext):
+                if not cg:
+                    Cg_ext[i][1] = 1
+                    borrowed_entries += 1
+            # Now iterate over the group limits in the reverse order, subtract
+            # borrowed entries from the largest groups. To avoid hurting one
+            # group too much, we take entries in a round robin fashion. If the
+            # borrowed entries are more than the number of groups, we repeat the
+            # round robin until all borrowed entries are clear.
+            while borrowed_entries:
+                for i, (_, cg) in reversed(list(enumerate(Cg_ext))):
+                    if cg > 1:
+                        Cg_ext[i][1] -= 1
+                        borrowed_entries -= 1
+                    if not borrowed_entries:
+                        break
+            Cg = [cg for _, cg in sorted(Cg_ext, key=lambda x: x[0])]
 
         try:
             # Step 1: solve SSSG using table carving limits.

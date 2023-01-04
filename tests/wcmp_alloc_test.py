@@ -191,5 +191,17 @@ class TestGroupReduction(unittest.TestCase):
         self.assertEqual([[0, 1, 1], [0, 0, 1]],
                          group_reduction.table_fitting_ssmg())
 
+    def test_single_switch_multi_group_7(self):
+        FLAG.IMPROVED_HEURISTIC = True
+        group_reduction = GroupReduction([[0.01, 0.01, 0.01], [997, 1, 1]],
+                                         te_sol.PrefixIntent.PrefixType.SRC,
+                                         1000)
+        # First group gets 0 entry by simple table carving. But it will be
+        # rebalanced to 1 entry, so there is at least one member in the final
+        # output.
+        groups = group_reduction.table_carving_ssmg()
+        self.assertTrue(sum(groups[0]) > 1)
+        self.assertTrue(1 in groups[0])
+
 if __name__ == "__main__":
     unittest.main()
