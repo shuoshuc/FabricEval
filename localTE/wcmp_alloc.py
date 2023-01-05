@@ -90,6 +90,8 @@ class WCMPWorker:
         self._target_block = te_intent.target_block
         self._topo = topo_obj
         self._te_intent = te_intent
+        # Distributes flows onto DCN links.
+        self.sendIdealDCNTraffic()
         # groups holds pre-reduction groups. Each is keyed by PrefixType
         # because groups of different types cannot merge. Example format:
         # {
@@ -97,6 +99,16 @@ class WCMPWorker:
         #   ...
         # }
         self.groups = {}
+
+    def sendIdealDCNTraffic(self):
+        '''
+        Sends ideal traffic onto all DCN links belonging to this block (i.e.,
+        outgoing links).
+        '''
+        for prefix_intent in self._te_intent.prefix_intents:
+            for ne in prefix_intent.nexthop_entries:
+                port = self._topo.getPortByName(ne.nexthop_port)
+                port.orig_link._ideal_residual -= ne.weight
 
     def populateGroups(self):
         '''

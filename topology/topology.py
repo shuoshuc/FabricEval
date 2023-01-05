@@ -611,7 +611,7 @@ class Topology:
     def distributeFlows(self, path_map):
         '''
         Distributes the MCF solution for a commodity into flows on each physical
-        link, links will accumulate the flows placed on them.
+        link.
 
         Also returns a distribution of flows of format:
         {
@@ -646,8 +646,6 @@ class Topology:
                 # This is assuming all links have the same speed.
                 t_frac = traffic_vol / len(links)
                 for link in links:
-                    # Accumulates flow on each link.
-                    link._ideal_residual -= t_frac
                     flow_dist.setdefault(seg, {})[link.src_port.name] = t_frac
         return flow_dist
 
