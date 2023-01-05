@@ -204,13 +204,3 @@ class GlobalTE:
         except AttributeError:
             print('Encountered an attribute error')
             return []
-
-if __name__ == "__main__":
-    TOY2_PATH = 'tests/data/toy2.textproto'
-    TOY2_TRAFFIC_PATH = 'tests/data/toy2_traffic.textproto'
-    toy2 = Topology(TOY2_PATH)
-    toy2_traffic = Traffic(TOY2_TRAFFIC_PATH)
-    global_te = GlobalTE(toy2, toy2_traffic)
-    sol = global_te.solve()
-    print(text_format.MessageToString(sol))
-    #print(toy2.dumpLinkUtil())
