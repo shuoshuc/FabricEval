@@ -175,6 +175,11 @@ class WCMPAllocation:
             # this case, it only manages one aggregation block.
             self._worker_map[aggr_block] = WCMPWorker(topo_obj, te_intent)
 
+        # Use single process if invoking Gurobi. Gurobi is able to use all
+        # CPU cores, no need to multi-process, which adds extra overhead.
+        FLAG.PARALLELISM = 1 if FLAG.GR_ALGO in ['carving', 'gurobi'] else \
+            os.cpu_count()
+
     def run(self):
         '''
         Launches all WCMP workers to reduce groups.
@@ -189,9 +194,7 @@ class WCMPAllocation:
         node_limit_set = set()
         for node, _, limit in self.groups_in.keys():
             node_limit_set.add((node, limit))
-        # Run group reduction for each node in parallel. Limit parallelism up to
-        # a relatively small number. This avoids queueing too much jobs and
-        # filling up the internal job queue/message pipe.
+        # Run group reduction for each node in parallel.
         for set_slice in chunk(node_limit_set, FLAG.PARALLELISM):
             t = time.time()
             with ProcessPoolExecutor(max_workers=FLAG.PARALLELISM) as exe:
@@ -207,20 +210,6 @@ class WCMPAllocation:
                     self.groups_out[(node, TRANSIT, limit)] = reduced_transit
             PRINTV(1, f'{datetime.now()} [reduceGroups] batch complete in '
                    f'{time.time() - t} sec.')
-        '''
-        for node, limit in node_limit_set:
-            t = time.time()
-            _, _, reduced_src, reduced_transit = \
-                reduceGroups(node, limit,
-                             self.groups_in.get((node, SRC, limit)),
-                             self.groups_in.get((node, TRANSIT, limit)))
-            if len(reduced_src):
-                self.groups_out[(node, SRC, limit)] = reduced_src
-            if len(reduced_transit):
-                self.groups_out[(node, TRANSIT, limit)] = reduced_transit
-            PRINTV(1, f'{datetime.now()} [reduceGroups] {node} '
-                   f'complete in {time.time() - t} sec.')
-        '''
 
         # For each prefix type and each node, install all groups.
         for (node, g_type, _), groups in self.groups_out.items():
