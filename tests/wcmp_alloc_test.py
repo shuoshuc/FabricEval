@@ -6,8 +6,9 @@ import proto.te_solution_pb2 as te_sol
 import common.flags as FLAG
 from localTE.group_reduction import GroupReduction
 from localTE.wcmp_alloc import WCMPAllocation, loadTESolution
-from topology.topogen import generateToy3
+from topology.topogen import generateToy3, generateToy4
 from topology.topology import Topology, loadTopo
+from traffic.traffic import Traffic
 
 TOY2_TOPO_PATH = 'tests/data/toy2.textproto'
 TOY2_SOL_PATH = 'tests/data/te_sol_toy2.textproto'
@@ -15,10 +16,17 @@ C1AB1 = 'toy2-c1-ab1'
 C3AB1 = 'toy2-c3-ab1'
 # Toy3
 TOY3_SOL_PATH = 'tests/data/toy3_te_sol.textproto'
+TOY3_TM_PATH = 'tests/data/toy3_traffic_gravity.textproto'
 TOY3_C1 = 'toy3-c1-ab1'
 TOY3_LINK1 = 'toy3-c64-ab1-s3i1-p29:toy3-c15-ab1-s3i1-p125'
 TOY3_LINK2 = 'toy3-c42-ab1-s3i4-p105:toy3-c54-ab1-s3i4-p83'
 TOY3_NODE1 = 'toy3-c1-ab1-s3i1'
+# Toy4
+TOY4_TM_PATH = 'tests/data/toy4_traffic.textproto'
+TOY4_SOL_PATH = 'tests/data/toy4_te_sol.textproto'
+TOY4_C1 = 'toy4-c1-ab1'
+TOY4_LINK1 = 'toy4-c4-ab1-s3i1-p1:toy4-c1-ab1-s3i1-p5'
+TOY4_NODE1 = 'toy4-c1-ab1-s3i1'
 
 class TestWCMPAlloc(unittest.TestCase):
     def test_load_invalid_te_solution(self):
@@ -54,34 +62,38 @@ class TestWCMPAlloc(unittest.TestCase):
 
     def test_toy3_intent_distribution(self):
         toy3 = Topology('', input_proto=generateToy3())
-        wcmp_alloc = WCMPAllocation(toy3, TOY3_SOL_PATH)
+        toy3_traffic = Traffic(toy3, TOY3_TM_PATH)
+        wcmp_alloc = WCMPAllocation(toy3, toy3_traffic, TOY3_SOL_PATH)
         self.assertEqual(65, len(wcmp_alloc._worker_map.keys()))
         c1_worker = wcmp_alloc._worker_map[TOY3_C1]
         self.assertEqual(TOY3_C1, c1_worker._target_block)
         self.assertEqual(TOY3_C1, c1_worker._te_intent.target_block)
 
-    def test_toy3_generated_groups(self):
-        toy3 = Topology('', input_proto=generateToy3())
-        wcmp_alloc = WCMPAllocation(toy3, TOY3_SOL_PATH)
+    def test_toy4_generated_groups(self):
+        FLAG.GR_ALGO = 'eurosys'
+        toy4 = Topology('', input_proto=generateToy4())
+        toy4_traffic = Traffic(toy4, TOY4_TM_PATH)
+        wcmp_alloc = WCMPAllocation(toy4, toy4_traffic, TOY4_SOL_PATH)
         wcmp_alloc.run()
-        c1_worker = wcmp_alloc._worker_map[TOY3_C1]
+        c1_worker = wcmp_alloc._worker_map[TOY4_C1]
         # Verify there exist 4 nodes * (SRC and TRANSIT) = 8 sets of groups.
         self.assertEqual(8, len(c1_worker.groups.values()))
         for node, _, _ in c1_worker.groups.keys():
             # Verify node has non-zero ECMP utilization.
-            self.assertTrue(toy3.getNodeByName(node).getECMPUtil() > 0)
-            self.assertTrue(toy3.getNodeByName(node).getNumGroups() > 0)
-        link_util = toy3.dumpRealLinkUtil()
+            self.assertTrue(toy4.getNodeByName(node).getECMPUtil() > 0)
+            self.assertTrue(toy4.getNodeByName(node).getNumGroups() > 0)
+        link_util = toy4.dumpRealLinkUtil()
         # Verify real link utilization.
-        self.assertTrue(link_util[TOY3_LINK1] > 0.68)
-        self.assertTrue(link_util[TOY3_LINK2] > 0.36)
-        ecmp_util = toy3.dumpECMPUtil()
+        self.assertTrue(link_util[TOY4_LINK1] > 0.16)
+        self.assertTrue(link_util[TOY4_LINK1] < 0.17)
+        ecmp_util = toy4.dumpECMPUtil()
         # Verify node ECMP utilization.
-        self.assertTrue(ecmp_util[TOY3_NODE1][0] > 0.025)
-        self.assertEqual(73, ecmp_util[TOY3_NODE1][1])
-        demand = toy3.dumpDemandAdmission()
+        self.assertTrue(ecmp_util[TOY4_NODE1][0] > 0.03)
+        self.assertTrue(ecmp_util[TOY4_NODE1][0] < 0.04)
+        self.assertEqual(6, ecmp_util[TOY4_NODE1][1])
+        demand = toy4.dumpDemandAdmission()
         # Verify node admits all demands.
-        self.assertEqual(1.0, demand[TOY3_NODE1][2])
+        self.assertEqual(1.0, demand[TOY4_NODE1][2])
 
 class TestGroupReduction(unittest.TestCase):
     def test_single_switch_single_group_1(self):

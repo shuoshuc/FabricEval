@@ -28,6 +28,7 @@ py_test(
     deps = [
         '//topology:topology',
         '//topology:topogen',
+        '//traffic:traffic',
         '//localTE:wcmp_alloc',
         '//localTE:group_reduction',
     ],

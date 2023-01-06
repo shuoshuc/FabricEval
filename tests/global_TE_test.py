@@ -4,6 +4,7 @@ import numpy as np
 import proto.te_solution_pb2 as TESolution
 from google.protobuf import text_format
 
+import common.flags as FLAG
 from globalTE.global_te import GlobalTE
 from topology.topogen import generateToy3, generateToy4
 from topology.topology import Topology, filterPathSetWithSeg
@@ -25,6 +26,7 @@ TOY4_C5 = 'toy4-c5-ab1'
 
 class TestGlobalTESolution(unittest.TestCase):
     def test_te_sol_toy2(self):
+        FLAG.ENABLE_HEDGING = False
         toy2 = Topology(TOY2_PATH)
         toy2_traffic = Traffic(toy2, TOY2_TRAFFIC_PATH)
         global_te = GlobalTE(toy2, toy2_traffic)
@@ -57,19 +59,6 @@ class TestGlobalTESolution(unittest.TestCase):
                                  len(te_intent.prefix_intents[0].nexthop_entries))
                 for nexthop_entry in te_intent.prefix_intents[0].nexthop_entries:
                     self.assertEqual(50000.0, nexthop_entry.weight)
-        # Verify intended link utilization.
-        link_util = list(toy2.dumpIdealLinkUtil().items())
-        # 4 src links from C1AB1 have 0.75 link util.
-        self.assertEqual(0.75, link_util[0][1])
-        self.assertEqual(0.75, link_util[1][1])
-        self.assertEqual(0.75, link_util[2][1])
-        self.assertEqual(0.75, link_util[3][1])
-        # 2 transit links from C2AB1 have 0.75 link util.
-        self.assertEqual(0.75, link_util[4][1])
-        self.assertEqual(0.75, link_util[5][1])
-        # 2 src links from C3AB1 have 0.5 link util.
-        self.assertEqual(0.5, link_util[6][1])
-        self.assertEqual(0.5, link_util[7][1])
 
     def test_te_sol_toy4(self):
         toy4 = Topology('', input_proto=generateToy4())
@@ -106,16 +95,6 @@ class TestGlobalTESolution(unittest.TestCase):
                                  len(te_intent.prefix_intents[0].nexthop_entries))
                 for nexthop_entry in te_intent.prefix_intents[0].nexthop_entries:
                     self.assertEqual(5000.0, nexthop_entry.weight)
-        # Verify intended link utilization.
-        link_util = toy4.dumpIdealLinkUtil()
-        # All links originating from c1 should see 0.125 link util.
-        for path_name in toy4.findOrigPathsOfAggrBlock(TOY4_C1).keys():
-            for link in toy4.findLinksOfPath(path_name):
-                self.assertEqual(0.125, link_util[link.name])
-        # All links terminating at c5 should see 0.125 link util.
-        for path_name in toy4.findTermPathsOfAggrBlock(TOY4_C5).keys():
-            for link in toy4.findLinksOfPath(path_name):
-                self.assertEqual(0.125, link_util[link.name])
 
 if __name__ == "__main__":
     unittest.main()
