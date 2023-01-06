@@ -147,13 +147,14 @@ def genProto(tor_level, num_clusters, num_nodes, TM, netname):
                 if i == j and u == v:
                     continue
                 # Skip zero entries for proto efficiency.
-                if floor(TM[(i - 1) * 32 + u - 1, (j - 1) * 32 + v - 1]) <= 0:
+                if floor(TM[(i - 1) * num_nodes + u - 1,
+                            (j - 1) * num_nodes + v - 1]) <= 0:
                     continue
                 demand = tm_proto.demands.add()
                 demand.src = f'{netname}-c{i}-ab1-s1i{u}'
                 demand.dst = f'{netname}-c{j}-ab1-s1i{v}'
-                demand.volume_mbps = floor(TM[(i - 1) * 32 + u - 1,
-                                              (j - 1) * 32 + v - 1])
+                demand.volume_mbps = floor(TM[(i - 1) * num_nodes + u - 1,
+                                              (j - 1) * num_nodes + v - 1])
         else:
             # Populate AggrBlock-level demand matrix.
             if i == j:
