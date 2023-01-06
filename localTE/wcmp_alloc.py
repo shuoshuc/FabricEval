@@ -86,12 +86,14 @@ class WCMPWorker:
     A WCMP worker is responsible for mapping the TE intents targeting an
     AggrBlock that it manages to programmed flows and groups on switches.
     '''
-    def __init__(self, topo_obj, te_intent):
+    def __init__(self, topo_obj, te_intent, block_demands):
         self._target_block = te_intent.target_block
         self._topo = topo_obj
         self._te_intent = te_intent
-        # Distributes flows onto DCN links.
-        self.sendIdealDCNTraffic()
+        # An instance of the BlockDemands dataclass. Contains demands related to
+        # this AggrBlock. Always check before accessing, it could be None if
+        # there is no demand for this block.
+        self._block_demands = block_demands
         # groups holds pre-reduction groups. Each is keyed by PrefixType
         # because groups of different types cannot merge. Example format:
         # {
@@ -100,15 +102,95 @@ class WCMPWorker:
         # }
         self.groups = {}
 
-    def sendIdealDCNTraffic(self):
+    def sendIdealTraffic(self):
         '''
-        Sends ideal traffic onto all DCN links belonging to this block (i.e.,
-        outgoing links).
+        Sends ideal traffic onto all links belonging to this block (including
+        outgoing DCN links, but not incoming ones).
         '''
+        # [Step 1] Sends ideal DCN traffic based on the TEIntent. This will load
+        # up all outgoing S3-S3 links.
         for prefix_intent in self._te_intent.prefix_intents:
             for ne in prefix_intent.nexthop_entries:
                 port = self._topo.getPortByName(ne.nexthop_port)
                 port.orig_link._ideal_residual -= ne.weight
+
+        # [Step 2] Sends ideal S2-S3 traffic. This will load up all S2->S3 links
+        # and S3->S2 links.
+        # For the traffic on S2->S3 links, it includes SRC traffic leaving this
+        # block and TRANSIT traffic bounded back at S2. The sum of egress
+        # traffic on each S3 should equal all traffic sent from all S2. Each S2
+        # sends an equal share so the traffic is evenly divided by the number of
+        # links.
+        # For the traffic on S3->S2 links, it includes DST traffic destinating
+        # this block and TRANSIT traffic to be bounded back by S2. The sum of
+        # ingress traffic on each S3 should equal all traffic sent to all S2.
+        # Each S2 receives an equal share so the traffic is evenly divided by
+        # the number of links.
+        cluster = self._topo.getAggrBlockByName(self._target_block).getParent()
+        s3_nodes = self._topo.findNodesinClusterByStage(cluster.name, 3)
+        for s3_node in s3_nodes:
+            up_ports = self._topo.findUpFacingPortsOfNode(s3_node.name)
+            ingress, egress = 0, 0
+            # Sum the ingress and egress traffic volume on S3 node.
+            for port in up_ports:
+                link_in, link_out = port.term_link, port.orig_link
+                ingress += link_in.link_speed - link_in._ideal_residual
+                egress += link_out.link_speed - link_out._ideal_residual
+            down_ports = self._topo.findDownFacingPortsOfNode(s3_node.name)
+            # Equally spreads: (1) the ingress traffic on this S3 to all
+            # S2-bound links. (2) the egress traffic on this S3 to all links
+            # from S2.
+            for port in down_ports:
+                link_to_s2, link_from_s2 = port.orig_link, port.term_link
+                link_to_s2._ideal_residual -= ingress / len(down_ports)
+                link_from_s2._ideal_residual -= egress / len(down_ports)
+
+        # If there is no ToR-level demands for this block, nothing can be done
+        # for the S1-S2 links, call it a day.
+        if not self._block_demands:
+            PRINTV(2, f'sendIdealTraffic: {self._target_block} has no demand.')
+            return
+
+        # [Step 3] Sends ideal S1-S2 traffic and the internal demand portion of
+        # S2-S3 traffic. This will load up all S1->S2 and S2->S1 links. It also
+        # adds to the existing S2->S3 and S3->S2 link loads.
+        # For egress demand traffic, src ToR is located in this block, the dst
+        # is elsewhere. So we only need to load up the S1->S2 links because the
+        # S2-S3 links are already processed above as part of the block demands.
+        # For ingress demand traffic, dst ToR is located in this block, the src
+        # is elsewhere. So we only need to load up the S2->S1 links.
+        # For internal demands, they are not exposed to globalTE, hence the load
+        # is not reflected on S2-S3 links. We process both the S1->S2 and S2->S1
+        # links like above. In addition, each S2 node evenly spreads its portion
+        # of the internal demand to load up the S2-S3 links.
+        for (src_tor, _), vol in self._block_demands.src_only.items():
+            up_ports = self._topo.findUpFacingPortsOfNode(src_tor)
+            for port in up_ports:
+                link_to_s2 = port.orig_link
+                link_to_s2._ideal_residual -= vol / len(up_ports)
+        for (_, dst_tor), vol in self._block_demands.dst_only.items():
+            up_ports = self._topo.findUpFacingPortsOfNode(dst_tor)
+            for port in up_ports:
+                link_from_s2 = port.term_link
+                link_from_s2._ideal_residual -= vol / len(up_ports)
+        s2_nodes = self._topo.findNodesinClusterByStage(cluster.name, 2)
+        for (src_tor, dst_tor), vol in self._block_demands.src_dst.items():
+            src_up_ports = self._topo.findUpFacingPortsOfNode(src_tor)
+            dst_up_ports = self._topo.findUpFacingPortsOfNode(dst_tor)
+            for port in src_up_ports:
+                link_to_s2 = port.orig_link
+                link_to_s2._ideal_residual -= vol / len(src_up_ports)
+            for port in dst_up_ports:
+                link_from_s2 = port.term_link
+                link_from_s2._ideal_residual -= vol / len(dst_up_ports)
+            # Equal demand sent to each S2.
+            vol_per_s2 = vol / len(s2_nodes)
+            for s2_node in s2_nodes:
+                s2_up_ports = self._topo.findUpFacingPortsOfNode(s2_node.name)
+                for port in s2_up_ports:
+                    link_to_s3, link_from_s3 = port.orig_link, port.term_link
+                    link_to_s3._ideal_residual -= vol_per_s2 / len(s2_up_ports)
+                    link_from_s3._ideal_residual -= vol_per_s2 / len(s2_up_ports)
 
     def populateGroups(self):
         '''
@@ -166,13 +248,15 @@ class WCMPAllocation:
     It translates the TE solution to flows and groups that are programmed on
     each switch.
     '''
-    def __init__(self, topo_obj, input_path, input_proto=None):
+    def __init__(self, topo_obj, traffic_obj, input_path, input_proto=None):
         # A map from AggrBlock name to the corresponding WCMP worker instance.
         self._worker_map = {}
         self.groups_in = {}
         self.groups_out = {}
         # Stores the topology object in case we need to look up an element.
         self._topo = topo_obj
+        # Stores the traffic object in case we need to look up a demand.
+        self._traffic = traffic_obj
         # Loads the full network TE solution.
         sol_proto = input_proto if input_proto else loadTESolution(input_path)
         for te_intent in sol_proto.te_intents:
@@ -185,7 +269,8 @@ class WCMPAllocation:
             # block. Since a worker is supposed to align with an SDN control
             # domain, it manages all the aggregation blocks in a cluster. In
             # this case, it only manages one aggregation block.
-            self._worker_map[aggr_block] = WCMPWorker(topo_obj, te_intent)
+            self._worker_map[aggr_block] = WCMPWorker(topo_obj, te_intent,
+                self._traffic.getBlockDemands(aggr_block))
 
         # Use single process if invoking Gurobi. Gurobi is able to use all
         # CPU cores, no need to multi-process, which adds extra overhead.
@@ -196,6 +281,10 @@ class WCMPAllocation:
         '''
         Launches all WCMP workers to reduce groups.
         '''
+        # Generates ideal link utilization of the entire fabric.
+        for worker in self._worker_map.values():
+            worker.sendIdealTraffic()
+
         # Collect groups to be reduced from each WCMPWorker and merge them into
         # a unified map.
         for worker in self._worker_map.values():

@@ -42,13 +42,14 @@ class Port:
     index: index of the port.
     '''
     def __init__(self, name, orig_link=None, term_link=None, speed=None,
-                 dcn_facing=None, index=None):
+                 dcn_facing=None, host_facing=None, index=None):
         self.name = name
         self.index = index
         self.orig_link = orig_link
         self.term_link = term_link
         self.port_speed = speed
         self.dcn_facing = dcn_facing
+        self.host_facing = host_facing
         # parent node this port belongs to.
         self._parent_node = None
 
@@ -217,6 +218,9 @@ class AggregationBlock:
     def setParent(self, cluster):
         self._parent_cluster = cluster
 
+    def getParent(self):
+        return self._parent_cluster
+
     def addMember(self, node):
         self._member_nodes.append(node)
 
@@ -305,6 +309,7 @@ class Topology:
                     for port in node.ports:
                         port_obj = Port(port.name, speed=port.port_speed_mbps,
                                         dcn_facing=port.dcn_facing,
+                                        host_facing=port.host_facing,
                                         index=port.index)
                         self._ports[port.name] = port_obj
                         node_obj.addMember(port_obj)
@@ -332,6 +337,7 @@ class Topology:
                 for port in tor.ports:
                     port_obj = Port(port.name, speed=port.port_speed_mbps,
                                     dcn_facing=port.dcn_facing,
+                                    host_facing=port.host_facing,
                                     index=port.index)
                     self._ports[port.name] = port_obj
                     tor_obj.addMember(port_obj)
@@ -440,6 +446,16 @@ class Topology:
             return None
         return self._nodes[node_name]
 
+    def getAggrBlockByName(self, aggr_block_name):
+        '''
+        Looks up the AggrBlock object of the given name.
+        '''
+        if aggr_block_name not in self._aggr_blocks:
+            print(f'[ERROR] getAggrBlockByName: Input block {aggr_block_name} '
+                  f'does not exist in this topology!')
+            return None
+        return self._aggr_blocks[aggr_block_name]
+
     def findPeerPortOfPort(self, port_name):
         '''
         Looks up the peer port of the given port, returns the port object.
@@ -512,6 +528,75 @@ class Topology:
         src-dst pair.
         '''
         return (f"{src}:{dst}" in self._paths)
+
+    def findUpFacingPortsOfNode(self, node_name):
+        '''
+        Returns a list of port objects facing up in the give node.
+        '''
+        if node_name not in self._nodes:
+            print(f'[ERROR] findUpFacingPortsOfNode: node {node_name} does not'
+                  f' exist in this topology!')
+            return None
+
+        port_list = []
+        # Special handling for S1 nodes, the first a few ports are up facing.
+        if self._nodes[node_name].stage == 1:
+            for port in self._nodes[node_name]._member_ports:
+                if not port.host_facing:
+                    port_list.append(port)
+            return port_list
+
+        # Normal handling for S2 and S3 nodes.
+        for port in self._nodes[node_name]._member_ports:
+            # Odd-indexed ports are up facing.
+            if port.index % 2 == 1:
+                port_list.append(port)
+        return port_list
+
+    def findDownFacingPortsOfNode(self, node_name):
+        '''
+        Returns a list of port objects facing down in the give node.
+        '''
+        if node_name not in self._nodes:
+            print(f'[ERROR] findDownFacingPortsOfNode: node {node_name} does '
+                  f'not exist in this topology!')
+            return None
+
+        port_list = []
+        # Special handling for S1 nodes, the first a few ports are up facing.
+        # The rest are all down facing.
+        if self._nodes[node_name].stage == 1:
+            for port in self._nodes[node_name]._member_ports:
+                if port.host_facing:
+                    port_list.append(port)
+            return port_list
+
+        # Normal handling for S2 and S3 nodes.
+        for port in self._nodes[node_name]._member_ports:
+            # Even-indexed ports are down facing.
+            if port.index % 2 == 0:
+                port_list.append(port)
+        return port_list
+
+    def findNodesinClusterByStage(self, cluster_name, stage):
+        '''
+        Returns a list of node objects of the given stage in the give cluster.
+        '''
+        if cluster_name not in self._clusters:
+            print(f'[ERROR] findNodesinClusterByStage: cluster {cluster_name} '
+                  f'does not exist in this topology!')
+            return None
+
+        # Short circuit for ToR nodes.
+        if stage == 1:
+            return self._clusters[cluster_name]._member_tors
+
+        node_list = []
+        for aggr_block in self._clusters[cluster_name]._member_aggr_blocks:
+            for node in aggr_block._member_nodes:
+                if node.stage == stage:
+                    node_list.append(node)
+        return node_list
 
     def findHostPrefixOfToR(self, tor_name):
         '''

@@ -21,7 +21,7 @@ if __name__ == "__main__":
     toy3 = Topology('', net_proto)
     print(f'{datetime.now()} [Step 1] topology generated.', flush=True)
     #print(text_format.MessageToString(net_proto))
-    traffic_proto = tmgen(tor_level=False,
+    traffic_proto = tmgen(tor_level=True,
                           cluster_vector=np.array([1]*22 + [2.5]*22 + [5]*21),
                           num_nodes=32,
                           model='gravity',
@@ -37,7 +37,7 @@ if __name__ == "__main__":
         te_sol.write(text_format.MessageToString(sol))
     print(f'{datetime.now()} [Step 3] global TE solution generated.', flush=True)
     #print(text_format.MessageToString(sol))
-    wcmp_alloc = WCMPAllocation(toy3, '', sol)
+    wcmp_alloc = WCMPAllocation(toy3, toy3_traffic, '', sol)
     wcmp_alloc.run()
     print(f'{datetime.now()} [Step 4] local TE solution generated.', flush=True)
     real_LUs = toy3.dumpRealLinkUtil()

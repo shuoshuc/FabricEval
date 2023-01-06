@@ -52,6 +52,8 @@ def generateToy3():
     }
     # Number of ports on S1/S2/S3 nodes.
     NPORTS1, NPORTS2, NPORTS3 = 32, 128, 128
+    # Number of up facing (non-host) ports on S1.
+    NS1UP = 8
     # Port speeds (in Mbps) for each generation.
     PORT_SPEEDS = {
         1: 40000,
@@ -84,6 +86,7 @@ def generateToy3():
                 s3_port.port_speed_mbps = PORT_SPEEDS[cluster_gen]
                 # Odd indices indicate DCN facing ports.
                 s3_port.dcn_facing = True if s3p_idx % 2 == 1 else False
+                s3_port.host_facing = False
                 s3_port.index = s3p_idx
             # TODO: assign mgmt prefixes.
         # Add S2 nodes under AggrBlock.
@@ -101,6 +104,7 @@ def generateToy3():
                 s2_port.port_speed_mbps = PORT_SPEEDS[cluster_gen]
                 # S2 nodes have no DCN facing port.
                 s2_port.dcn_facing = False
+                s2_port.host_facing = False
                 s2_port.index = s2p_idx
             # TODO: assign mgmt prefixes.
 
@@ -119,6 +123,8 @@ def generateToy3():
                 s1_port.port_speed_mbps = PORT_SPEEDS[cluster_gen]
                 # S1 nodes have no DCN facing port.
                 s1_port.dcn_facing = False
+                # First 8 ports on S1 are up facing.
+                s1_port.host_facing = False if s1p_idx <= NS1UP else True
                 s1_port.index = s1p_idx
             # TODO: assign host and mgmt prefixes.
 
@@ -279,6 +285,8 @@ def generateToy4():
     }
     # Number of ports on S1/S2/S3 nodes.
     NPORTS1, NPORTS2, NPORTS3 = 16, 8, 8
+    # Number of up facing ports on S1.
+    NS1UP = 4
     # Port speeds (in Mbps) for each generation.
     PORT_SPEEDS = {
         1: 40000,
@@ -309,6 +317,7 @@ def generateToy4():
                 s3_port.port_speed_mbps = PORT_SPEEDS[cluster_gen]
                 # Odd indices indicate DCN facing ports.
                 s3_port.dcn_facing = True if s3p_idx % 2 == 1 else False
+                s3_port.host_facing = False
                 s3_port.index = s3p_idx
             # TODO: assign mgmt prefixes.
         # Add S2 nodes under AggrBlock.
@@ -326,6 +335,7 @@ def generateToy4():
                 s2_port.port_speed_mbps = PORT_SPEEDS[cluster_gen]
                 # S2 nodes have no DCN facing port.
                 s2_port.dcn_facing = False
+                s2_port.host_facing = False
                 s2_port.index = s2p_idx
             # TODO: assign mgmt prefixes.
 
@@ -344,6 +354,8 @@ def generateToy4():
                 s1_port.port_speed_mbps = PORT_SPEEDS[cluster_gen]
                 # S1 nodes have no DCN facing port.
                 s1_port.dcn_facing = False
+                # First 4 ports on S1 are up facing.
+                s1_port.host_facing = False if s1p_idx <= NS1UP else True
                 s1_port.index = s1p_idx
             # TODO: assign host and mgmt prefixes.
 
