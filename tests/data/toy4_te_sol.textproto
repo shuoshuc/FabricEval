@@ -1,0 +1,560 @@
+type: LEVEL_TOR
+te_intents {
+  target_block: "toy4-c1-ab1"
+  prefix_intents {
+    dst_name: "toy4-c2-ab1"
+    type: SRC
+    nexthop_entries {
+      nexthop_port: "toy4-c1-ab1-s3i1-p1"
+      weight: 2615.812499999999
+    }
+    nexthop_entries {
+      nexthop_port: "toy4-c1-ab1-s3i2-p1"
+      weight: 2615.812499999999
+    }
+    nexthop_entries {
+      nexthop_port: "toy4-c1-ab1-s3i3-p1"
+      weight: 2615.812499999999
+    }
+    nexthop_entries {
+      nexthop_port: "toy4-c1-ab1-s3i4-p1"
+      weight: 2615.812499999999
+    }
+    nexthop_entries {
+      nexthop_port: "toy4-c1-ab1-s3i1-p3"
+      weight: 887.9375000000007
+    }
+    nexthop_entries {
+      nexthop_port: "toy4-c1-ab1-s3i2-p3"
+      weight: 887.9375000000007
+    }
+    nexthop_entries {
+      nexthop_port: "toy4-c1-ab1-s3i3-p3"
+      weight: 887.9375000000007
+    }
+    nexthop_entries {
+      nexthop_port: "toy4-c1-ab1-s3i4-p3"
+      weight: 887.9375000000007
+    }
+  }
+  prefix_intents {
+    dst_name: "toy4-c3-ab1"
+    type: SRC
+    nexthop_entries {
+      nexthop_port: "toy4-c1-ab1-s3i1-p3"
+      weight: 1771.5
+    }
+    nexthop_entries {
+      nexthop_port: "toy4-c1-ab1-s3i2-p3"
+      weight: 1771.5
+    }
+    nexthop_entries {
+      nexthop_port: "toy4-c1-ab1-s3i3-p3"
+      weight: 1771.5
+    }
+    nexthop_entries {
+      nexthop_port: "toy4-c1-ab1-s3i4-p3"
+      weight: 1771.5
+    }
+  }
+  prefix_intents {
+    dst_name: "toy4-c4-ab1"
+    type: SRC
+    nexthop_entries {
+      nexthop_port: "toy4-c1-ab1-s3i1-p5"
+      weight: 1570.5
+    }
+    nexthop_entries {
+      nexthop_port: "toy4-c1-ab1-s3i2-p5"
+      weight: 1570.5
+    }
+    nexthop_entries {
+      nexthop_port: "toy4-c1-ab1-s3i3-p5"
+      weight: 1570.5
+    }
+    nexthop_entries {
+      nexthop_port: "toy4-c1-ab1-s3i4-p5"
+      weight: 1570.5
+    }
+  }
+  prefix_intents {
+    dst_name: "toy4-c5-ab1"
+    type: SRC
+    nexthop_entries {
+      nexthop_port: "toy4-c1-ab1-s3i1-p7"
+      weight: 2182.0
+    }
+    nexthop_entries {
+      nexthop_port: "toy4-c1-ab1-s3i2-p7"
+      weight: 2182.0
+    }
+    nexthop_entries {
+      nexthop_port: "toy4-c1-ab1-s3i3-p7"
+      weight: 2182.0
+    }
+    nexthop_entries {
+      nexthop_port: "toy4-c1-ab1-s3i4-p7"
+      weight: 2182.0
+    }
+  }
+  prefix_intents {
+    dst_name: "toy4-c2-ab1"
+    type: TRANSIT
+    nexthop_entries {
+      nexthop_port: "toy4-c1-ab1-s3i1-p1"
+      weight: 3932.375000000001
+    }
+    nexthop_entries {
+      nexthop_port: "toy4-c1-ab1-s3i2-p1"
+      weight: 3932.375000000001
+    }
+    nexthop_entries {
+      nexthop_port: "toy4-c1-ab1-s3i3-p1"
+      weight: 3932.375000000001
+    }
+    nexthop_entries {
+      nexthop_port: "toy4-c1-ab1-s3i4-p1"
+      weight: 3932.375000000001
+    }
+  }
+  prefix_intents {
+    dst_name: "toy4-c5-ab1"
+    type: TRANSIT
+    nexthop_entries {
+      nexthop_port: "toy4-c1-ab1-s3i1-p7"
+      weight: 495.8124999999997
+    }
+    nexthop_entries {
+      nexthop_port: "toy4-c1-ab1-s3i2-p7"
+      weight: 495.8124999999997
+    }
+    nexthop_entries {
+      nexthop_port: "toy4-c1-ab1-s3i3-p7"
+      weight: 495.8124999999997
+    }
+    nexthop_entries {
+      nexthop_port: "toy4-c1-ab1-s3i4-p7"
+      weight: 495.8124999999997
+    }
+  }
+}
+te_intents {
+  target_block: "toy4-c3-ab1"
+  prefix_intents {
+    dst_name: "toy4-c2-ab1"
+    type: TRANSIT
+    nexthop_entries {
+      nexthop_port: "toy4-c3-ab1-s3i1-p3"
+      weight: 887.9375000000007
+    }
+    nexthop_entries {
+      nexthop_port: "toy4-c3-ab1-s3i2-p3"
+      weight: 887.9375000000007
+    }
+    nexthop_entries {
+      nexthop_port: "toy4-c3-ab1-s3i3-p3"
+      weight: 887.9375000000007
+    }
+    nexthop_entries {
+      nexthop_port: "toy4-c3-ab1-s3i4-p3"
+      weight: 887.9375000000007
+    }
+  }
+  prefix_intents {
+    dst_name: "toy4-c1-ab1"
+    type: SRC
+    nexthop_entries {
+      nexthop_port: "toy4-c3-ab1-s3i1-p1"
+      weight: 843.75
+    }
+    nexthop_entries {
+      nexthop_port: "toy4-c3-ab1-s3i2-p1"
+      weight: 843.75
+    }
+    nexthop_entries {
+      nexthop_port: "toy4-c3-ab1-s3i3-p1"
+      weight: 843.75
+    }
+    nexthop_entries {
+      nexthop_port: "toy4-c3-ab1-s3i4-p1"
+      weight: 843.75
+    }
+  }
+  prefix_intents {
+    dst_name: "toy4-c2-ab1"
+    type: SRC
+    nexthop_entries {
+      nexthop_port: "toy4-c3-ab1-s3i1-p3"
+      weight: 4506.75
+    }
+    nexthop_entries {
+      nexthop_port: "toy4-c3-ab1-s3i2-p3"
+      weight: 4506.75
+    }
+    nexthop_entries {
+      nexthop_port: "toy4-c3-ab1-s3i3-p3"
+      weight: 4506.75
+    }
+    nexthop_entries {
+      nexthop_port: "toy4-c3-ab1-s3i4-p3"
+      weight: 4506.75
+    }
+  }
+  prefix_intents {
+    dst_name: "toy4-c4-ab1"
+    type: SRC
+    nexthop_entries {
+      nexthop_port: "toy4-c3-ab1-s3i1-p5"
+      weight: 2020.0
+    }
+    nexthop_entries {
+      nexthop_port: "toy4-c3-ab1-s3i2-p5"
+      weight: 2020.0
+    }
+    nexthop_entries {
+      nexthop_port: "toy4-c3-ab1-s3i3-p5"
+      weight: 2020.0
+    }
+    nexthop_entries {
+      nexthop_port: "toy4-c3-ab1-s3i4-p5"
+      weight: 2020.0
+    }
+  }
+  prefix_intents {
+    dst_name: "toy4-c5-ab1"
+    type: SRC
+    nexthop_entries {
+      nexthop_port: "toy4-c3-ab1-s3i1-p7"
+      weight: 2807.25
+    }
+    nexthop_entries {
+      nexthop_port: "toy4-c3-ab1-s3i2-p7"
+      weight: 2807.25
+    }
+    nexthop_entries {
+      nexthop_port: "toy4-c3-ab1-s3i3-p7"
+      weight: 2807.25
+    }
+    nexthop_entries {
+      nexthop_port: "toy4-c3-ab1-s3i4-p7"
+      weight: 2807.25
+    }
+  }
+  prefix_intents {
+    dst_name: "toy4-c2-ab1"
+    type: TRANSIT
+    nexthop_entries {
+      nexthop_port: "toy4-c3-ab1-s3i1-p3"
+      weight: 827.6875000000006
+    }
+    nexthop_entries {
+      nexthop_port: "toy4-c3-ab1-s3i2-p3"
+      weight: 827.6875000000006
+    }
+    nexthop_entries {
+      nexthop_port: "toy4-c3-ab1-s3i3-p3"
+      weight: 827.6875000000006
+    }
+    nexthop_entries {
+      nexthop_port: "toy4-c3-ab1-s3i4-p3"
+      weight: 827.6875000000006
+    }
+  }
+}
+te_intents {
+  target_block: "toy4-c2-ab1"
+  prefix_intents {
+    dst_name: "toy4-c1-ab1"
+    type: SRC
+    nexthop_entries {
+      nexthop_port: "toy4-c2-ab1-s3i1-p1"
+      weight: 756.75
+    }
+    nexthop_entries {
+      nexthop_port: "toy4-c2-ab1-s3i2-p1"
+      weight: 756.75
+    }
+    nexthop_entries {
+      nexthop_port: "toy4-c2-ab1-s3i3-p1"
+      weight: 756.75
+    }
+    nexthop_entries {
+      nexthop_port: "toy4-c2-ab1-s3i4-p1"
+      weight: 756.75
+    }
+  }
+  prefix_intents {
+    dst_name: "toy4-c3-ab1"
+    type: SRC
+    nexthop_entries {
+      nexthop_port: "toy4-c2-ab1-s3i1-p3"
+      weight: 2044.4999999999998
+    }
+    nexthop_entries {
+      nexthop_port: "toy4-c2-ab1-s3i2-p3"
+      weight: 2044.4999999999998
+    }
+    nexthop_entries {
+      nexthop_port: "toy4-c2-ab1-s3i3-p3"
+      weight: 2044.4999999999998
+    }
+    nexthop_entries {
+      nexthop_port: "toy4-c2-ab1-s3i4-p3"
+      weight: 2044.4999999999998
+    }
+  }
+  prefix_intents {
+    dst_name: "toy4-c4-ab1"
+    type: SRC
+    nexthop_entries {
+      nexthop_port: "toy4-c2-ab1-s3i1-p5"
+      weight: 1812.25
+    }
+    nexthop_entries {
+      nexthop_port: "toy4-c2-ab1-s3i2-p5"
+      weight: 1812.25
+    }
+    nexthop_entries {
+      nexthop_port: "toy4-c2-ab1-s3i3-p5"
+      weight: 1812.25
+    }
+    nexthop_entries {
+      nexthop_port: "toy4-c2-ab1-s3i4-p5"
+      weight: 1812.25
+    }
+  }
+  prefix_intents {
+    dst_name: "toy4-c5-ab1"
+    type: SRC
+    nexthop_entries {
+      nexthop_port: "toy4-c2-ab1-s3i1-p7"
+      weight: 2518.0
+    }
+    nexthop_entries {
+      nexthop_port: "toy4-c2-ab1-s3i2-p7"
+      weight: 2518.0
+    }
+    nexthop_entries {
+      nexthop_port: "toy4-c2-ab1-s3i3-p7"
+      weight: 2518.0
+    }
+    nexthop_entries {
+      nexthop_port: "toy4-c2-ab1-s3i4-p7"
+      weight: 2518.0
+    }
+  }
+}
+te_intents {
+  target_block: "toy4-c4-ab1"
+  prefix_intents {
+    dst_name: "toy4-c1-ab1"
+    type: SRC
+    nexthop_entries {
+      nexthop_port: "toy4-c4-ab1-s3i1-p1"
+      weight: 2120.0
+    }
+    nexthop_entries {
+      nexthop_port: "toy4-c4-ab1-s3i2-p1"
+      weight: 2120.0
+    }
+    nexthop_entries {
+      nexthop_port: "toy4-c4-ab1-s3i3-p1"
+      weight: 2120.0
+    }
+    nexthop_entries {
+      nexthop_port: "toy4-c4-ab1-s3i4-p1"
+      weight: 2120.0
+    }
+  }
+  prefix_intents {
+    dst_name: "toy4-c2-ab1"
+    type: SRC
+    nexthop_entries {
+      nexthop_port: "toy4-c4-ab1-s3i1-p3"
+      weight: 6548.1875
+    }
+    nexthop_entries {
+      nexthop_port: "toy4-c4-ab1-s3i2-p3"
+      weight: 6548.1875
+    }
+    nexthop_entries {
+      nexthop_port: "toy4-c4-ab1-s3i3-p3"
+      weight: 6548.1875
+    }
+    nexthop_entries {
+      nexthop_port: "toy4-c4-ab1-s3i4-p3"
+      weight: 6548.1875
+    }
+    nexthop_entries {
+      nexthop_port: "toy4-c4-ab1-s3i1-p1"
+      weight: 3932.375000000001
+    }
+    nexthop_entries {
+      nexthop_port: "toy4-c4-ab1-s3i2-p1"
+      weight: 3932.375000000001
+    }
+    nexthop_entries {
+      nexthop_port: "toy4-c4-ab1-s3i3-p1"
+      weight: 3932.375000000001
+    }
+    nexthop_entries {
+      nexthop_port: "toy4-c4-ab1-s3i4-p1"
+      weight: 3932.375000000001
+    }
+    nexthop_entries {
+      nexthop_port: "toy4-c4-ab1-s3i1-p5"
+      weight: 827.6875000000006
+    }
+    nexthop_entries {
+      nexthop_port: "toy4-c4-ab1-s3i2-p5"
+      weight: 827.6875000000006
+    }
+    nexthop_entries {
+      nexthop_port: "toy4-c4-ab1-s3i3-p5"
+      weight: 827.6875000000006
+    }
+    nexthop_entries {
+      nexthop_port: "toy4-c4-ab1-s3i4-p5"
+      weight: 827.6875000000006
+    }
+  }
+  prefix_intents {
+    dst_name: "toy4-c3-ab1"
+    type: SRC
+    nexthop_entries {
+      nexthop_port: "toy4-c4-ab1-s3i1-p5"
+      weight: 5720.5
+    }
+    nexthop_entries {
+      nexthop_port: "toy4-c4-ab1-s3i2-p5"
+      weight: 5720.5
+    }
+    nexthop_entries {
+      nexthop_port: "toy4-c4-ab1-s3i3-p5"
+      weight: 5720.5
+    }
+    nexthop_entries {
+      nexthop_port: "toy4-c4-ab1-s3i4-p5"
+      weight: 5720.5
+    }
+  }
+  prefix_intents {
+    dst_name: "toy4-c5-ab1"
+    type: SRC
+    nexthop_entries {
+      nexthop_port: "toy4-c4-ab1-s3i1-p7"
+      weight: 6548.1875
+    }
+    nexthop_entries {
+      nexthop_port: "toy4-c4-ab1-s3i2-p7"
+      weight: 6548.1875
+    }
+    nexthop_entries {
+      nexthop_port: "toy4-c4-ab1-s3i3-p7"
+      weight: 6548.1875
+    }
+    nexthop_entries {
+      nexthop_port: "toy4-c4-ab1-s3i4-p7"
+      weight: 6548.1875
+    }
+    nexthop_entries {
+      nexthop_port: "toy4-c4-ab1-s3i1-p1"
+      weight: 495.8124999999997
+    }
+    nexthop_entries {
+      nexthop_port: "toy4-c4-ab1-s3i2-p1"
+      weight: 495.8124999999997
+    }
+    nexthop_entries {
+      nexthop_port: "toy4-c4-ab1-s3i3-p1"
+      weight: 495.8124999999997
+    }
+    nexthop_entries {
+      nexthop_port: "toy4-c4-ab1-s3i4-p1"
+      weight: 495.8124999999997
+    }
+  }
+}
+te_intents {
+  target_block: "toy4-c5-ab1"
+  prefix_intents {
+    dst_name: "toy4-c1-ab1"
+    type: SRC
+    nexthop_entries {
+      nexthop_port: "toy4-c5-ab1-s3i1-p1"
+      weight: 996.25
+    }
+    nexthop_entries {
+      nexthop_port: "toy4-c5-ab1-s3i2-p1"
+      weight: 996.25
+    }
+    nexthop_entries {
+      nexthop_port: "toy4-c5-ab1-s3i3-p1"
+      weight: 996.25
+    }
+    nexthop_entries {
+      nexthop_port: "toy4-c5-ab1-s3i4-p1"
+      weight: 996.25
+    }
+  }
+  prefix_intents {
+    dst_name: "toy4-c2-ab1"
+    type: SRC
+    nexthop_entries {
+      nexthop_port: "toy4-c5-ab1-s3i1-p3"
+      weight: 5321.0
+    }
+    nexthop_entries {
+      nexthop_port: "toy4-c5-ab1-s3i2-p3"
+      weight: 5321.0
+    }
+    nexthop_entries {
+      nexthop_port: "toy4-c5-ab1-s3i3-p3"
+      weight: 5321.0
+    }
+    nexthop_entries {
+      nexthop_port: "toy4-c5-ab1-s3i4-p3"
+      weight: 5321.0
+    }
+  }
+  prefix_intents {
+    dst_name: "toy4-c3-ab1"
+    type: SRC
+    nexthop_entries {
+      nexthop_port: "toy4-c5-ab1-s3i1-p5"
+      weight: 2691.0
+    }
+    nexthop_entries {
+      nexthop_port: "toy4-c5-ab1-s3i2-p5"
+      weight: 2691.0
+    }
+    nexthop_entries {
+      nexthop_port: "toy4-c5-ab1-s3i3-p5"
+      weight: 2691.0
+    }
+    nexthop_entries {
+      nexthop_port: "toy4-c5-ab1-s3i4-p5"
+      weight: 2691.0
+    }
+  }
+  prefix_intents {
+    dst_name: "toy4-c4-ab1"
+    type: SRC
+    nexthop_entries {
+      nexthop_port: "toy4-c5-ab1-s3i1-p7"
+      weight: 2384.75
+    }
+    nexthop_entries {
+      nexthop_port: "toy4-c5-ab1-s3i2-p7"
+      weight: 2384.75
+    }
+    nexthop_entries {
+      nexthop_port: "toy4-c5-ab1-s3i3-p7"
+      weight: 2384.75
+    }
+    nexthop_entries {
+      nexthop_port: "toy4-c5-ab1-s3i4-p7"
+      weight: 2384.75
+    }
+  }
+}
