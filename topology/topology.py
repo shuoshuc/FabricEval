@@ -276,9 +276,9 @@ class Node:
             merged_group = orig_groups[0]
             if len(orig_groups) > 1:
                 merged_group = copy.deepcopy(orig_groups[0])
-                # Merged group could have different dst, we just put a wildcard
+                # Merged group could have different uuid, we just put a wildcard
                 # here to mask it, as we don't need this info.
-                merged_group.dst = '*'
+                merged_group.uuid = '*'
                 # Clears the original weights, they are not needed any more.
                 merged_group.orig_w = []
                 # Clears ideal_vol to avoid double counting the first group.
