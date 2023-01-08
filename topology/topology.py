@@ -137,6 +137,12 @@ class Node:
             te_sol.PrefixIntent.PrefixType.SRC: [],
             te_sol.PrefixIntent.PrefixType.TRANSIT: []
         }
+        # All currently installed groups with duplicates. If a merged group is
+        # installed in `self._groups`, all of the originals are saved here.
+        self._dup_groups = {
+            te_sol.PrefixIntent.PrefixType.SRC: [],
+            te_sol.PrefixIntent.PrefixType.TRANSIT: []
+        }
         # Installed static groups, for DST/LOCAL type of traffic. Groups here
         # are plain lists.
         self._static_groups = []
@@ -287,6 +293,9 @@ class Node:
                 self._groups[group_type].append(merged_group)
                 ecmp_cnt += sum(merged_group.reduced_w)
                 self.tot_admit += merged_group.ideal_vol
+                # If the merged group is installed, all the originals are saved
+                # so that we can construct real link utilizations later.
+                self._dup_groups[group_type] += orig_groups
         self.updateECMPUsage()
 
 
