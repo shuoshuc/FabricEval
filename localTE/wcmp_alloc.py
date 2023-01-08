@@ -1,8 +1,10 @@
 import os
 import time
 from concurrent.futures import ProcessPoolExecutor, as_completed
+from dataclasses import dataclass, field
 from datetime import datetime
 from itertools import islice
+from typing import List
 
 import proto.te_solution_pb2 as te_sol
 from google.protobuf import text_format
@@ -14,6 +16,24 @@ from localTE.group_reduction import GroupReduction
 # Shorthand alias for SRC and TRANSIT type constants.
 SRC = te_sol.PrefixIntent.PrefixType.SRC
 TRANSIT = te_sol.PrefixIntent.PrefixType.TRANSIT
+
+@dataclass
+class FwdGroup:
+    '''
+    A data structure representing a group.
+    '''
+    # The dst blocks this group can reach.
+    dst: List[str]
+    # original group weights.
+    orig_w: List[float]
+    # reduced group weights.
+    reduced_w: List[int] = field(init=False)
+    # Ideal traffic volume served by this group.
+    ideal_vol: float
+    # Real traffic volume served by this group.
+    real_vol: float = field(init=False)
+    # Group type: represents the type of traffic this group carries.
+    g_type: int
 
 def loadTESolution(filepath):
     if not filepath:
@@ -47,28 +67,32 @@ def reduceGroups(node, limit, src_groups, transit_groups):
 
     node: node name.
     limit: ECMP table limit.
-    src_groups: a list of pre-reduction src groups. Can be None.
-    transit_groups: a list of pre-reduction transit groups. Can be None.
+    src_groups: a list of pre-reduction SRC FwdGroups. Can be None.
+    transit_groups: a list of pre-reduction TRANSIT FwdGroups. Can be None.
 
-    Returns a tuple of the same structure as the input, except groups are
-    post-reduction.
+    Returns a tuple of the same structure as the input. The FwdGroup.reduced_w
+    field of each SRC and TRANSIT groups will be populated in place.
     '''
-    reduced_src_groups, reduced_transit_groups = [], []
-    # # entries consumed by transit groups.
+    # Num entries consumed by transit groups.
     used = 0
 
     # Work on TRANSIT groups.
     if transit_groups:
-        transit_vec = [g for (g, _) in transit_groups]
+        transit_vec = [FwdG.orig_w for FwdG in transit_groups]
         gr = GroupReduction(transit_vec, TRANSIT, round(limit / 2))
         reduced_transit = gr.solve(FLAG.GR_ALGO)
         used = deDupSize(reduced_transit)
+        if len(transit_groups) != len(reduced_transit):
+            print(f'[ERROR] reduceGroups: orig transits and reduced transits'
+                  f' have mismatched size {len(transit_groups)} != '
+                  f'{len(reduced_transit)}.')
+            return None
         for i, vec in enumerate(reduced_transit):
-            reduced_transit_groups.append((vec, transit_groups[i][1]))
+            transit_groups[i].reduced_w = vec
 
     # Work on SRC groups.
     if src_groups:
-        src_vec = [g for (g, _) in src_groups]
+        src_vec = [FwdG.orig_w for FwdG in src_groups]
         # ECMP table is by default split half and half between SRC and TRANSIT.
         # With improved heuristic, SRC groups can use all the rest space after
         # fitting TRANSIT groups. This is a relaxation because TRANSIT groups
@@ -76,10 +100,14 @@ def reduceGroups(node, limit, src_groups, transit_groups):
         gr = GroupReduction(src_vec, SRC, limit - used \
                             if FLAG.IMPROVED_HEURISTIC else round(limit / 2))
         reduced_src = gr.solve(FLAG.GR_ALGO)
+        if len(src_groups) != len(reduced_src):
+            print(f'[ERROR] reduceGroups: orig src and reduced src have '
+                  f'mismatched size {len(src_groups)} != {len(reduced_src)}.')
+            return None
         for i, vec in enumerate(reduced_src):
-            reduced_src_groups.append((vec, src_groups[i][1]))
+            src_groups[i].reduced_w = vec
 
-    return (node, limit, reduced_src_groups, reduced_transit_groups)
+    return (node, limit, src_groups, transit_groups)
 
 class WCMPWorker:
     '''
@@ -94,10 +122,11 @@ class WCMPWorker:
         # this AggrBlock. Always check before accessing, it could be None if
         # there is no demand for this block.
         self._block_demands = block_demands
-        # groups holds pre-reduction groups. Each is keyed by PrefixType
-        # because groups of different types cannot merge. Example format:
+        # Holds pre-reduction groups. Each is keyed by (node name, prefix type,
+        # ECMP limit) because groups of different types cannot merge.
+        # Example format:
         # {
-        #   (node, prefix_type, ecmp_limit): [([w1, w2, w3], vol), ...],
+        #   (node, prefix_type, ecmp_limit): [FwdGroup1, FwdGroup2, ...],
         #   ...
         # }
         self.groups = {}
@@ -195,52 +224,69 @@ class WCMPWorker:
     def populateGroups(self):
         '''
         Translates the high level TE intents to pre-reduction groups.
+        Specifically, this function splits all PrefixIntents and puts ports on
+        the same node together to form one group. It will construct SRC/TRANSIT
+        groups for all S2 and S3 nodes, but no S1 because S1 only needs a static
+        group. Also no groups for DST/LOCAL traffic because they only require
+        static groups that will be hardcoded on each node.
 
         Returns `self.groups` for caller to run group reduction.
         '''
+        # Each PrefixIntent is translated into a set of SRC/TRANSIT groups that
+        # go to a certain dst.
         for prefix_intent in self._te_intent.prefix_intents:
-            self.convertPrefixIntentToGroups(prefix_intent)
+            if prefix_intent.type not in [SRC, TRANSIT]:
+                print(f'[ERROR] populateGroups: unknown prefix type '
+                      f'{prefix_intent.type}!')
+                return
 
-        # `groups` may contain duplicates. Dedup and updates `self.groups`.
-        self.consolidateGroups()
+            # [Constructs S3 groups]
+            # Goes through all nexthops in this prefix intent (to a particular
+            # dst). Groups nexthop ports by their parent nodes. Note that only
+            # groups on S3 nodes will be created because nexthops are all DCN
+            # facing ports.
+            tmp_g = {}
+            for ne in prefix_intent.nexthop_entries:
+                port = self._topo.getPortByName(ne.nexthop_port)
+                node = port.getParent().name
+                limit = port.getParent().ecmp_space()
+                group = tmp_g.setdefault((node, limit),
+                    [0] * len(port.getParent()._member_ports))
+                group[port.index - 1] = abs(ne.weight)
+            # Groups for all S3 nodes should have been created by now.
+            # Constructs FwdGroup dataclass instances.
+            s3_vol = {}
+            for (node, limit), g in tmp_g.items():
+                FG = FwdGroup(dst=[prefix_intent.dst_name], orig_w=g,
+                              ideal_vol=sum(g), g_type=prefix_intent.type)
+                # Saves the total ideal traffic volume for each S3. This will be
+                # used to construct S2 groups later.
+                s3_vol[node] = FG.ideal_vol
+                self.groups.setdefault((node, FG.g_type, limit), []).append(FG)
+
+            # [Constructs S2 groups]
+            # For each S2, the traffic volume it sends to each S3 is the total
+            # S3 volume / # S2. This fraction is equally spread across all S2-S3
+            # links between the pair. Going through all S3 nodes, we can
+            # construct a group for this prefix dst on the S2.
+            cluster = self._topo.getAggrBlockByName(self._target_block).getParent()
+            s2_nodes = self._topo.findNodesinClusterByStage(cluster.name, 2)
+            for s2_obj in s2_nodes:
+                weight_vec = [0] * len(s2_obj._member_ports)
+                for s3_node, vol in s3_vol.items():
+                    vol_per_s2 = vol / len(s2_nodes)
+                    up_ports = self._topo.findPortsFacingNode(s2_obj.name,
+                                                              s3_node)
+                    for port in up_ports:
+                        weight_vec[port.index - 1] = vol_per_s2 / len(up_ports)
+                FG = FwdGroup(dst=[prefix_intent.dst_name],
+                              orig_w=weight_vec,
+                              ideal_vol=sum(weight_vec),
+                              g_type=prefix_intent.type)
+                self.groups.setdefault((s2_obj.name, FG.g_type,
+                                        s2_obj.ecmp_space()), []).append(FG)
 
         return self.groups
-
-    def convertPrefixIntentToGroups(self, prefix_intent):
-        '''
-        Converts a PrefixIntent to a list of (pre-reduction) groups.
-        Specifically, this function splits a PrefixIntent and puts ports on the
-        same node together to form one group.
-        No return, directly modifies class member variables.
-        '''
-        if prefix_intent.type not in [SRC, TRANSIT]:
-            print(f'[ERROR] PrefixIntentToGroups: unknown prefix type '
-                  f'{prefix_intent.type}!')
-            return
-
-        tmp_g = {}
-        for ne in prefix_intent.nexthop_entries:
-            port = self._topo.getPortByName(ne.nexthop_port)
-            node, limit = port.getParent().name, port.getParent().ecmp_limit
-            group = tmp_g.setdefault((node, prefix_intent.type, limit),
-                                     [0] * len(port.getParent()._member_ports))
-            group[port.index - 1] = abs(ne.weight)
-        for node_type_limit, g in tmp_g.items():
-            self.groups.setdefault(node_type_limit, []).append((g, sum(g)))
-
-    def consolidateGroups(self):
-        '''
-        Consolidates groups in `self.groups`: de-duplicates groups on the
-        same node, and accumulates total traffic carried by a shared group.
-        '''
-        for node_type_limit, groups in self.groups.items():
-            g_vol = {}
-            # Each `group` is a tuple of (weight vector, volume).
-            for (group, vol) in groups:
-                g_vol.setdefault(tuple(group), 0)
-                g_vol[tuple(group)] += vol
-            self.groups[node_type_limit] = [(list(k), v) \
-                                            for k, v in g_vol.items()]
 
 class WCMPAllocation:
     '''
@@ -251,8 +297,7 @@ class WCMPAllocation:
     def __init__(self, topo_obj, traffic_obj, input_path, input_proto=None):
         # A map from AggrBlock name to the corresponding WCMP worker instance.
         self._worker_map = {}
-        self.groups_in = {}
-        self.groups_out = {}
+        self.groups = {}
         # Stores the topology object in case we need to look up an element.
         self._topo = topo_obj
         # Stores the traffic object in case we need to look up a demand.
@@ -282,36 +327,50 @@ class WCMPAllocation:
         Launches all WCMP workers to reduce groups.
         '''
         # Generates ideal link utilization of the entire fabric.
+        t = time.time()
         for worker in self._worker_map.values():
             worker.sendIdealTraffic()
+        PRINTV(1, f'{datetime.now()} [sendIdealTraffic] complete in '
+               f'{time.time() - t} sec.')
 
         # Collect groups to be reduced from each WCMPWorker and merge them into
         # a unified map.
+        t = time.time()
         for worker in self._worker_map.values():
-            self.groups_in.update(worker.populateGroups())
+            self.groups.update(worker.populateGroups())
+        PRINTV(1, f'{datetime.now()} [populateGroups] complete in '
+               f'{time.time() - t} sec.')
 
         # Creates a set of (node, limit) so that we can later fetch both the SRC
         # and TRANSIT groups to reduce together.
         node_limit_set = set()
-        for node, _, limit in self.groups_in.keys():
+        for node, _, limit in self.groups.keys():
             node_limit_set.add((node, limit))
         # Run group reduction for each node in parallel.
         for set_slice in chunk(node_limit_set, FLAG.PARALLELISM):
             t = time.time()
             with ProcessPoolExecutor(max_workers=FLAG.PARALLELISM) as exe:
                 futures = {exe.submit(reduceGroups, node, limit,
-                                      self.groups_in.get((node, SRC, limit)),
-                                      self.groups_in.get((node, TRANSIT, limit)))
+                                      self.groups.get((node, SRC, limit)),
+                                      self.groups.get((node, TRANSIT, limit)))
                            for node, limit in set_slice}
             for fut in as_completed(futures):
-                node, limit, reduced_src, reduced_transit = fut.result()
-                if len(reduced_src):
-                    self.groups_out[(node, SRC, limit)] = reduced_src
-                if len(reduced_transit):
-                    self.groups_out[(node, TRANSIT, limit)] = reduced_transit
+                node, limit, src_groups, transit_groups = fut.result()
+                if src_groups:
+                    self.groups[(node, SRC, limit)] = src_groups
+                if transit_groups:
+                    self.groups[(node, TRANSIT, limit)] = transit_groups
             PRINTV(1, f'{datetime.now()} [reduceGroups] batch complete in '
                    f'{time.time() - t} sec.')
 
-        # For each prefix type and each node, install all groups.
-        for (node, g_type, _), groups in self.groups_out.items():
-            self._topo.installGroupsOnNode(node, groups, g_type)
+        # Installs all groups for each node. Note that not all groups are
+        # guaranteed to be installed due to table limit. We need to check to see
+        # if a group is indeed installed when generating real link utilizations
+        # later.
+        t = time.time()
+        for node, C in node_limit_set:
+            self._topo.installGroupsOnNode(node,
+                                           self.groups.get((node, SRC, C)),
+                                           self.groups.get((node, TRANSIT, C)))
+        PRINTV(1, f'{datetime.now()} [installGroups] complete in '
+               f'{time.time() - t} sec.')

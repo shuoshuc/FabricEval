@@ -131,16 +131,23 @@ class Node:
         self._parent_aggr_block = None
         # parent cluster this node belongs to.
         self._parent_cluster = None
-        # All currently installed groups.
+        # All currently installed groups. Groups here are FwdGroup dataclass
+        # instances.
         self._groups = {
             te_sol.PrefixIntent.PrefixType.SRC: [],
             te_sol.PrefixIntent.PrefixType.TRANSIT: []
         }
+        # Installed static groups, for DST/LOCAL type of traffic. Groups here
+        # are plain lists.
+        self._static_groups = []
         # Current ECMP table usage, should equal sum of all groups.
         self.ecmp_used = 0
-        # Total traffic demand that is sent to this node.
+        # Total (ideal) traffic demand that is sent to this node.
         self.tot_demand = 0
-        # Total traffic demand that is eventually admitted into this node.
+        # Total (ideal) traffic demand that is eventually admitted by this node.
+        # If a group is not installed, its traffic carried is not admitted.
+        # N.B., this only tracks SRC and TRANSIT traffic, static groups are
+        # always installed, so their traffic is admitted for sure.
         self.tot_admit = 0
 
     def setParent(self, aggr_block, cluster):
@@ -156,21 +163,24 @@ class Node:
     def getParentCluster(self):
         return self._parent_cluster
 
-    def hasGroup(self, group, g_type):
+    def ecmp_space(self):
         '''
-        Returns whether `group` is installed on this node.
+        Returns the ECMP available space.
         '''
-        return (group in self._groups[g_type])
+        return self.ecmp_limit - self.ecmp_used
 
     def updateECMPUsage(self):
-        self.ecmp_used = sum([sum(g) for glist in self._groups.values() \
-                              for g in glist])
+        '''
+        ECMP usage must be updated after addition/deletion on the groups.
+        '''
+        self.ecmp_used = sum([sum(fwdg.reduced_w) for glist in \
+                              self._groups.values() for fwdg in glist])
+        self.ecmp_used += sum([sum(g) for g in self._static_groups])
 
     def getECMPUtil(self):
         '''
         Returns the ECMP table util on this node.
         '''
-        self.updateECMPUsage()
         if self.ecmp_used > self.ecmp_limit:
             print(f'[ERROR] node {self.name} ECMP used {self.ecmp_used} exceed'
                   f' limit {self.ecmp_limit}.')
@@ -181,24 +191,102 @@ class Node:
         Returns the total number of groups installed on this node.
         '''
         return len(self._groups[te_sol.PrefixIntent.PrefixType.SRC]) + \
-            len(self._groups[te_sol.PrefixIntent.PrefixType.TRANSIT])
+            len(self._groups[te_sol.PrefixIntent.PrefixType.TRANSIT]) + \
+            len(self._static_groups)
+
+    def installStaticGroups(self):
+        '''
+        Installs static groups on node. These are groups that will always exist
+        and can be shared by different types of traffic. We don't really care
+        about their weights, link utilization will be computed assuming they are
+        ECMP. We just need them to exist and hold up some table space.
+
+        S3 node has 1 static ECMP group serving all TRANSIT/DST/LOCAL traffic
+        going to S2.
+        S2 node has 1 static ECMP group serving LOCAL traffic going to S3, and
+        N=(# S1) static ECMP groups serving all DST/LOCAL traffic going to S1.
+        S1 node has 1 static ECMP group serving all SRC/LOCAL egress traffic.
+        '''
+        # S1/S2/S3 all have one ECMP group, so generate an all-0 group to begin.
+        ecmp_vec = [0] * len(self._member_ports)
+
+        if self.stage == 1:
+            for port in self._member_ports:
+                if not port.host_facing:
+                    ecmp_vec[port.index - 1] = 1
+
+        elif self.stage == 2:
+            # Installs the N=(# S1) static ECMP groups for DST/LOCAL traffic
+            # going to S1.
+            for s1 in self.getParentCluster()._member_tors:
+                ecmp_to_s1 = [0] * len(self._member_ports)
+                for port in self._member_ports:
+                    # Port has no link, hence no peer. Not the port we need.
+                    if not port.orig_link or not port.term_link:
+                        continue
+                    # Peer port's parent node matches the ToR name, found it.
+                    if port.orig_link.dst_port.getParent().name == s1.name:
+                        ecmp_to_s1[port.index - 1] = 1
+                self._static_groups.append(ecmp_to_s1)
+
+            # This is the 1 ECMP group for LOCAL traffic going to S3.
+            for port in self._member_ports:
+                # Odd-indexed ports are up facing.
+                if port.index % 2 == 1:
+                    ecmp_vec[port.index - 1] = 1
+
+        elif self.stage == 3:
+            for port in self._member_ports:
+                # Even-indexed ports are down facing.
+                if port.index % 2 == 0:
+                    ecmp_vec[port.index - 1] = 1
+        self._static_groups.append(ecmp_vec)
+        self.updateECMPUsage()
 
     def installGroups(self, groups, group_type):
         '''
         Installs groups on node, and updates ECMP table space used. Groups
         completely overwrites the old ones of the same type.
+
+        groups: a list of FwdGroup dataclass instances.
+        group_type: group type, SRC or TRANSIT.
         '''
+        # By default, SRC/TRANSIT should share the table equally. So limit minus
+        # the static entries should be split by half for each type. Improved
+        # heuristic allows one type to use the free space from the other type.
+        static_used = sum([sum(g) for g in self._static_groups])
         free_space = self.ecmp_limit - self.ecmp_used \
-            if FLAG.IMPROVED_HEURISTIC else self.ecmp_limit / 2
+            if FLAG.IMPROVED_HEURISTIC else (self.ecmp_limit - static_used) / 2
+
+        # Merges input groups. Groups with the same weight vector and type can
+        # be merged. The merged group should contain all dst of original groups
+        # and sum up the traffic volume.
         ecmp_cnt = 0
-        # Merges duplicate groups and drops the traffic volume associated.
-        # Groups can become duplicate after reduction.
-        dedup_groups = [list(mg) for mg in set([tuple(g) for g, _ in groups])]
-        for dedup_group in dedup_groups:
+        dst_groups = {}
+        for FwdG in groups:
+            dst_groups.setdefault(tuple(FwdG.reduced_w), []).append(FwdG)
+        for _, orig_groups in dst_groups.items():
+            # There should exist at least 1 group.
+            merged_group = orig_groups[0]
+            if len(orig_groups) > 1:
+                merged_group = copy.deepcopy(orig_groups[0])
+                # Clears the original weights, they are not needed any more.
+                merged_group.orig_w = []
+                # Clears ideal_vol to avoid double counting the first group.
+                merged_group.ideal_vol = 0
+                for orig_group in orig_groups:
+                    merged_group.ideal_vol += orig_group.ideal_vol
+                    # We assume original groups should only have one dst.
+                    if orig_group.dst[0] not in merged_group.dst:
+                        merged_group.dst.append(orig_group.dst[0])
+            # The merged group, regardless of being installed, contributes to
+            # the total ideal demand on this node.
+            self.tot_demand += merged_group.ideal_vol
             # Only install groups that can fit into the ECMP table.
-            if ecmp_cnt + sum(dedup_group) <= free_space:
-                self._groups[group_type].append(dedup_group)
-                ecmp_cnt += sum(dedup_group)
+            if ecmp_cnt + sum(merged_group.reduced_w) <= free_space:
+                self._groups[group_type].append(merged_group)
+                ecmp_cnt += sum(merged_group.reduced_w)
+                self.tot_admit += merged_group.ideal_vol
         self.updateECMPUsage()
 
 
@@ -390,6 +478,12 @@ class Topology:
                           path_obj.capacity, path_obj.available_capacity))
                 return
 
+        # Install static groups after nodes are instantiated. For S1 nodes, this
+        # is the only chance to install static groups. S1 nodes are hardly
+        # touched again during the full pipeline run.
+        for node in self._nodes.values():
+            node.installStaticGroups()
+
     def numClusters(self):
         '''
         Returns number of clusters in this topology.
@@ -471,6 +565,21 @@ class Topology:
             return None
         assert port_obj.orig_link.dst_port == port_obj.term_link.src_port
         return port_obj.orig_link.dst_port
+
+    def findPortsFacingNode(self, self_node, peer_node):
+        '''
+        Finds a list of port objects on self_node facing peer_node.
+        '''
+        results = []
+        self_node_obj = self.getNodeByName(self_node)
+        for port in self_node_obj._member_ports:
+            # Port has no link, hence no peer. Not the port we are looking for.
+            if not port.orig_link or not port.term_link:
+                continue
+            # Peer port's parent node matches the peer_node name, found it.
+            if port.orig_link.dst_port.getParent().name == peer_node:
+                results.append(port)
+        return results
 
     def findAggrBlockOfPort(self, port_name):
         '''
@@ -747,30 +856,26 @@ class Topology:
         return dict(sorted(link_util_map.items(), key=lambda x: x[1],
                            reverse=True))
 
-    def installGroupsOnNode(self, node_name, groups, group_type):
+    def installGroupsOnNode(self, node_name, src_groups, transit_groups):
         '''
         Installs groups on node. Groups will be persisted in the node instance
-        until next installation. ECMP util will be updated as well. In addition,
-        each link will be updated with the traffic load according to the group
-        weights.
+        until next installation.
+        N.B., not all groups are guaranteed to be installed due to table limits.
+        Traffic admission will be calculated based on the groups installed.
 
         node_name: name of the node the groups belong to.
-        groups: a list of (group, volume) tuples.
-        group_type: SRC or TRANSIT, groups of different types cannot be shared.
+        src_groups: a list of SRC FwdGroups.
+        transit_groups: a list of TRANSIT FwdGroups.
         '''
         node = self.getNodeByName(node_name)
-        # Note that not all groups are guaranteed to be installed due to table
-        # limit. We need to check to see if a group is indeed installed.
-        node.installGroups(groups, group_type)
+        # The order to install groups should be TRANSIT, SRC.
+        if transit_groups:
+            node.installGroups(transit_groups,
+                               te_sol.PrefixIntent.PrefixType.TRANSIT)
+        if src_groups:
+            node.installGroups(src_groups, te_sol.PrefixIntent.PrefixType.SRC)
+        '''
         for (group, vol) in groups:
-            # Keep track of the traffic landing on node and admitted. If a group
-            # is not installed, the corresponding traffic is completely dropped.
-            # This means, we count it in tot_demand but not tot_admit. We also
-            # do not count the traffic distributed on each link.
-            node.tot_demand += vol
-            if not node.hasGroup(group, group_type):
-                continue
-            node.tot_admit += vol
             # Finds all the ports that carry traffic in the group.
             nz_indices = np.nonzero(np.array(group))[0]
             for i in nz_indices:
@@ -780,6 +885,7 @@ class Topology:
                 # port (since traffic is outgoing). `_real_residual` can be
                 # negative due to oversubscription.
                 port.orig_link._real_residual -= group[i] / sum(group) * vol
+        '''
 
     def dumpRealLinkUtil(self):
         '''

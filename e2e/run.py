@@ -5,6 +5,7 @@ from datetime import datetime
 import numpy as np
 from google.protobuf import text_format
 
+import common.flags as FLAG
 from globalTE.global_te import GlobalTE
 from localTE.wcmp_alloc import WCMPAllocation
 from topology.topogen import generateToy3
@@ -16,6 +17,22 @@ TOY3_SOL = 'tests/data/te_sol.textproto'
 TOY3_TM = 'tests/data/toy3_traffic_gravity.textproto'
 
 if __name__ == "__main__":
+    # Initializes global flags before running the pipeline.
+    if FLAG.GR_ALGO == 'eurosys':
+        FLAG.EUROSYS_MOD = False
+    elif FLAG.GR_ALGO == 'eurosys_mod':
+        FLAG.EUROSYS_MOD = True
+    elif FLAG.GR_ALGO == 'google':
+        FLAG.IMPROVED_HEURISTIC = False
+    elif FLAG.GR_ALGO == 'google_new':
+        FLAG.IMPROVED_HEURISTIC = True
+    elif FLAG.GR_ALGO == 'carving':
+        FLAG.IMPROVED_HEURISTIC = True
+    elif FLAG.GR_ALGO == 'gurobi':
+        FLAG.IMPROVED_HEURISTIC = True
+    else:
+        print(f'[ERROR] unknown group reduction algorithm {FLAG.GR_ALGO}.')
+
     logpath = sys.argv[1]
     net_proto = generateToy3()
     toy3 = Topology('', net_proto)
