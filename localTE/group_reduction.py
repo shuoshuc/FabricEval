@@ -134,15 +134,16 @@ class Group:
         '''
         Prunes a port in group to reduce its size.
         '''
+
         # A group cannot be empty, so stop when its already a singleton.
         if len(self.integer) <= 1:
             return
 
         if FLAG.IMPROVED_HEURISTIC:
-            # Smart pruning policy:
+            # Smart pruning policy: finds the smallest non-zero member and
+            # prunes it.
             np_unstrip = np.array(self.unstrip)
-            idx_min = np.argmin(np.ma.masked_where(self.unstrip==0,
-                                                   self.unstrip))
+            idx_min = np.argmin(np.ma.masked_where(np_unstrip==0, np_unstrip))
             self.unstrip[idx_min] = 0.0
             self.__post_init__()
         else:
@@ -931,22 +932,16 @@ class GroupReduction:
         algorithm: one of eurosys[_mod]/google[_new]/carving/gurobi.
         '''
         if algorithm == 'eurosys':
-            FLAG.EUROSYS_MOD = False
             return self.table_fitting_ssmg()
         elif algorithm == 'eurosys_mod':
-            FLAG.EUROSYS_MOD = True
             return self.table_fitting_ssmg()
         elif algorithm == 'google':
-            FLAG.IMPROVED_HEURISTIC = False
             return self.google_ssmg()
         elif algorithm == 'google_new':
-            FLAG.IMPROVED_HEURISTIC = True
             return self.google_ssmg()
         elif algorithm == 'carving':
-            FLAG.IMPROVED_HEURISTIC = True
             return self.table_carving_ssmg()
         elif algorithm == 'gurobi':
-            FLAG.IMPROVED_HEURISTIC = True
             return self.solve_ssmg()
         else:
             print(f'[ERROR] unknown group reduction algorithm {algorithm}.')
