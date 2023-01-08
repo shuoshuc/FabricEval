@@ -270,15 +270,15 @@ class Node:
             merged_group = orig_groups[0]
             if len(orig_groups) > 1:
                 merged_group = copy.deepcopy(orig_groups[0])
+                # Merged group could have different dst, we just put a wildcard
+                # here to mask it, as we don't need this info.
+                merged_group.dst = '*'
                 # Clears the original weights, they are not needed any more.
                 merged_group.orig_w = []
                 # Clears ideal_vol to avoid double counting the first group.
                 merged_group.ideal_vol = 0
                 for orig_group in orig_groups:
                     merged_group.ideal_vol += orig_group.ideal_vol
-                    # We assume original groups should only have one dst.
-                    if orig_group.dst[0] not in merged_group.dst:
-                        merged_group.dst.append(orig_group.dst[0])
             # The merged group, regardless of being installed, contributes to
             # the total ideal demand on this node.
             self.tot_demand += merged_group.ideal_vol

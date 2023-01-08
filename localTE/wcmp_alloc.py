@@ -22,8 +22,8 @@ class FwdGroup:
     '''
     A data structure representing a group.
     '''
-    # The dst blocks this group can reach.
-    dst: List[str]
+    # The dst block this group can reach.
+    dst: str
     # original group weights.
     orig_w: List[float]
     # reduced group weights.
@@ -257,7 +257,7 @@ class WCMPWorker:
             # Constructs FwdGroup dataclass instances.
             s3_vol = {}
             for (node, limit), g in tmp_g.items():
-                FG = FwdGroup(dst=[prefix_intent.dst_name], orig_w=g,
+                FG = FwdGroup(dst=prefix_intent.dst_name, orig_w=g,
                               ideal_vol=sum(g), g_type=prefix_intent.type)
                 # Saves the total ideal traffic volume for each S3. This will be
                 # used to construct S2 groups later.
@@ -279,7 +279,7 @@ class WCMPWorker:
                                                               s3_node)
                     for port in up_ports:
                         weight_vec[port.index - 1] = vol_per_s2 / len(up_ports)
-                FG = FwdGroup(dst=[prefix_intent.dst_name],
+                FG = FwdGroup(dst=prefix_intent.dst_name,
                               orig_w=weight_vec,
                               ideal_vol=sum(weight_vec),
                               g_type=prefix_intent.type)
