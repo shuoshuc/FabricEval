@@ -60,16 +60,17 @@ if __name__ == "__main__":
     real_LUs = toy3.dumpRealLinkUtil()
     ideal_LUs = toy3.dumpIdealLinkUtil()
     delta_LUs = {}
-    for k, v in real_LUs.items():
-        delta_LUs[k] = v - ideal_LUs[k]
+    for k, (u, dcn) in real_LUs.items():
+        delta_LUs[k] = (u - ideal_LUs[k][0], dcn)
 
     print(f'{datetime.now()} [Step 5] dump link util to LU.csv', flush=True)
     with open(f'{logpath}/LU.csv', 'w') as LU:
         writer = csv.writer(LU)
-        writer.writerow(["link name", "ideal LU", "real LU", "delta"])
-        for k, v in dict(sorted(delta_LUs.items(), key=lambda x: x[1],
-                                reverse=True)).items():
-            writer.writerow([k, f'{ideal_LUs[k]}', f'{real_LUs[k]}', f'{v}'])
+        writer.writerow(["link name", "dcn facing", "ideal LU", "real LU", "delta"])
+        for k, (v, dcn) in dict(sorted(delta_LUs.items(), key=lambda x: x[1][0],
+                                       reverse=True)).items():
+            writer.writerow([k, f'{dcn}', f'{ideal_LUs[k][0]}',
+                             f'{real_LUs[k][0]}', f'{v}'])
 
     print(f'{datetime.now()} [Step 6] dump node table util to node_ecmp.csv',
           flush=True)

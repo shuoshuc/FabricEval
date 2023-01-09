@@ -866,15 +866,17 @@ class Topology:
 
     def dumpIdealLinkUtil(self):
         '''
-        Returns a map of all link utilizations normalized to 1. Returned dict is
-        sorted from highest link util to lowest.
+        Returns a map of all link utilizations normalized to 1. Dict value is a
+        tuple of (LU, DCN facing). Returned dict is sorted from highest link
+        util to lowest.
         NB: returned link util is ideal utilization without precision loss.
         '''
         link_util_map = {}
         for link in self._links.values():
             link_util_map[link.name] = \
-                (link.link_speed - link._ideal_residual) / link.link_speed
-        return dict(sorted(link_util_map.items(), key=lambda x: x[1],
+                ((link.link_speed - link._ideal_residual) / link.link_speed,
+                 link.dcn_facing)
+        return dict(sorted(link_util_map.items(), key=lambda x: x[1][0],
                            reverse=True))
 
     def installGroupsOnNode(self, node_name, src_groups, transit_groups):
@@ -898,15 +900,17 @@ class Topology:
 
     def dumpRealLinkUtil(self):
         '''
-        Returns a map of all link utilizations normalized to 1. Returned dict is
-        sorted from highest link util to lowest.
+        Returns a map of all link utilizations normalized to 1. Dict value is a
+        tuple of (LU, DCN facing). Returned dict is sorted from highest link
+        util to lowest.
         NB: returned link util is real utilization with precision loss.
         '''
         link_util_map = {}
         for link in self._links.values():
             link_util_map[link.name] = \
-                (link.link_speed - link._real_residual) / link.link_speed
-        return dict(sorted(link_util_map.items(), key=lambda x: x[1],
+                ((link.link_speed - link._real_residual) / link.link_speed,
+                 link.dcn_facing)
+        return dict(sorted(link_util_map.items(), key=lambda x: x[1][0],
                            reverse=True))
 
     def dumpECMPUtil(self):
