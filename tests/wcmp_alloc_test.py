@@ -76,8 +76,8 @@ class TestWCMPAlloc(unittest.TestCase):
         wcmp_alloc = WCMPAllocation(toy4, toy4_traffic, TOY4_SOL_PATH)
         wcmp_alloc.run()
         c1_worker = wcmp_alloc._worker_map[TOY4_C1]
-        # Verify there exist 4 nodes * (SRC and TRANSIT) = 8 sets of groups.
-        self.assertEqual(8, len(c1_worker.groups.values()))
+        # Verify there exist 8 nodes * (SRC and TRANSIT) = 16 sets of groups.
+        self.assertEqual(16, len(c1_worker.groups.values()))
         for node, _, _ in c1_worker.groups.keys():
             # Verify node has non-zero ECMP utilization.
             self.assertTrue(toy4.getNodeByName(node).getECMPUtil() > 0)
@@ -90,7 +90,7 @@ class TestWCMPAlloc(unittest.TestCase):
         # Verify node ECMP utilization.
         self.assertTrue(ecmp_util[TOY4_NODE1][0] > 0.03)
         self.assertTrue(ecmp_util[TOY4_NODE1][0] < 0.04)
-        self.assertEqual(6, ecmp_util[TOY4_NODE1][1])
+        self.assertEqual(7, ecmp_util[TOY4_NODE1][1])
         demand = toy4.dumpDemandAdmission()
         # Verify node admits all demands.
         self.assertEqual(1.0, demand[TOY4_NODE1][2])
