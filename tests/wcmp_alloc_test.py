@@ -84,8 +84,9 @@ class TestWCMPAlloc(unittest.TestCase):
             self.assertTrue(toy4.getNodeByName(node).getNumGroups() > 0)
         link_util = toy4.dumpRealLinkUtil()
         # Verify real link utilization.
-        self.assertTrue(link_util[TOY4_LINK1] > 0.16)
-        self.assertTrue(link_util[TOY4_LINK1] < 0.17)
+        self.assertTrue(link_util[TOY4_LINK1][1])
+        self.assertTrue(link_util[TOY4_LINK1][0] > 0.16)
+        self.assertTrue(link_util[TOY4_LINK1][0] < 0.17)
         ecmp_util = toy4.dumpECMPUtil()
         # Verify node ECMP utilization.
         self.assertTrue(ecmp_util[TOY4_NODE1][0] > 0.03)
