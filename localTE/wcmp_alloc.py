@@ -7,6 +7,7 @@ from datetime import datetime
 from itertools import islice
 from typing import List
 
+import numpy as np
 import proto.te_solution_pb2 as te_sol
 from google.protobuf import text_format
 
@@ -36,6 +37,9 @@ class FwdGroup:
     real_vol: float = field(init=False)
     # Group type: represents the type of traffic this group carries.
     g_type: int
+
+    def __post_init__(self):
+        self.real_vol = 0
 
 def loadTESolution(filepath):
     if not filepath:
@@ -148,12 +152,12 @@ class WCMPWorker:
         # [Step 2] Sends ideal S2-S3 traffic. This will load up all S2->S3 links
         # and S3->S2 links.
         # For the traffic on S2->S3 links, it includes SRC traffic leaving this
-        # block and TRANSIT traffic bounded back at S2. The sum of egress
+        # block and TRANSIT traffic bounced back at S2. The sum of egress
         # traffic on each S3 should equal all traffic sent from all S2. Each S2
         # sends an equal share so the traffic is evenly divided by the number of
         # links.
         # For the traffic on S3->S2 links, it includes DST traffic destinating
-        # this block and TRANSIT traffic to be bounded back by S2. The sum of
+        # this block and TRANSIT traffic to be bounced back by S2. The sum of
         # ingress traffic on each S3 should equal all traffic sent to all S2.
         # Each S2 receives an equal share so the traffic is evenly divided by
         # the number of links.
@@ -294,6 +298,205 @@ class WCMPWorker:
 
         return self.groups
 
+    def sendRealEgressTraffic(self):
+        '''
+        Sends real egress traffic onto all links above S2 that belong to this
+        block (including outgoing DCN links, but not incoming ones). Egress
+        traffic includes SRC and TRANSIT traffic. TRANSIT traffic first enters
+        this block and then exits, so technically it is also ingress traffic.
+        We only handle the egress part in this function. The ingress part on
+        S3->S2 links is handled by `sendRealIngressTraffic`.
+        '''
+        cluster = self._topo.getAggrBlockByName(self._target_block).getParent()
+        s2_nodes = self._topo.findNodesinClusterByStage(cluster.name, 2)
+        s3_nodes = self._topo.findNodesinClusterByStage(cluster.name, 3)
+
+        # [Step 1] Sends SRC traffic. This will load up the S2->S3 and S3->S3
+        # links with SRC traffic. We start from S2 and computes traffic
+        # distribution group by group. Since S1 has no precision loss, S2 real
+        # volume is just ideal volume. We can derive S3 traffic distribution
+        # according to the S2 precision loss (cascading precision loss).
+        for s2_obj in s2_nodes:
+            for FwdG in s2_obj._dup_groups[SRC].values():
+                # Groups on S2 have real volume equal to ideal volume because
+                # S1 is strictly ECMP, there is no precision loss.
+                FwdG.real_vol = FwdG.ideal_vol
+                real_dist = FwdG.real_vol * \
+                    (np.array(FwdG.reduced_w) / sum(FwdG.reduced_w))
+                for s3_obj in s3_nodes:
+                    ports_to_s3 = self._topo.findPortsFacingNode(s2_obj.name,
+                                                                 s3_obj.name)
+                    vol_to_s3 = 0
+                    # Distributes traffic onto S2->S3 links and accmulates total
+                    # traffic of FwdG to S3.
+                    for p in ports_to_s3:
+                        p.orig_link._real_residual -= real_dist[p.index - 1]
+                        vol_to_s3 += real_dist[p.index - 1]
+                    # Finds group with the same UUID on S3, traffic on S3->S3
+                    # links is determined by this S3 group.
+                    G_s3 = s3_obj.findGroupByUUID(FwdG.uuid, SRC)
+                    # If this S3 does not have a group with this UUID, it means
+                    # the group is likely not installed, so the traffic of this
+                    # group is dropped.
+                    if not G_s3:
+                        continue
+                    # A fraction of the real volume on G_s3 is contributed by
+                    # vol_to_s3 from this S2. Other S2s will also contribute.
+                    # So the S3->S3 link load will be placed multiple times
+                    # based on the vol_to_s3 from each S2.
+                    G_s3.real_vol += vol_to_s3
+                    real_dist_s3 = vol_to_s3 * \
+                        (np.array(G_s3.reduced_w) / sum(G_s3.reduced_w))
+                    # Finds all the ports that carry traffic in the group.
+                    # Distributes S3->S3 traffic on the links.
+                    nz_indices = np.nonzero(real_dist_s3)[0]
+                    for i in nz_indices:
+                        port = self._topo.getPortByName(f'{s3_obj.name}-p{i+1}')
+                        port.orig_link._real_residual -= real_dist_s3[i]
+
+        # [Step 2a] Sends TRANSIT traffic from S3 to S2. This will *NOT* load up
+        # the S3->S2 links with TRANSIT traffic. The main objective of this step
+        # is to calculate the traffic volume of each TRANSIT group on S2 to send
+        # back to S3. It is not straightforward because some transit traffic can
+        # be dropped on S3 and some on S2 due to groups not being installed.
+        for s3_obj in s3_nodes:
+            num_down = len(self._topo.findDownFacingPortsOfNode(s3_obj.name))
+            for FwdG in s3_obj._dup_groups[TRANSIT].values():
+                # Ideal ingress traffic of a group on S3 should equal the ideal
+                # egress traffic, due to the nature of TRANSIT traffic. However,
+                # real ingress traffic of a group on S3 can be different than
+                # the ideal ingress, because the upstream src blocks experience
+                # precision loss and send more or less transit traffic over. For
+                # simplicity, we assume ideal and real ingress are equal. S3
+                # always sends the TRANSIT traffic to S2 using ECMP, so each
+                # link gets the same volume.
+                # TODO: calculate the correct real ingress transit traffic.
+                vol_per_link = FwdG.ideal_vol / num_down
+                for s2_obj in s2_nodes:
+                    # Finds group with the same UUID on S2, traffic on S2->S3
+                    # links is determined by this S2 group.
+                    G_s2 = s2_obj.findGroupByUUID(FwdG.uuid, TRANSIT)
+                    # If this S2 does not have a group with this UUID, it means
+                    # the group is likely not installed, so the traffic of this
+                    # group is dropped.
+                    if not G_s2:
+                        continue
+                    # The total transit traffic of this group is the sum from
+                    # all S3.
+                    num_to_s2 = len(self._topo.findPortsFacingNode(s3_obj.name,
+                                                                   s2_obj.name))
+                    G_s2.real_vol += vol_per_link * num_to_s2
+
+        # [Step 2b] Sends TRANSIT traffic from S2 to S3. This will load up the
+        # S2->S3 and S3->S3 links with TRANSIT traffic. The procedure is quite
+        # similar to step 1.
+        for s2_obj in s2_nodes:
+            for FwdG in s2_obj._dup_groups[TRANSIT].values():
+                real_dist = FwdG.real_vol * \
+                    (np.array(FwdG.reduced_w) / sum(FwdG.reduced_w))
+                for s3_obj in s3_nodes:
+                    ports_to_s3 = self._topo.findPortsFacingNode(s2_obj.name,
+                                                                 s3_obj.name)
+                    vol_to_s3 = 0
+                    # Distributes traffic onto S2->S3 links and accmulates total
+                    # traffic of FwdG to S3.
+                    for p in ports_to_s3:
+                        p.orig_link._real_residual -= real_dist[p.index - 1]
+                        vol_to_s3 += real_dist[p.index - 1]
+                    # Finds group with the same UUID on S3, traffic on S3->S3
+                    # links is determined by this S3 group.
+                    G_s3 = s3_obj.findGroupByUUID(FwdG.uuid, TRANSIT)
+                    # If this S3 does not have a group with this UUID, it means
+                    # the group is likely not installed, so the traffic of this
+                    # group is dropped.
+                    if not G_s3:
+                        continue
+                    # A fraction of the real volume on G_s3 is contributed by
+                    # vol_to_s3 from this S2. Other S2s will also contribute.
+                    # So the S3->S3 link load will be placed multiple times
+                    # based on the vol_to_s3 from each S2.
+                    G_s3.real_vol += vol_to_s3
+                    real_dist_s3 = vol_to_s3 * \
+                        (np.array(G_s3.reduced_w) / sum(G_s3.reduced_w))
+                    # Finds all the ports that carry traffic in the group.
+                    # Distributes S3->S3 traffic on the links.
+                    nz_indices = np.nonzero(real_dist_s3)[0]
+                    for i in nz_indices:
+                        port = self._topo.getPortByName(f'{s3_obj.name}-p{i+1}')
+                        port.orig_link._real_residual -= real_dist_s3[i]
+
+    def sendRealIngressTraffic(self):
+        '''
+        Sends real ingress traffic onto all links above S2 that belong to this
+        block. Ingress traffic includes DST and TRANSIT traffic. TRANSIT traffic
+        first enters this block and then exits, the entering part of link load
+        is handled here, the exiting part is handled by `sendRealEgressTraffic`.
+        The links below S2 are handled by `sendRealLocalTraffic`.
+        '''
+        cluster = self._topo.getAggrBlockByName(self._target_block).getParent()
+        s3_nodes = self._topo.findNodesinClusterByStage(cluster.name, 3)
+        for s3_obj in s3_nodes:
+            up_ports = self._topo.findUpFacingPortsOfNode(s3_obj.name)
+            down_ports = self._topo.findDownFacingPortsOfNode(s3_obj.name)
+            tot_ingress = 0
+            # Sum up the ingress traffic (DST + TRANSIT) on this S3.
+            for port in up_ports:
+                link = port.term_link
+                tot_ingress += link.link_speed - link._real_residual
+            # Spreads total traffic to all S2 using ECMP.
+            for port in down_ports:
+                link = port.orig_link
+                link._real_residual -= tot_ingress / len(down_ports)
+
+    def sendRealLocalTraffic(self):
+        '''
+        Sends real LOCAL traffic on all links that are internal to this block.
+        LOCAL traffic follows the direction of S1->S2->S3->S2->S1. We also send
+        all non-LOCAL traffic (i.e., SRC + DST) on S1-S2 links.
+        '''
+        # If there is no ToR-level demands for this block, nothing can be done
+        # for the S1-S2 links, call it a day.
+        if not self._block_demands:
+            PRINTV(2, f'sendRealLocalTraffic: {self._target_block} has no '
+                   f'demand.')
+            return
+
+        cluster = self._topo.getAggrBlockByName(self._target_block).getParent()
+        s2_nodes = self._topo.findNodesinClusterByStage(cluster.name, 2)
+
+        # Sends real S1-S2 traffic and the internal demand portion of S2-S3
+        # traffic. This will load up all S1->S2 and S2->S1 links. It also adds
+        # to the existing S2->S3 and S3->S2 link loads. The logic is the same as
+        # step 3 of `self.sendIdealTraffic()`. Since S1 has no precision loss,
+        # real traffic simply equal ideal traffic on S1-S2 links.
+        for (src_tor, _), vol in self._block_demands.src_only.items():
+            up_ports = self._topo.findUpFacingPortsOfNode(src_tor)
+            for port in up_ports:
+                link_to_s2 = port.orig_link
+                link_to_s2._real_residual -= vol / len(up_ports)
+        for (_, dst_tor), vol in self._block_demands.dst_only.items():
+            up_ports = self._topo.findUpFacingPortsOfNode(dst_tor)
+            for port in up_ports:
+                link_from_s2 = port.term_link
+                link_from_s2._real_residual -= vol / len(up_ports)
+        for (src_tor, dst_tor), vol in self._block_demands.src_dst.items():
+            src_up_ports = self._topo.findUpFacingPortsOfNode(src_tor)
+            dst_up_ports = self._topo.findUpFacingPortsOfNode(dst_tor)
+            for port in src_up_ports:
+                link_to_s2 = port.orig_link
+                link_to_s2._real_residual -= vol / len(src_up_ports)
+            for port in dst_up_ports:
+                link_from_s2 = port.term_link
+                link_from_s2._real_residual -= vol / len(dst_up_ports)
+            # Equal demand sent to each S2.
+            vol_per_s2 = vol / len(s2_nodes)
+            for s2_node in s2_nodes:
+                s2_up = self._topo.findUpFacingPortsOfNode(s2_node.name)
+                for port in s2_up:
+                    link_to_s3, link_from_s3 = port.orig_link, port.term_link
+                    link_to_s3._real_residual -= vol_per_s2 / len(s2_up)
+                    link_from_s3._real_residual -= vol_per_s2 / len(s2_up)
+
 class WCMPAllocation:
     '''
     WCMP allocation class that handles the intra-cluster WCMP implementation.
@@ -379,4 +582,18 @@ class WCMPAllocation:
                                            self.groups.get((node, SRC, C)),
                                            self.groups.get((node, TRANSIT, C)))
         PRINTV(1, f'{datetime.now()} [installGroups] complete in '
+               f'{time.time() - t} sec.')
+
+        # Generates real link utilization of the entire fabric. Note that for
+        # the sake of correctness, we must do egress traffic first, since
+        # ingress traffic depends on all blocks to load up the S3-S3 links with
+        # egress traffic.
+        t = time.time()
+        for worker in self._worker_map.values():
+            worker.sendRealEgressTraffic()
+        for worker in self._worker_map.values():
+            worker.sendRealIngressTraffic()
+        for worker in self._worker_map.values():
+            worker.sendRealLocalTraffic()
+        PRINTV(1, f'{datetime.now()} [sendRealTraffic] complete in '
                f'{time.time() - t} sec.')

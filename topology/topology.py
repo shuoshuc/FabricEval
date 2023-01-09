@@ -139,9 +139,11 @@ class Node:
         }
         # All currently installed groups with duplicates. If a merged group is
         # installed in `self._groups`, all of the originals are saved here.
+        # Note that unlike `self._groups`, each type points to a dict instead of
+        # a list. This dict is keyed by UUID.
         self._dup_groups = {
-            te_sol.PrefixIntent.PrefixType.SRC: [],
-            te_sol.PrefixIntent.PrefixType.TRANSIT: []
+            te_sol.PrefixIntent.PrefixType.SRC: {},
+            te_sol.PrefixIntent.PrefixType.TRANSIT: {}
         }
         # Installed static groups, for DST/LOCAL type of traffic. Groups here
         # are plain lists.
@@ -199,6 +201,13 @@ class Node:
         return len(self._groups[te_sol.PrefixIntent.PrefixType.SRC]) + \
             len(self._groups[te_sol.PrefixIntent.PrefixType.TRANSIT]) + \
             len(self._static_groups)
+
+    def findGroupByUUID(self, uuid, g_type):
+        '''
+        Finds a `g_type` group in `self._dup_groups` using the given UUID.
+        Returns None if not found.
+        '''
+        return self._dup_groups[g_type].get(uuid)
 
     def installStaticGroups(self):
         '''
@@ -294,8 +303,11 @@ class Node:
                 ecmp_cnt += sum(merged_group.reduced_w)
                 self.tot_admit += merged_group.ideal_vol
                 # If the merged group is installed, all the originals are saved
-                # so that we can construct real link utilizations later.
-                self._dup_groups[group_type] += orig_groups
+                # so that we can construct real link utilizations later. We do
+                # not expect multiple groups to have the same UUID on the same
+                # node.
+                for orig_group in orig_groups:
+                    self._dup_groups[group_type][orig_group.uuid] = orig_group
         self.updateECMPUsage()
 
 
@@ -883,18 +895,6 @@ class Topology:
                                te_sol.PrefixIntent.PrefixType.TRANSIT)
         if src_groups:
             node.installGroups(src_groups, te_sol.PrefixIntent.PrefixType.SRC)
-        '''
-        for (group, vol) in groups:
-            # Finds all the ports that carry traffic in the group.
-            nz_indices = np.nonzero(np.array(group))[0]
-            for i in nz_indices:
-                port_name = f'{node_name}-p{i + 1}'
-                port = self.getPortByName(port_name)
-                # Places traffic fraction of the group on the outgoing link of
-                # port (since traffic is outgoing). `_real_residual` can be
-                # negative due to oversubscription.
-                port.orig_link._real_residual -= group[i] / sum(group) * vol
-        '''
 
     def dumpRealLinkUtil(self):
         '''
