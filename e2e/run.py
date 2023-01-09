@@ -14,10 +14,10 @@ from topology.topology import Topology, filterPathSetWithSeg, loadTopo
 from traffic.tmgen import tmgen
 from traffic.traffic import Traffic
 
-TOY3_SOL = 'tests/data/te_sol.textproto'
+TOY3_SOL = 'tests/data/toy3_te_sol.textproto'
 TOY3_TM = 'tests/data/toy3_traffic_gravity.textproto'
 # True to load TM and TE solution from the above files.
-LOAD_FILE = False
+LOAD_FILE = True
 
 if __name__ == "__main__":
     # Initializes global flags before running the pipeline.
