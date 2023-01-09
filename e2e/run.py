@@ -14,10 +14,12 @@ from topology.topology import Topology, filterPathSetWithSeg, loadTopo
 from traffic.tmgen import tmgen
 from traffic.traffic import Traffic
 
-TOY3_SOL = 'tests/data/toy3_te_sol.textproto'
 TOY3_TM = 'tests/data/toy3_traffic_gravity.textproto'
-# True to load TM and TE solution from the above files.
-LOAD_FILE = True
+TOY3_SOL = 'tests/data/toy3_te_sol.textproto'
+# True to load TM from the above file.
+LOAD_TM = True
+# True to load TE solution from the above file.
+LOAD_SOL = False
 
 if __name__ == "__main__":
     # Initializes global flags before running the pipeline.
@@ -47,7 +49,7 @@ if __name__ == "__main__":
 
     # Generates TM.
     traffic_proto = None
-    if not LOAD_FILE:
+    if not LOAD_TM:
         traffic_proto = tmgen(tor_level=True,
                               cluster_vector=np.array([1]*22 + [2.5]*22 + [5]*21),
                               num_nodes=32,
@@ -61,7 +63,7 @@ if __name__ == "__main__":
 
     # Runs global TE.
     sol = None
-    if not LOAD_FILE:
+    if not LOAD_SOL:
         global_te = GlobalTE(toy3, toy3_traffic)
         sol = global_te.solve()
         with (logpath / 'te_sol.textproto').open('w') as te_sol:
