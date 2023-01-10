@@ -388,15 +388,19 @@ class GroupReduction:
                     # prune. If all groups are already singletons, pruning is a
                     # no-op, should just give up.
                     if FLAG.EUROSYS_MOD and ecmp_size != len(groups_out):
-                        # Prune a port in the largest group. Basically like
-                        # starting over, but keep the current enforced_oversub.
-                        self.groups[0].prune()
-                        self.groups.sort(key=lambda g: sum(g.integer),
-                                         reverse=True)
-                        groups_out = self.groups.copy()
-                        ecmp_size = sum([len(g.integer) for g in groups_out])
-                    else:
-                        return self.sanitize(groups_out)
+                        # Now that groups are all ECMP, we don't have to return
+                        # to the outer loop again, because oversub does not
+                        # matter any more. Simply keep pruning the largest group
+                        # until either total size fits or all groups are
+                        # singleton (give up).
+                        while total_size > S:
+                            groups_out[0].prune()
+                            groups_out.sort(key=lambda g: sum(g.integer),
+                                            reverse=True)
+                            total_size = sum([sum(g.integer) for g in groups_out])
+                            if total_size <= len(groups_out):
+                                break
+                    return self.sanitize(groups_out)
             # Relaxes oversub limit if we fail to fit all groups with the same
             # oversub.
             enforced_oversub += step_size
