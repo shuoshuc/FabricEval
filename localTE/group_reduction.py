@@ -719,8 +719,13 @@ class GroupReduction:
             print(f'[ERROR] {GroupReduction.solve_ssmg.__name__}: unexpected '
                   f'number of input groups {len(self.groups)}.')
             return []
-        final_groups = copy.deepcopy(self.groups)
 
+        # Heuristic: directly returns ECMP/singleton groups for TRANSIT type.
+        # No need to go through the full reduction process.
+        if self.g_type == te_sol.PrefixIntent.PrefixType.TRANSIT:
+            return self.direct_ecmp()
+
+        final_groups = copy.deepcopy(self.groups)
         try:
             # Initialize a new model
             m = gp.Model("single_switch_multi_group")
@@ -754,11 +759,11 @@ class GroupReduction:
                     gi, pi = int(split[1]) - 1, int(split[2]) - 1
                     final_groups[gi].integer[pi] = round(v.X)
                     sol_w[v.VarName] = v.X
-            PRINTV(1, 'Obj: %s' % m.ObjVal)
-            PRINTV(1, str(sol_w))
-            PRINTV(1, 'wf:')
+            PRINTV(2, 'Obj: %s' % m.ObjVal)
+            PRINTV(2, str(sol_w))
+            PRINTV(2, 'wf:')
             for g in self.groups:
-                PRINTV(1, f'{g.integer}')
+                PRINTV(2, f'{g.integer}')
             # Applies a final GCD reduction just in case.
             for final_group in final_groups:
                 final_group.integer = frac2int_lossless(final_group.integer)
