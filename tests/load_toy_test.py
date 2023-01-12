@@ -5,7 +5,7 @@ import numpy as np
 import proto.traffic_pb2 as traffic_pb2
 
 import common.flags as FLAG
-from topology.topogen import generateToy3, generateToy4
+from topology.topogen import generateToy3, generateToy4, generateToy5
 from topology.topology import Topology, filterPathSetWithSeg, loadTopo
 from traffic.tmgen import tmgen
 from traffic.traffic import Traffic, loadTraffic
@@ -63,6 +63,20 @@ TOY4_PEER_PORT3 = 'toy4-c1-ab1-s1i1-p1'
 TOY4_AGGR_BLOCK1 = 'toy4-c1-ab1'
 TOY4_AGGR_BLOCK2 = 'toy4-c5-ab1'
 TOY4_TOR1 = 'toy4-c1-ab1-s1i1'
+# Toy5 entities.
+TOY5_PATH1 = 'toy5-c1-ab1:toy5-c2-ab1'
+TOY5_PATH2 = 'toy5-c1-ab1:toy5-c33-ab1'
+TOY5_PATH3 = 'toy5-c32-ab1:toy5-c33-ab1'
+TOY5_LINK1 = 'toy5-c1-ab1-s3i1-p1:toy5-c2-ab1-s3i1-p1'
+TOY5_PORT1 = 'toy5-c1-ab1-s3i1-p1'
+TOY5_PEER_PORT1 = 'toy5-c2-ab1-s3i1-p1'
+TOY5_PORT2 = 'toy5-c1-ab1-s3i1-p2'
+TOY5_PEER_PORT2 = 'toy5-c1-ab1-s2i1-p1'
+TOY5_PORT3 = 'toy5-c1-ab1-s2i1-p2'
+TOY5_PEER_PORT3 = 'toy5-c1-ab1-s1i1-p1'
+TOY5_AGGR_BLOCK1 = 'toy5-c1-ab1'
+TOY5_AGGR_BLOCK2 = 'toy5-c2-ab1'
+TOY5_TOR1 = 'toy5-c1-ab1-s1i1'
 
 class TestLoadToyNet(unittest.TestCase):
     def test_load_invalid_topo(self):
@@ -401,6 +415,97 @@ class TestLoadToy4Net(unittest.TestCase):
         self.assertEqual(40000 * 4 * 0.5,
                          toy4_traffic.getAllDemands()[(TOY4_AGGR_BLOCK1,
                                                        TOY4_AGGR_BLOCK2)])
+
+class TestLoadToy5Net(unittest.TestCase):
+    def test_toy5_topology_construction(self):
+        toy5 = Topology('', input_proto=generateToy5())
+        self.assertEqual(33, toy5.numClusters())
+        # 8 + 16 nodes per cluster
+        self.assertEqual(33 * 24, toy5.numNodes())
+        self.assertEqual(33 * 32, len(toy5.getAllPaths()))
+        # Path between two 40G clusters: 4 * 40
+        self.assertEqual(160000, toy5.findCapacityOfPath(TOY5_PATH1))
+        # Path between a 40G cluster and a 200G cluster: 4 * 40
+        self.assertEqual(160000, toy5.findCapacityOfPath(TOY5_PATH2))
+        # Path between two 200G clusters: 4 * 200
+        self.assertEqual(800000, toy5.findCapacityOfPath(TOY5_PATH3))
+        links = [l.name for l in toy5.findLinksOfPath(TOY5_PATH1)]
+        self.assertTrue(TOY5_LINK1 in links)
+        # Verify S3-S3 port and peer.
+        self.assertEqual(TOY5_PEER_PORT1,
+                         toy5.findPeerPortOfPort(TOY5_PORT1).name)
+        # Verify that DCN ports have odd port indices.
+        p1 = toy5.getPortByName(TOY5_PORT1)
+        self.assertEqual(TOY5_PORT1, p1.name)
+        self.assertTrue(p1.dcn_facing)
+        self.assertEqual(1, p1.index % 2)
+        pp1 = toy5.getPortByName(TOY5_PEER_PORT1)
+        self.assertTrue(pp1.dcn_facing)
+        self.assertEqual(1, pp1.index % 2)
+        # Verify S2-S3 port and peer.
+        self.assertEqual(TOY5_PEER_PORT2,
+                         toy5.findPeerPortOfPort(TOY5_PORT2).name)
+        # Verify that S2-facing S3 ports have even indices.
+        p2 = toy5.getPortByName(TOY5_PORT2)
+        self.assertFalse(p2.dcn_facing)
+        self.assertEqual(0, p2.index % 2)
+        # Verify that S3-facing S2 ports have odd indices.
+        pp2 = toy5.getPortByName(TOY5_PEER_PORT2)
+        self.assertFalse(pp2.dcn_facing)
+        self.assertEqual(1, pp2.index % 2)
+        # Verify S1-S2 port and peer.
+        self.assertEqual(TOY5_PEER_PORT3,
+                         toy5.findPeerPortOfPort(TOY5_PORT3).name)
+        # Verify that S1-facing S2 ports have even indices.
+        p3 = toy5.getPortByName(TOY5_PORT3)
+        self.assertFalse(p3.dcn_facing)
+        self.assertEqual(0, p3.index % 2)
+        # Verify that S2-facing S1 ports have odd indices.
+        pp3 = toy5.getPortByName(TOY5_PEER_PORT3)
+        self.assertFalse(pp3.dcn_facing)
+        self.assertEqual(1, pp3.index % 2)
+        # Verify the 'virutal' parent of ToRs.
+        self.assertEqual(TOY5_AGGR_BLOCK1,
+                         toy5.findAggrBlockOfToR(TOY5_TOR1).name)
+        # Verify the stage and index of ToR1.
+        self.assertEqual(1, toy5.getNodeByName(TOY5_TOR1).stage)
+
+    def test_toy5_traffic_construction1(self):
+        toy5 = Topology('', input_proto=generateToy5())
+        traffic_proto = tmgen(tor_level=False,
+                              cluster_vector=np.array([1]*11+[2.5]*11+[5]*11),
+                              num_nodes=16,
+                              model='flat',
+                              dist='',
+                              netname='toy5')
+        toy5_traffic = Traffic(toy5, '', traffic_proto)
+        self.assertEqual(traffic_pb2.TrafficDemand.DemandType.LEVEL_AGGR_BLOCK,
+                         toy5_traffic.getDemandType())
+        self.assertEqual(33 * 32, len(toy5_traffic.getAllDemands()))
+        # Flat demand matrix has the same volume in both directions.
+        # The inter-block demand should be 160000 Mbps when tor_level=False.
+        self.assertEqual(160000, toy5_traffic.getDemand(TOY5_AGGR_BLOCK1,
+                                                        TOY5_AGGR_BLOCK2))
+        self.assertEqual(160000, toy5_traffic.getDemand(TOY5_AGGR_BLOCK2,
+                                                        TOY5_AGGR_BLOCK1))
+
+    def test_toy5_traffic_construction2(self):
+        toy5 = Topology('', input_proto=generateToy5())
+        traffic_proto = tmgen(tor_level=False,
+                              cluster_vector=np.array([1]*11+[2.5]*11+[5]*11),
+                              num_nodes=16,
+                              model='gravity',
+                              dist='exp',
+                              netname='toy5')
+        toy5_traffic = Traffic(toy5, '', traffic_proto)
+        self.assertEqual(traffic_pb2.TrafficDemand.DemandType.LEVEL_AGGR_BLOCK,
+                         toy5_traffic.getDemandType())
+        self.assertEqual(33 * 32, len(toy5_traffic.getAllDemands()))
+        # Gravity demand matrix should not set the 40G blocks to empty.
+        self.assertNotEqual(0, toy5_traffic.getDemand(TOY5_AGGR_BLOCK1,
+                                                      TOY5_AGGR_BLOCK2))
+        self.assertNotEqual(0, toy5_traffic.getDemand(TOY5_AGGR_BLOCK2,
+                                                      TOY5_AGGR_BLOCK1))
 
 if __name__ == "__main__":
     unittest.main()
