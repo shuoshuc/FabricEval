@@ -9,13 +9,15 @@ from google.protobuf import text_format
 import common.flags as FLAG
 from globalTE.global_te import GlobalTE
 from localTE.wcmp_alloc import WCMPAllocation
-from topology.topogen import generateToy3
+from topology.topogen import generateFabric
 from topology.topology import Topology, filterPathSetWithSeg, loadTopo
 from traffic.tmgen import tmgen
 from traffic.traffic import Traffic
 
-TOY3_TM = 'tests/data/toy3_traffic_gravity.textproto'
-TOY3_SOL = 'tests/data/toy3_te_sol.textproto'
+NETWORK = 'toy3'
+
+TOY_TM = f'tests/data/{NETWORK}_traffic_gravity.textproto'
+TOY_SOL = 'tests/data/{NETWORK}_te_sol.textproto'
 # True to load TM from the above file.
 LOAD_TM = True
 # True to load TE solution from the above file.
@@ -42,8 +44,8 @@ if __name__ == "__main__":
     logpath.mkdir(parents=True, exist_ok=True)
 
     # Generates topology.
-    net_proto = generateToy3()
-    toy3 = Topology('', net_proto)
+    net_proto = generateFabric(NETWORK)
+    toy_topo = Topology('', net_proto)
     print(f'{datetime.now()} [Step 1] topology generated.', flush=True)
     #print(text_format.MessageToString(net_proto))
 
@@ -55,16 +57,16 @@ if __name__ == "__main__":
                               num_nodes=32,
                               model='gravity',
                               dist='exp',
-                              netname='toy3')
+                              netname=NETWORK)
         with (logpath / 'TM.textproto').open('w') as tm:
             tm.write(text_format.MessageToString(traffic_proto))
-    toy3_traffic = Traffic(toy3, TOY3_TM, traffic_proto)
+    toy_traffic = Traffic(toy_topo, TOY_TM, traffic_proto)
     print(f'{datetime.now()} [Step 2] traffic demand generated.', flush=True)
 
     # Runs global TE.
     sol = None
     if not LOAD_SOL:
-        global_te = GlobalTE(toy3, toy3_traffic)
+        global_te = GlobalTE(toy_topo, toy_traffic)
         sol = global_te.solve()
         with (logpath / 'te_sol.textproto').open('w') as te_sol:
             te_sol.write(text_format.MessageToString(sol))
@@ -72,13 +74,13 @@ if __name__ == "__main__":
     #print(text_format.MessageToString(sol))
 
     # Runs local TE.
-    wcmp_alloc = WCMPAllocation(toy3, toy3_traffic, TOY3_SOL, sol)
+    wcmp_alloc = WCMPAllocation(toy_topo, toy_traffic, TOY_SOL, sol)
     wcmp_alloc.run()
     print(f'{datetime.now()} [Step 4] local TE solution generated.', flush=True)
 
     # Dumps stats.
-    real_LUs = toy3.dumpRealLinkUtil()
-    ideal_LUs = toy3.dumpIdealLinkUtil()
+    real_LUs = toy_topo.dumpRealLinkUtil()
+    ideal_LUs = toy_topo.dumpIdealLinkUtil()
     delta_LUs = {}
     for k, (u, dcn) in real_LUs.items():
         delta_LUs[k] = (u - ideal_LUs[k][0], dcn)
@@ -94,7 +96,7 @@ if __name__ == "__main__":
 
     print(f'{datetime.now()} [Step 6] dump node table util to node_ecmp.csv',
           flush=True)
-    ecmp_util = toy3.dumpECMPUtil()
+    ecmp_util = toy_topo.dumpECMPUtil()
     with (logpath / 'node_ecmp.csv').open('w') as ecmp:
         writer = csv.writer(ecmp)
         writer.writerow(["node name", "ECMP util", "# groups"])
@@ -103,7 +105,7 @@ if __name__ == "__main__":
 
     print(f'{datetime.now()} [Step 7] dump node demand to node_demand.csv',
           flush=True)
-    demand_admit = toy3.dumpDemandAdmission()
+    demand_admit = toy_topo.dumpDemandAdmission()
     with (logpath / 'node_demand.csv').open('w') as demand:
         writer = csv.writer(demand)
         writer.writerow(["node name", "total demand", "total admit", "ratio"])

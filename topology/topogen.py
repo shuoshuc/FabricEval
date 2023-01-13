@@ -17,6 +17,14 @@ def getClusterGenByIndex(idx, genlist):
         if idx <= sum(genlist[:cursor + 1]):
             return cursor + 1
 
+def generateFabric(name):
+    if name == 'toy3':
+        return generateToy3()
+    elif name == 'toy4':
+        return generateToy4()
+    elif name == 'toy5':
+        return generateToy5()
+
 def generateToy3():
     '''
     Generates fabric toy3. Toy3 is a 65-cluster spine-free fabric. It has the
