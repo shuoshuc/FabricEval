@@ -662,9 +662,13 @@ class Topology:
         '''
         return (f"{src}:{dst}" in self._paths)
 
-    def findUpFacingPortsOfNode(self, node_name):
+    def findUpFacingPortsOfNode(self, node_name, filter_connected=True):
         '''
         Returns a list of port objects facing up in the give node.
+
+        filter_connected: If True, only returns ports that are connected, i.e.,
+                          having valid links associated. If False, returns all
+                          ports.
         '''
         if node_name not in self._nodes:
             print(f'[ERROR] findUpFacingPortsOfNode: node {node_name} does not'
@@ -676,6 +680,10 @@ class Topology:
         if self._nodes[node_name].stage == 1:
             for port in self._nodes[node_name]._member_ports:
                 if not port.host_facing:
+                    # Due to link failure, this port has no healthy link to use.
+                    if filter_connected and \
+                            (not port.term_link or not port.orig_link):
+                        continue
                     port_list.append(port)
             return port_list
 
@@ -683,12 +691,20 @@ class Topology:
         for port in self._nodes[node_name]._member_ports:
             # Odd-indexed ports are up facing.
             if port.index % 2 == 1:
+                # Due to link failure, this port has no healthy link to use.
+                if filter_connected and \
+                        (not port.term_link or not port.orig_link):
+                    continue
                 port_list.append(port)
         return port_list
 
-    def findDownFacingPortsOfNode(self, node_name):
+    def findDownFacingPortsOfNode(self, node_name, filter_connected=True):
         '''
         Returns a list of port objects facing down in the give node.
+
+        filter_connected: If True, only returns ports that are connected, i.e.,
+                          having valid links associated. If False, returns all
+                          ports.
         '''
         if node_name not in self._nodes:
             print(f'[ERROR] findDownFacingPortsOfNode: node {node_name} does '
@@ -701,6 +717,10 @@ class Topology:
         if self._nodes[node_name].stage == 1:
             for port in self._nodes[node_name]._member_ports:
                 if port.host_facing:
+                    # Due to link failure, this port has no healthy link to use.
+                    if filter_connected and \
+                            (not port.term_link or not port.orig_link):
+                        continue
                     port_list.append(port)
             return port_list
 
@@ -708,6 +728,10 @@ class Topology:
         for port in self._nodes[node_name]._member_ports:
             # Even-indexed ports are down facing.
             if port.index % 2 == 0:
+                # Due to link failure, this port has no healthy link to use.
+                if filter_connected and \
+                        (not port.term_link or not port.orig_link):
+                    continue
                 port_list.append(port)
         return port_list
 
