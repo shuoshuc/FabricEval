@@ -3,6 +3,10 @@
 # VERBOSE=2: full Gubrobi log.
 VERBOSE = 1
 
+# Probability of a link failure in the topology. N.B., setting it too high might
+# cause a network partition.
+P_LINK_FAILURE = 0.1
+
 # True means the block total ingress should equal its total egress.
 EQUAL_INGRESS_EGRESS = False
 

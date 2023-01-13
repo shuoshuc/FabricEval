@@ -14,5 +14,6 @@ py_library(
     srcs = ['topogen.py'],
     deps = [
         "//proto:topology_proto",
+        "//common:flags",
     ],
 )

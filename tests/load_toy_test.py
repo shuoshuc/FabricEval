@@ -193,6 +193,7 @@ class TestLoadToyNet(unittest.TestCase):
 
 class TestLoadToy3Net(unittest.TestCase):
     def test_toy3_topology_construction(self):
+        FLAG.P_LINK_FAILURE = 0.0
         toy3 = Topology('', input_proto=generateToy3())
         self.assertEqual(65, toy3.numClusters())
         # 8 + 32 nodes per cluster

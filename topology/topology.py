@@ -493,7 +493,10 @@ class Topology:
                 path_obj.addMember(l)
                 l.setParent(path_obj)
                 path_obj.available_capacity += l.link_speed
-            if path_obj.capacity != path_obj.available_capacity:
+            # If there is link failure, available_capacity could be less than
+            # theoretical capacity.
+            if FLAG.P_LINK_FAILURE == 0 and \
+                    path_obj.capacity != path_obj.available_capacity:
                 print('[ERROR] Topology parsing: path {} has capacity {} and '
                       'available_capacity {}.'.format(path.name,
                           path_obj.capacity, path_obj.available_capacity))

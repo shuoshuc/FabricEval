@@ -1,5 +1,8 @@
 import proto.topology_pb2 as topo
 from google.protobuf import text_format
+from numpy.random import default_rng
+
+import common.flags as FLAG
 
 
 def getClusterGenByIndex(idx, genlist):
@@ -46,6 +49,7 @@ def generateToy3():
 
     Returns a populated protobuf-format topology.
     '''
+    rng = default_rng()
     # Network name
     NETNAME = 'toy3'
     # Number of gen1/gen2/gen3 clusters.
@@ -212,6 +216,10 @@ def generateToy3():
                                     range(32 * node.index - 31,
                                           32 * node.index,
                                           2)):
+                        # With probability `P_LINK_FAILURE`, this link and its
+                        # reverse fail, hence will not be added in the topology.
+                        if rng.uniform(low=0, high=1) < FLAG.P_LINK_FAILURE:
+                            continue
                         # Add S3->S2 link.
                         link_s3_s2 = net.links.add()
                         src_port_id = f'{node.name}-p{i}'
@@ -237,6 +245,10 @@ def generateToy3():
                 # C1) to port 3 of rest peers. S3 of C3 spreads N-2 links to
                 # port 5 of rest peers, etc.
                 for port_idx in range(peer_i, NPORTS3, 2):
+                    # With probability `P_LINK_FAILURE`, this link and its
+                    # reverse fail, hence will not be added in the topology.
+                    if rng.uniform(low=0, high=1) < FLAG.P_LINK_FAILURE:
+                        continue
                     # Calculate peer cluster index.
                     peer_c_idx = int(port_idx // 2 + 2)
                     peer_aggr_block = f'{NETNAME}-c{peer_c_idx}-ab1'
