@@ -16,8 +16,11 @@ from traffic.traffic import Traffic
 
 NETWORK = 'toy3'
 
+TOY_TOPO = f'tests/data/{NETWORK}_topo.textproto'
 TOY_TM = f'tests/data/{NETWORK}_traffic_gravity.textproto'
-TOY_SOL = 'tests/data/{NETWORK}_te_sol.textproto'
+TOY_SOL = f'tests/data/{NETWORK}_te_sol.textproto'
+# True to load topo from the above file.
+LOAD_TOPO = False
 # True to load TM from the above file.
 LOAD_TM = True
 # True to load TE solution from the above file.
@@ -44,10 +47,13 @@ if __name__ == "__main__":
     logpath.mkdir(parents=True, exist_ok=True)
 
     # Generates topology.
-    net_proto = generateFabric(NETWORK)
-    toy_topo = Topology('', net_proto)
+    net_proto = None
+    if not LOAD_TOPO:
+        net_proto = generateFabric(NETWORK)
+        with (logpath / 'topo.textproto').open('w') as topo:
+            topo.write(text_format.MessageToString(net_proto))
+    toy_topo = Topology(TOY_TOPO, net_proto)
     print(f'{datetime.now()} [Step 1] topology generated.', flush=True)
-    #print(text_format.MessageToString(net_proto))
 
     # Generates TM.
     traffic_proto = None
