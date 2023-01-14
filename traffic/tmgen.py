@@ -33,7 +33,7 @@ def tmgen(tor_level, cluster_vector, num_nodes, model, dist='exp', netname=''):
         # Generates a flat traffic demand matrix. If tor_level=True, each
         # src-dst pair sees 153 Mbps demand. If false, each src-dst pair sees
         # 80000 Mbps demand.
-        tm[tm >= 0] = 40000 * 8 / (num_nodes * num_clusters - 1) if tor_level \
+        tm[tm >= 0] = 30000 * 8 / (num_nodes * num_clusters - 1) if tor_level \
             else 20000 * 256 / (num_clusters - 1)
     elif model == 'uniform':
         # Generates a uniform random traffic demand matrix. Each src-dst pair
