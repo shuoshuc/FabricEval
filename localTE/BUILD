@@ -15,5 +15,16 @@ py_library(
     deps = [
         "//common:common",
         "//common:flags",
+        "//proto:te_solution_proto",
     ],
+)
+
+py_binary(
+    name = 'test_driver',
+    srcs = ['test_driver.py'],
+    deps = [
+        "//common:flags",
+        '//localTE:group_reduction',
+    ],
+    python_version = 'PY3',
 )

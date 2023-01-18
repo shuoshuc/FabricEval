@@ -32,3 +32,8 @@ globalTE solution, and link utilization stats to the current path:
 ```bash
 bazel run //e2e:run -- $(pwd)
 ```
+Run the following command to benchmark solving time of each algorithm. Output
+will be written to a file named grspeed.csv in current path.
+```bash
+bazel run //localTE:test_driver -- $(pwd)
+```
