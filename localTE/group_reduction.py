@@ -12,6 +12,7 @@ import gurobipy as gp
 import numpy as np
 import proto.te_solution_pb2 as te_sol
 from gurobipy import GRB
+from numpy.random import default_rng
 
 import common.flags as FLAG
 from common.common import PRINTV
@@ -68,8 +69,11 @@ def input_groups_gen(g, p, lb, ub, frac_digits):
 
     Returns a list of lists.
     '''
+    rng = default_rng()
+    p_zero = 0.3
     input_groups = np.random.uniform(lb, ub, size=(g, p)).tolist()
-    return [[round(w, frac_digits) for w in g] for g in input_groups]
+    return [[round(w, frac_digits) if rng.uniform(low=0, high=1) > p_zero \
+             else 0 for w in g] for g in input_groups]
 
 def calc_group_oversub(G, G_prime, mode='max'):
     '''
