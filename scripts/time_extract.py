@@ -11,7 +11,7 @@ import sys
 if __name__ == "__main__":
     logfile, csvfile = sys.argv[1], sys.argv[2]
     time_pts = []
-    p = re.compile(".*[reduceGroups].*in (.*) sec")
+    p = re.compile(".*\[reduceGroups\].*in (.*) sec")
     with open(logfile, 'r') as f:
         for line in f:
             result = p.search(line)
