@@ -70,7 +70,7 @@ def input_groups_gen(g, p, lb, ub, frac_digits):
     Returns a list of lists.
     '''
     rng = default_rng()
-    p_zero = 0.3
+    p_zero = 0.5
     input_groups = np.random.uniform(lb, ub, size=(g, p)).tolist()
     return [[round(w, frac_digits) if rng.uniform(low=0, high=1) > p_zero \
              else 0 for w in g] for g in input_groups]

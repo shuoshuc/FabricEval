@@ -10,8 +10,6 @@ if __name__ == "__main__":
     num_runs = 20
     # lower bound, upper bound, fraction precision, table size
     lb, ub, frac_digits, C = 0, 200000, 6, 16*1024
-    # num groups, num ports per group
-    num_g, num_p = 1, 2
 
     with open(f'{sys.argv[1]}/grspeed.csv', 'w') as f:
         writer = csv.writer(f)
@@ -50,7 +48,7 @@ if __name__ == "__main__":
         print(f'[Fixed port group sweep]')
         for run in range(num_runs):
             print(f'===== Run {run} starts =====')
-            for g in [16, 32, 64, 128]:
+            for g in [16, 32, 64]:
                 runtime = []
                 orig_groups = input_groups_gen(g, 64, lb, ub, frac_digits)
                 print(f'Input: {orig_groups}')
