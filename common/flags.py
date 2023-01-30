@@ -17,7 +17,7 @@ P_SPARSE = 0.15
 ENABLE_HEDGING = True
 
 # Spread in (0, 1] used by the hedging constraint.
-S = 0.2
+S = 0.5
 
 # If True, feeds GroupReduction solver with scaled up integer groups.
 USE_INT_INPUT_GROUPS = False
@@ -44,4 +44,4 @@ GUROBI_TIMEOUT = 120
 
 # The algorithm to use for group reduction.
 # Must be one of eurosys[_mod]/google[_new]/carving/gurobi.
-GR_ALGO = 'carving'
+GR_ALGO = 'google_new'
