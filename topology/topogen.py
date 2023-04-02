@@ -301,7 +301,7 @@ def generateToy4():
     NS1, NS2, NS3 = 4, 4, 4
     # ECMP table limits for each generation.
     ECMP_LIMITS = {
-        1: 4096,
+        1: 4096 if not FLAG.INFINITE_ECMP_TABLE else FLAG.TABLE_LIMIT,
     }
     # Number of ports on S1/S2/S3 nodes.
     NPORTS1, NPORTS2, NPORTS3 = 16, 8, 8
@@ -505,9 +505,9 @@ def generateToy5():
     NS1, NS2, NS3 = 16, 4, 4
     # ECMP table limits for each generation.
     ECMP_LIMITS = {
-        1: 4096,
-        2: 16384,
-        3: 32768
+        1: 4096 if not FLAG.INFINITE_ECMP_TABLE else FLAG.TABLE_LIMIT,
+        2: 16384 if not FLAG.INFINITE_ECMP_TABLE else FLAG.TABLE_LIMIT,
+        3: 32768 if not FLAG.INFINITE_ECMP_TABLE else FLAG.TABLE_LIMIT
     }
     # Number of ports on S1/S2/S3 nodes.
     NPORTS1, NPORTS2, NPORTS3 = 32, 64, 64
