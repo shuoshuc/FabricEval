@@ -22,11 +22,19 @@ S = 0.5
 # If True, feeds GroupReduction solver with scaled up integer groups.
 USE_INT_INPUT_GROUPS = False
 
-# Broadcom Tomahawk 2 ECMP table limit.
-TABLE_LIMIT = 16 * 1024
+# Infinite ECMP table size, overrides `TABLE_LIMIT` and `MAX_GROUP_SIZE` flag.
+INFINITE_ECMP_TABLE = False
 
-# Max ECMP entries a group is allowed to use.
-MAX_GROUP_SIZE = 256
+# Example (Broadcom Tomahawk 2) ECMP table limit. To simulate unlimited table
+# size, simply set the limit to the worst case consumption:
+# max port weight (200000 Mbps) * # ports/group (64) * [# src groups (64) +
+# # transit groups (65*65)] = 54899200000.
+TABLE_LIMIT = 16 * 1024 if not INFINITE_ECMP_TABLE else 54899200000
+
+# Max ECMP entries a group is allowed to use. To simulate unlimited table
+# size, simply set the limit to the worst case consumption:
+# max port weight (200000 Mbps) * # ports/group (64) = 12800000
+MAX_GROUP_SIZE = 256 if not INFINITE_ECMP_TABLE else 12800000
 
 # True to enable a set of improved heuristics in group reduction.
 # (1) pruning policy. (2) max group size. (3) table limit used. (4) group

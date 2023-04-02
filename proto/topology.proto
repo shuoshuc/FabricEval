@@ -34,11 +34,11 @@ message Node {
     // Unique index among the nodes of the same stage.
     int32 index = 3;
     // Number of LPM entries the flow table can hold.
-    int32 flow_limit = 4;
+    int64 flow_limit = 4;
     // Number of ECMP entries the ECMP table can hold.
-    int32 ecmp_limit = 5;
+    int64 ecmp_limit = 5;
     // Max number of ECMP entries each group can use.
-    int32 group_limit = 6;
+    int64 group_limit = 6;
     // Member ports on the node.
     repeated Port ports = 7;
     // Aggregated IPv4 prefix of all hosts in the rack (only a ToR can have the
