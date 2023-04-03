@@ -944,6 +944,15 @@ class GroupReduction:
 
         algorithm: one of eurosys[_mod]/google[_new]/carving/gurobi.
         '''
+        # When ECMP table size is infinite, no reduction is needed, we only do
+        # simple integer rounding.
+        if FLAG.INFINITE_ECMP_TABLE:
+            rounded_groups = [[]] * len(self.groups)
+            for group in self.groups:
+                raw_vec = np.ceil(np.array(group.unstrip))
+                rounded_groups[group.gid] = raw_vec.astype(np.int32).tolist()
+            return rounded_groups
+
         if algorithm == 'eurosys':
             return self.table_fitting_ssmg()
         elif algorithm == 'eurosys_mod':
