@@ -117,3 +117,13 @@ if __name__ == "__main__":
         writer.writerow(["node name", "total demand", "total admit", "ratio"])
         for node, (tot_demand, tot_admit, f) in demand_admit.items():
             writer.writerow([node, tot_demand, tot_admit, f])
+
+    print(f'{datetime.now()} [Step 8] dump path diversity to path_diversity.csv',
+          flush=True)
+    pd_list = wcmp_alloc.dumpPathDiversityStats()
+    with (logpath / 'path_diversity.csv').open('w') as path_diversity:
+        writer = csv.writer(path_diversity)
+        writer.writerow(["node", "gid", "total volume (Mbps)", "orig paths",
+                         "reduced paths"])
+        for node, gid, vol, orig_paths, reduced_paths in pd_list:
+            writer.writerow([node, gid, vol, orig_paths, reduced_paths])

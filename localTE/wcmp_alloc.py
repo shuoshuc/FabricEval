@@ -597,3 +597,16 @@ class WCMPAllocation:
             worker.sendRealLocalTraffic()
         PRINTV(1, f'{datetime.now()} [sendRealTraffic] complete in '
                f'{time.time() - t} sec.')
+
+    def dumpPathDiversityStats(self):
+        '''
+        Dumps group stats about path diversity, i.e., paths used before/after
+        group reduction for each group.
+        '''
+        pd_list = []
+        for (node, g_type, _), groups in self.groups.items():
+            for i, G in enumerate(groups):
+                pd_list.append([node, i + g_type * 10000, G.ideal_vol,
+                                np.count_nonzero(np.array(G.orig_w)),
+                                np.count_nonzero(np.array(G.reduced_w))])
+        return pd_list
