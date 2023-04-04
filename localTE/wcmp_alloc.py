@@ -553,11 +553,12 @@ class WCMPAllocation:
 
         # Since the original weights are also pruned after group reduction, we
         # should look at the pre-reduction groups to get the correct path
-        # diversity. Later the reduced path diversity will be filled in.
+        # diversity. Later the reduced path diversity and total impacted traffic
+        # volume will be filled in.
         for (node, g_type, _), groups in self.groups.items():
             for i, G in enumerate(groups):
                 self.path_div[(node, i + g_type * 10000, G.ideal_vol)] = \
-                    [np.count_nonzero(np.array(G.orig_w)), None]
+                    [np.count_nonzero(np.array(G.orig_w)), None, None]
 
         # Creates a set of (node, limit) so that we can later fetch both the SRC
         # and TRANSIT groups to reduce together.
@@ -616,4 +617,6 @@ class WCMPAllocation:
             for i, G in enumerate(groups):
                 self.path_div[(node, i + g_type * 10000, G.ideal_vol)][1] = \
                     np.count_nonzero(np.array(G.reduced_w))
+                self.path_div[(node, i + g_type * 10000, G.ideal_vol)][2] = \
+                    G.ideal_vol - sum(G.orig_w)
         return self.path_div

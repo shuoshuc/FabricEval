@@ -124,6 +124,6 @@ if __name__ == "__main__":
     with (logpath / 'path_diversity.csv').open('w') as path_diversity:
         writer = csv.writer(path_diversity)
         writer.writerow(["node", "gid", "total volume (Mbps)", "orig paths",
-                         "reduced paths"])
-        for (node, gid, vol), [orig_paths, reduced_paths] in path_div.items():
-            writer.writerow([node, gid, vol, orig_paths, reduced_paths])
+                         "reduced paths", "pruned volume (Mbps)"])
+        for (node, gid, vol), [orig_p, reduced_p, pruned_vol] in path_div.items():
+            writer.writerow([node, gid, vol, orig_p, reduced_p, pruned_vol])
