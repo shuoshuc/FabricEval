@@ -507,6 +507,7 @@ class WCMPAllocation:
         # A map from AggrBlock name to the corresponding WCMP worker instance.
         self._worker_map = {}
         self.groups = {}
+        self.path_div = {}
         # Stores the topology object in case we need to look up an element.
         self._topo = topo_obj
         # Stores the traffic object in case we need to look up a demand.
@@ -549,6 +550,14 @@ class WCMPAllocation:
             self.groups.update(worker.populateGroups())
         PRINTV(1, f'{datetime.now()} [populateGroups] complete in '
                f'{time.time() - t} sec.')
+
+        # Since the original weights are also pruned after group reduction, we
+        # should look at the pre-reduction groups to get the correct path
+        # diversity. Later the reduced path diversity will be filled in.
+        for (node, g_type, _), groups in self.groups.items():
+            for i, G in enumerate(groups):
+                self.path_div[(node, i + g_type * 10000, G.ideal_vol)] = \
+                    [np.count_nonzero(np.array(G.orig_w)), None]
 
         # Creates a set of (node, limit) so that we can later fetch both the SRC
         # and TRANSIT groups to reduce together.
@@ -603,10 +612,8 @@ class WCMPAllocation:
         Dumps group stats about path diversity, i.e., paths used before/after
         group reduction for each group.
         '''
-        pd_list = []
         for (node, g_type, _), groups in self.groups.items():
             for i, G in enumerate(groups):
-                pd_list.append([node, i + g_type * 10000, G.ideal_vol,
-                                np.count_nonzero(np.array(G.orig_w)),
-                                np.count_nonzero(np.array(G.reduced_w))])
-        return pd_list
+                self.path_div[(node, i + g_type * 10000, G.ideal_vol)][1] = \
+                    np.count_nonzero(np.array(G.reduced_w))
+        return self.path_div

@@ -120,10 +120,10 @@ if __name__ == "__main__":
 
     print(f'{datetime.now()} [Step 8] dump path diversity to path_diversity.csv',
           flush=True)
-    pd_list = wcmp_alloc.dumpPathDiversityStats()
+    path_div = wcmp_alloc.dumpPathDiversityStats()
     with (logpath / 'path_diversity.csv').open('w') as path_diversity:
         writer = csv.writer(path_diversity)
         writer.writerow(["node", "gid", "total volume (Mbps)", "orig paths",
                          "reduced paths"])
-        for node, gid, vol, orig_paths, reduced_paths in pd_list:
+        for (node, gid, vol), [orig_paths, reduced_paths] in path_div.items():
             writer.writerow([node, gid, vol, orig_paths, reduced_paths])
