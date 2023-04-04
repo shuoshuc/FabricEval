@@ -91,7 +91,6 @@ if __name__ == "__main__":
     for k, (u, dcn) in real_LUs.items():
         delta_LUs[k] = (u - ideal_LUs[k][0], dcn)
 
-    print(f'{datetime.now()} [Step 5] dump link util to LU.csv', flush=True)
     with (logpath / 'LU.csv').open('w') as LU:
         writer = csv.writer(LU)
         writer.writerow(["link name", "dcn facing", "ideal LU", "real LU", "delta"])
@@ -99,27 +98,26 @@ if __name__ == "__main__":
                                        reverse=True)).items():
             writer.writerow([k, f'{dcn}', f'{ideal_LUs[k][0]}',
                              f'{real_LUs[k][0]}', f'{v}'])
+    print(f'{datetime.now()} [Step 5] dump link util to LU.csv', flush=True)
 
-    print(f'{datetime.now()} [Step 6] dump node table util to node_ecmp.csv',
-          flush=True)
     ecmp_util = toy_topo.dumpECMPUtil()
     with (logpath / 'node_ecmp.csv').open('w') as ecmp:
         writer = csv.writer(ecmp)
         writer.writerow(["node name", "ECMP util", "# groups"])
         for k, (util, num_g) in ecmp_util.items():
             writer.writerow([k, f'{util}', f'{num_g}'])
-
-    print(f'{datetime.now()} [Step 7] dump node demand to node_demand.csv',
+    print(f'{datetime.now()} [Step 6] dump node table util to node_ecmp.csv',
           flush=True)
+
     demand_admit = toy_topo.dumpDemandAdmission()
     with (logpath / 'node_demand.csv').open('w') as demand:
         writer = csv.writer(demand)
         writer.writerow(["node name", "total demand", "total admit", "ratio"])
         for node, (tot_demand, tot_admit, f) in demand_admit.items():
             writer.writerow([node, tot_demand, tot_admit, f])
-
-    print(f'{datetime.now()} [Step 8] dump path diversity to path_diversity.csv',
+    print(f'{datetime.now()} [Step 7] dump node demand to node_demand.csv',
           flush=True)
+
     path_div = wcmp_alloc.dumpPathDiversityStats()
     with (logpath / 'path_diversity.csv').open('w') as path_diversity:
         writer = csv.writer(path_diversity)
@@ -127,3 +125,5 @@ if __name__ == "__main__":
                          "reduced paths", "pruned volume (Mbps)"])
         for (node, gid, vol), [orig_p, reduced_p, pruned_vol] in path_div.items():
             writer.writerow([node, gid, vol, orig_p, reduced_p, pruned_vol])
+    print(f'{datetime.now()} [Step 8] dump path diversity to path_diversity.csv',
+          flush=True)
