@@ -191,6 +191,14 @@ class TestLoadToyNet(unittest.TestCase):
                           ('toy2-c3-ab1', 'toy2-c1-ab1'): 100000},
                          toy2_traffic.getAllDemands())
 
+    def test_toy2_topology_serialization(self):
+        toy2 = Topology(TOY2_PATH)
+        toy2_proto = toy2.serialize()
+        # check network
+        self.assertEqual('toy2', toy2_proto.name)
+        self.assertEqual(3, len(toy2_proto.clusters))
+        self.assertEqual(6, len(toy2_proto.paths))
+
 class TestLoadToy3Net(unittest.TestCase):
     def test_toy3_topology_construction(self):
         FLAG.P_LINK_FAILURE = 0.0

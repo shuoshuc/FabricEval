@@ -508,6 +508,56 @@ class Topology:
         for node in self._nodes.values():
             node.installStaticGroups()
 
+    def serialize(self):
+        '''
+        Serializes the topology class instance into a topology proto.
+        '''
+        net = topo.Network()
+        net.name = ''
+        for c_name, c in self._clusters.items():
+            if not net.name:
+                net.name = c_name.split('-')[0]
+            cluster = net.clusters.add()
+            cluster.name = c_name
+            for ab in c._member_aggr_blocks:
+                aggr_block = cluster.aggr_blocks.add()
+                aggr_block.name = ab.name
+                for n in ab._member_nodes:
+                    node = aggr_block.nodes.add()
+                    node.name = n.name
+                    node.stage = n.stage
+                    node.index = n.index
+                    node.flow_limit = n.flow_limit
+                    node.ecmp_limit = n.ecmp_limit
+                    node.group_limit = n.group_limit
+                    for p in n._member_ports:
+                        port = node.ports.add()
+                        port.name = p.name
+                        port.port_speed_mbps = p.port_speed
+                        port.dcn_facing = p.dcn_facing
+                        port.host_facing = p.host_facing
+            for t in c._member_tors:
+                tor = cluster.nodes.add()
+                tor.name = t.name
+                tor.stage = t.stage
+                tor.index = t.index
+                tor.flow_limit = t.flow_limit
+                tor.ecmp_limit = t.ecmp_limit
+                tor.group_limit = t.group_limit
+        for p_name, p in self._paths.items():
+            path = net.paths.add()
+            path.name = p.name
+            path.src_aggr_block = p.src_aggr_block.name
+            path.dst_aggr_block = p.dst_aggr_block.name
+            path.capacity_mbps = p.capacity
+        for l_name, l in self._links.items():
+            link = net.links.add()
+            link.name = l.name
+            link.src_port_id = l.src_port.name
+            link.dst_port_id = l.dst_port.name
+            link.link_speed_mbps = l.link_speed
+        return net
+
     def numClusters(self):
         '''
         Returns number of clusters in this topology.
