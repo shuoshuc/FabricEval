@@ -43,6 +43,8 @@ modular, and can easily be replaced with the user's own choice.
 * [NumPy](https://numpy.org/) and [SciPy](https://scipy.org/).
 * [Protobuf](https://developers.google.com/protocol-buffers).
 
+Make sure the above dependencies are all installed.
+
 ## Usage
 Run the following command to run all unit tests.
 ```bash
