@@ -9,7 +9,7 @@ and fed to a TE solver. The output of the TE solver is distributed to each switc
 and translated to switch rules in the form of Longest Prefix Match (LPM) flows
 and Weighted-Cost Multi-Path (WCMP) groups. Finally, the data plane implementation
 is compared to the desired state derived from the original TE solution. A set of
-log files will generated to record the precision loss.
+log files will be generated to record the precision loss.
 
 FabricEval by default generates production-like data center network topologies,
 production-like traffic demand matrices, and uses the same TE algorithm from
@@ -22,8 +22,8 @@ A main component of TE implementation is the group reduction algorithm that
 reduces original groups with large sizes to smaller ones to fit into the switch
 table limits. FabricEval includes a selection of such group reduction algorithms,
 including a re-implementation of WCMP TableFitting \[EuroSys'14\], our own DMIR
-and IGR, as well as a few other variants. The group reduction algorithm is also
-modular, and can easily be replaced with the user's own choice.
+and IGR algorithms, as well as a few other variants. The group reduction algorithm
+is also modular, and can easily be replaced with the user's own choice.
 
 ## Structure
 * **common/**: common helper functions and flags.
