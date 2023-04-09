@@ -33,6 +33,7 @@ modular, and can easily be replaced with the user's own choice.
 * **proto/**: protobuf definitions for topology, traffic demands, TE solutions and other inputs.
 * **scripts/**: log parsing scripts.
 * **tests/**: unit tests.
+  * **tests/data/**: protobuf format production-like topologies and traffic demand matrices.
 * **topology/**: the topology class that represents a network in memory.
 * **traffic/**: the traffic class that represents traffic demand matrices.
 
