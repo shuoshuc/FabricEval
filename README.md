@@ -1,4 +1,4 @@
-# FabricEval
+# <img src="./FabricEval-logo.svg" width="30"> FabricEval
 FabricEval is a modular evaluation framework built for studying data center
 traffic engineering (TE) schemes. FabricEval's end-to-end pipeline includes
 three main parts: (1) topology/traffic demand generators, (2) TE solution + implementation,
