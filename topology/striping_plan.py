@@ -33,6 +33,8 @@ class StripingPlan:
 
         model: pre-built empty model, needs decision vars and constraints.
         '''
+        min_radix = min(self.cluster_radices.values())
+
         # Create variables: x[i][j] is the number of links assigned between
         # cluster i and j. x is a matrix of connectivity assignment.
         x = []
@@ -59,7 +61,9 @@ class StripingPlan:
                     model.addConstr(x[i][i] == 0, "no_self_loop_{}".format(i+1))
                     continue
                 # Add constraint: equal spread of links to peers.
-                model.addConstr(x[i][j] >= math.floor(self.cluster_radices[i+1]\
+                # Note: lower bound should be the cluster of min radix, since
+                # we allow ports to be idle.
+                model.addConstr(x[i][j] >= math.floor(min_radix
                                                      / (self.num_clusters - 1)),
                                 "even_spread_lb_{}_{}".format(i+1, j+1))
                 model.addConstr(x[i][j] <= math.ceil(self.cluster_radices[i+1]\
@@ -119,7 +123,7 @@ if __name__ == "__main__":
     cluster_radices = {
         1: 16,
         2: 16,
-        3: 16,
+        3: 8,
         4: 16
     }
     sp = StripingPlan(4, cluster_radices)
