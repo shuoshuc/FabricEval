@@ -33,14 +33,18 @@ class StripingPlan:
     links/paths assigned between any cluster pair as evenly as possible (unless
     explicitly requested otherwise).
     '''
-    def __init__(self, num_clusters, cluster_radices):
+    def __init__(self, net_name, num_clusters, cluster_radices):
         '''
+        net_name: name of the network, used for constructing physical striping
+                  plan.
+
         num_clusters: the total number of clusters to be connected.
 
         cluster_radices: a map from cluster id to the radix/degree (of egress
                          links). Note that links are bidirectional here.
                          Note that cluster id is 1-indexed.
         '''
+        self.net_name = net_name
         self.num_clusters = num_clusters
         self.cluster_radices = cluster_radices
         # A map from globally unique S3 index to its radix.
@@ -153,18 +157,36 @@ class StripingPlan:
                 # Extract the two S3 switch indices.
                 i, j = int(split[1]) - 1, int(split[2]) - 1
                 mat_s3[i][j] = tot_links
-                '''
-                # The striping matrix is symmetric, we only need to process half
-                # of it.
-                if i >= j:
-                    continue
-                ci, si = matrixIndexToSwitchIndex(i)
-                cj, sj = matrixIndexToSwitchIndex(j)
-                print(f'c{ci+1}-s3i{si+1} -> c{cj+1}-s3i{sj+1}: {tot_links} links.')
-                '''
-            print(mat_s3)
 
-            return None
+            # A map from globally unique S3 switch id to a list of ports
+            # available for establishing connections.
+            available_ports = {}
+            # A list of tuples, each tuple consists of 2 ports that can form a
+            # bidi link.
+            port_pairs = []
+            # Iterate through the S3 radix map and populate a list of available
+            # ports for the connections.
+            for mi, radix in self.s3_radices.items():
+                ci, si = matrixIndexToSwitchIndex(mi)
+                for pi in range(radix):
+                    available_ports.setdefault(mi, []).append(
+                        f'{self.net_name}-c{ci+1}-ab1-s3i{si+1}-p{2*pi+1}')
+
+            # Iterate through the striping matrix to construct port pairs.
+            for mi, row in enumerate(mat_s3):
+                ci, si = matrixIndexToSwitchIndex(mi)
+                for mj, tot_links in enumerate(row):
+                    # The striping matrix is symmetric, we only need to process
+                    # half of it.
+                    if not tot_links or mi >= mj:
+                        continue
+                    cj, sj = matrixIndexToSwitchIndex(mj)
+                    for _ in range(int(tot_links)):
+                        p1 = available_ports[mi].pop(0)
+                        p2 = available_ports[mj].pop(0)
+                        port_pairs.append((p1, p2))
+
+            return port_pairs
 
         except gp.GurobiError as e:
             print('Error code ' + str(e.errno) + ': ' + str(e))
@@ -188,5 +210,6 @@ if __name__ == "__main__":
         2: 16,
         3: 16,
     }
-    sp = StripingPlan(3, cluster_radices)
-    sp.solve()
+    sp = StripingPlan('toy', 3, cluster_radices)
+    port_pairs = sp.solve()
+    print(port_pairs)
