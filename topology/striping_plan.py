@@ -6,11 +6,8 @@ import gurobipy as gp
 import numpy as np
 from gurobipy import GRB
 
-#import common.flags as FLAG
-#from common.common import PRINTV
+from common.common import PRINTV
 
-# Number of S3 switches per cluster.
-NUM_S3 = 4
 
 def matrixIndexToSwitchIndex(mi):
     '''
@@ -33,7 +30,7 @@ class StripingPlan:
     links/paths assigned between any cluster pair as evenly as possible (unless
     explicitly requested otherwise).
     '''
-    def __init__(self, net_name, num_clusters, cluster_radices):
+    def __init__(self, net_name, num_clusters, cluster_radices, num_s3):
         '''
         net_name: name of the network, used for constructing physical striping
                   plan.
@@ -43,10 +40,14 @@ class StripingPlan:
         cluster_radices: a map from cluster id to the radix/degree (of egress
                          links). Note that links are bidirectional here.
                          Note that cluster id is 1-indexed.
+
+        num_s3: number of S3 switches per cluster.
         '''
         self.net_name = net_name
         self.num_clusters = num_clusters
         self.cluster_radices = cluster_radices
+        global NUM_S3
+        NUM_S3 = num_s3
         # A map from globally unique S3 index to its radix.
         self.s3_radices = {}
         # Distribute the cluster radix to each S3 switch. If the radix is
@@ -121,11 +122,16 @@ class StripingPlan:
         return model
 
     def solve(self):
+        '''
+        Solves the striping problem by modeling it as a max assignment
+        optimization.
+        Returns a list of tuples (port pairs) that should be connected. Port
+        names are FQDNs.
+        '''
         try:
             # Initialize a new model
             m = gp.Model("striping")
-            #m.setParam("LogToConsole", 1 if FLAG.VERBOSE >= 2 else 0)
-            m.setParam("LogToConsole", 1)
+            m.setParam("LogToConsole", 1 if FLAG.VERBOSE >= 2 else 0)
             m.setParam("FeasibilityTol", 1e-7)
             m.setParam("IntFeasTol", 1e-8)
             m.setParam("MIPGap", 1e-4)
@@ -143,8 +149,7 @@ class StripingPlan:
             # Optimize model
             m.optimize()
 
-            #PRINTV(2, 'Obj: %s' % m.ObjVal)
-            print(f'[Obj] max links assigned in DCN: {m.ObjVal}')
+            PRINTV(2, f'[Obj] max links assigned in DCN: {m.ObjVal}')
 
             # A striping matrix for all S3 switches.
             mat_s3 = np.zeros(shape=(self.num_clusters * NUM_S3,

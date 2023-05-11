@@ -15,5 +15,14 @@ py_library(
     deps = [
         "//proto:topology_proto",
         "//common:flags",
+        "//topology:striping_plan",
+    ],
+)
+
+py_library(
+    name = 'striping_plan',
+    srcs = ['striping_plan.py'],
+    deps = [
+        "//common:flags",
     ],
 )
