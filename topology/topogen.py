@@ -830,7 +830,7 @@ def generateF1():
             # TODO: assign host and mgmt prefixes.
 
     sp = StripingPlan(NETNAME, NGEN1 + NGEN2 + NGEN3,
-                      {cidx+1: 128 for c_idx in range(NGEN1 + NGEN2 + NGEN3)},
+                      {c_idx+1: 128 for c_idx in range(NGEN1 + NGEN2 + NGEN3)},
                       NS3, getClusterGenByIndex, [NGEN1, NGEN2, NGEN3],
                       PORT_SPEEDS)
     paths, port_pairs = sp.solve()
@@ -842,13 +842,13 @@ def generateF1():
         path_ij.src_aggr_block = f'{NETNAME}-c{ci}-ab1'
         path_ij.dst_aggr_block = f'{NETNAME}-c{cj}-ab1'
         path_ij.name = f'{path_ij.src_aggr_block}:{path_ij.dst_aggr_block}'
-        path_ij.capacity_mbps = capacity
+        path_ij.capacity_mbps = int(capacity)
         # Create path cj => ci.
         path_ji = net.paths.add()
         path_ji.src_aggr_block = f'{NETNAME}-c{cj}-ab1'
         path_ji.dst_aggr_block = f'{NETNAME}-c{ci}-ab1'
         path_ji.name = f'{path_ji.src_aggr_block}:{path_ji.dst_aggr_block}'
-        path_ji.capacity_mbps = capacity
+        path_ji.capacity_mbps = int(capacity)
 
     # Add links under network.
     for c_idx in range(1, NGEN1 + NGEN2 + NGEN3 + 1):

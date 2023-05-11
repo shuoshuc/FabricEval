@@ -23,6 +23,7 @@ py_library(
     name = 'striping_plan',
     srcs = ['striping_plan.py'],
     deps = [
+        "//common:common",
         "//common:flags",
     ],
 )

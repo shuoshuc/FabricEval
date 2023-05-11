@@ -6,6 +6,7 @@ import gurobipy as gp
 import numpy as np
 from gurobipy import GRB
 
+import common.flags as FLAG
 from common.common import PRINTV
 
 
@@ -209,8 +210,8 @@ class StripingPlan:
                                      self.port_speeds[j_gen])
                     # Add up all the link capacity in the same path.
                     if ci != cj:
-                        capacity = paths.setdefault((ci+1, cj+1), 0)
-                        capacity += tot_links * link_speed
+                        paths.setdefault((ci+1, cj+1), 0)
+                        paths[(ci+1, cj+1)] += tot_links * link_speed
                     for _ in range(int(tot_links)):
                         pu = available_ports[mi].pop(0)
                         pv = available_ports[mj].pop(0)
@@ -224,22 +225,3 @@ class StripingPlan:
         except AttributeError:
             print('Encountered an attribute error')
             return []
-
-if __name__ == "__main__":
-    '''
-    cluster_radices = {
-        1: 16,
-        2: 16,
-        3: 8,
-        4: 16
-    }
-    sp = StripingPlan(4, cluster_radices)
-    '''
-    cluster_radices = {
-        1: 8,
-        2: 16,
-        3: 16,
-    }
-    sp = StripingPlan('toy', 3, cluster_radices)
-    port_pairs = sp.solve()
-    print(port_pairs)
