@@ -28,6 +28,8 @@ def generateFabric(name):
         return generateToy4()
     elif name == 'toy5':
         return generateToy5()
+    elif name == 'f1':
+        return generateF1()
 
 def generateToy3():
     '''
@@ -829,24 +831,24 @@ def generateF1():
 
     sp = StripingPlan(NETNAME, NGEN1 + NGEN2 + NGEN3,
                       {cidx+1: 128 for c_idx in range(NGEN1 + NGEN2 + NGEN3)},
-                      NS3)
-    port_pairs = sp.solve()
+                      NS3, getClusterGenByIndex, [NGEN1, NGEN2, NGEN3],
+                      PORT_SPEEDS)
+    paths, port_pairs = sp.solve()
 
     # Add paths under network.
-    for i in range(1, NGEN1 + NGEN2 + NGEN3 + 1):
-        for j in range(1, NGEN1 + NGEN2 + NGEN3 + 1):
-            # A cluster cannot have a path to itself.
-            if i == j:
-                continue
-            path = net.paths.add()
-            path.src_aggr_block = f'{NETNAME}-c{i}-ab1'
-            path.dst_aggr_block = f'{NETNAME}-c{j}-ab1'
-            path.name = f'{path.src_aggr_block}:{path.dst_aggr_block}'
-            i_gen = getClusterGenByIndex(i, [NGEN1, NGEN2, NGEN3])
-            j_gen = getClusterGenByIndex(j, [NGEN1, NGEN2, NGEN3])
-            # Path capacity = 4 links * link speed. Link speed is
-            # auto-negotiated to be the lower speed between src and dst.
-            path.capacity_mbps = 4 * min(PORT_SPEEDS[i_gen], PORT_SPEEDS[j_gen])
+    for (ci, cj), capacity in paths.items():
+        # Create path ci => cj.
+        path_ij = net.paths.add()
+        path_ij.src_aggr_block = f'{NETNAME}-c{ci}-ab1'
+        path_ij.dst_aggr_block = f'{NETNAME}-c{cj}-ab1'
+        path_ij.name = f'{path_ij.src_aggr_block}:{path_ij.dst_aggr_block}'
+        path_ij.capacity_mbps = capacity
+        # Create path cj => ci.
+        path_ji = net.paths.add()
+        path_ji.src_aggr_block = f'{NETNAME}-c{cj}-ab1'
+        path_ji.dst_aggr_block = f'{NETNAME}-c{ci}-ab1'
+        path_ji.name = f'{path_ji.src_aggr_block}:{path_ji.dst_aggr_block}'
+        path_ji.capacity_mbps = capacity
 
     # Add links under network.
     for c_idx in range(1, NGEN1 + NGEN2 + NGEN3 + 1):
@@ -924,38 +926,19 @@ def generateF1():
                         link_s2_s3.dst_port_id = dst_port_id
                         link_s2_s3.name = f'{src_port_id}:{dst_port_id}'
                         link_s2_s3.link_speed_mbps = PORT_SPEEDS[cluster_gen]
-                # ===== Add S3-S3 inter-cluster links. =====
-                # Calculate peer port index.
-                peer_i = 2 * (c_idx - 1) + 1
-                # Hard-coded striping: S3 nodes of the same index connect to
-                # each other. S3 of C1 spreads its links to port 1 of all peers.
-                # S3 of C2 spreads its N-1 links (first link already connects to
-                # C1) to port 3 of rest peers. S3 of C3 spreads N-2 links to
-                # port 5 of rest peers, etc.
-                for port_idx in range(peer_i, NPORTS3, 2):
-                    # Calculate peer cluster index.
-                    peer_c_idx = int(port_idx // 2 + 2)
-                    peer_aggr_block = f'{NETNAME}-c{peer_c_idx}-ab1'
-                    speed = min(PORT_SPEEDS[cluster_gen],
-                                PORT_SPEEDS[getClusterGenByIndex(peer_c_idx,
-                                                                 [NGEN1,
-                                                                  NGEN2,
-                                                                  NGEN3])])
-                    # Add current S3 to peer S3 link.
-                    link_away = net.links.add()
-                    src_port_id = f'{node.name}-p{port_idx}'
-                    dst_port_id = f'{peer_aggr_block}-s3i{node.index}-p{peer_i}'
-                    link_away.src_port_id = src_port_id
-                    link_away.dst_port_id = dst_port_id
-                    link_away.name = f'{src_port_id}:{dst_port_id}'
-                    link_away.link_speed_mbps = speed
-                    # Add peer S3 to current S3 link.
-                    link_back = net.links.add()
-                    src_port_id = f'{peer_aggr_block}-s3i{node.index}-p{peer_i}'
-                    dst_port_id = f'{node.name}-p{port_idx}'
-                    link_back.src_port_id = src_port_id
-                    link_back.dst_port_id = dst_port_id
-                    link_back.name = f'{src_port_id}:{dst_port_id}'
-                    link_back.link_speed_mbps = speed
+    # ===== Add S3-S3 inter-cluster links. =====
+    for pu, pv, speed in port_pairs:
+        # Add link pu => pv.
+        link_uv= net.links.add()
+        link_uv.src_port_id = pu
+        link_uv.dst_port_id = pv
+        link_uv.name = f'{pu}:{pv}'
+        link_uv.link_speed_mbps = speed
+        # Add link pv => pu.
+        link_vu= net.links.add()
+        link_vu.src_port_id = pv
+        link_vu.dst_port_id = pu
+        link_vu.name = f'{pu}:{pv}'
+        link_vu.link_speed_mbps = speed
 
     return net

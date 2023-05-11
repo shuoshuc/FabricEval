@@ -30,7 +30,8 @@ class StripingPlan:
     links/paths assigned between any cluster pair as evenly as possible (unless
     explicitly requested otherwise).
     '''
-    def __init__(self, net_name, num_clusters, cluster_radices, num_s3):
+    def __init__(self, net_name, num_clusters, cluster_radices, num_s3,
+                 getClusterGenByIndex, genlist, port_speeds):
         '''
         net_name: name of the network, used for constructing physical striping
                   plan.
@@ -42,12 +43,25 @@ class StripingPlan:
                          Note that cluster id is 1-indexed.
 
         num_s3: number of S3 switches per cluster.
+
+        getClusterGenByIndex: a function object that returns the generation of
+                              a given cluster index. It takes two arguments:
+                              1. cluster index; 2. a list of the number of
+                              clusters for each generation.
+
+        genlist: a list of the number of clusters for each generation. This is
+                 the second argument to getClusterGenByIndex().
+
+        port_speeds: a map from Gen. ID to the port speed.
         '''
         self.net_name = net_name
         self.num_clusters = num_clusters
         self.cluster_radices = cluster_radices
         global NUM_S3
         NUM_S3 = num_s3
+        self.clusterGen = getClusterGenByIndex
+        self.genlist = genlist
+        self.port_speeds = port_speeds
         # A map from globally unique S3 index to its radix.
         self.s3_radices = {}
         # Distribute the cluster radix to each S3 switch. If the radix is
@@ -125,8 +139,8 @@ class StripingPlan:
         '''
         Solves the striping problem by modeling it as a max assignment
         optimization.
-        Returns a list of tuples (port pairs) that should be connected. Port
-        names are FQDNs.
+        Returns a list of tuples (port pairs) that should be connected, and a
+        map of paths to connect. Port names are FQDNs.
         '''
         try:
             # Initialize a new model
@@ -166,8 +180,10 @@ class StripingPlan:
             # A map from globally unique S3 switch id to a list of ports
             # available for establishing connections.
             available_ports = {}
+            # A map from paths to path capacity. The key is a tuple of clusters.
+            paths = {}
             # A list of tuples, each tuple consists of 2 ports that can form a
-            # bidi link.
+            # bidi link and the link speed.
             port_pairs = []
             # Iterate through the S3 radix map and populate a list of available
             # ports for the connections.
@@ -177,7 +193,8 @@ class StripingPlan:
                     available_ports.setdefault(mi, []).append(
                         f'{self.net_name}-c{ci+1}-ab1-s3i{si+1}-p{2*pi+1}')
 
-            # Iterate through the striping matrix to construct port pairs.
+            # Iterate through the striping matrix to construct port pairs and
+            # paths.
             for mi, row in enumerate(mat_s3):
                 ci, si = matrixIndexToSwitchIndex(mi)
                 for mj, tot_links in enumerate(row):
@@ -186,12 +203,20 @@ class StripingPlan:
                     if not tot_links or mi >= mj:
                         continue
                     cj, sj = matrixIndexToSwitchIndex(mj)
+                    i_gen = self.clusterGen(ci+1, self.genlist)
+                    j_gen = self.clusterGen(cj+1, self.genlist)
+                    link_speed = min(self.port_speeds[i_gen],
+                                     self.port_speeds[j_gen])
+                    # Add up all the link capacity in the same path.
+                    if ci != cj:
+                        capacity = paths.setdefault((ci+1, cj+1), 0)
+                        capacity += tot_links * link_speed
                     for _ in range(int(tot_links)):
-                        p1 = available_ports[mi].pop(0)
-                        p2 = available_ports[mj].pop(0)
-                        port_pairs.append((p1, p2))
+                        pu = available_ports[mi].pop(0)
+                        pv = available_ports[mj].pop(0)
+                        port_pairs.append((pu, pv, link_speed))
 
-            return port_pairs
+            return (paths, port_pairs)
 
         except gp.GurobiError as e:
             print('Error code ' + str(e.errno) + ': ' + str(e))
