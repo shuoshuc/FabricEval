@@ -632,3 +632,17 @@ class WCMPAllocation:
                 self.path_div[(node, i + g_type * 10000, G.ideal_vol)][2] = \
                     pruned_vol
         return self.path_div
+
+    def dumpOrigS3SrcGroups(self):
+        '''
+        Dumps original weights of each S3 src group.
+        '''
+        groups_by_node = {}
+        for (node, g_type, _), groups in self.groups.items():
+            if g_type != SRC:
+                continue
+            if 's3' not in node:
+                continue
+            for G in groups:
+                groups_by_node.setdefault(node, []).append(G.orig_w)
+        return groups_by_node

@@ -127,3 +127,15 @@ if __name__ == "__main__":
             writer.writerow([node, gid, vol, orig_p, reduced_p, pruned_vol])
     print(f'{datetime.now()} [Step 8] dump path diversity to path_diversity.csv',
           flush=True)
+
+    if FLAG.DUMP_GROUPS:
+        groups_by_node = wcmp_alloc.dumpOrigS3SrcGroups()
+        for node, groups in groups_by_node.items():
+            newpath = logpath / 'group_dump'
+            newpath.mkdir(parents=True, exist_ok=True)
+            with (newpath / f'orig_groups_{node}.csv').open('w') as gdump:
+                writer = csv.writer(gdump)
+                for G in groups:
+                    writer.writerow(G)
+        print(f'{datetime.now()} [Step 9] dump groups to group_dump/orig_groups_*.csv',
+              flush=True)
