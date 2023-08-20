@@ -5,7 +5,8 @@ import numpy as np
 import proto.traffic_pb2 as traffic_pb2
 
 import common.flags as FLAG
-from topology.topogen import generateToy3, generateToy4, generateToy5, generateF1
+from topology.topogen import (generateF1, generateF2, generateToy3,
+                              generateToy4, generateToy5)
 from topology.topology import Topology, filterPathSetWithSeg, loadTopo
 from traffic.tmgen import tmgen
 from traffic.traffic import Traffic, loadTraffic
@@ -91,6 +92,20 @@ F1_PEER_PORT3 = 'f1-c1-ab1-s1i1-p1'
 F1_AGGR_BLOCK1 = 'f1-c1-ab1'
 F1_AGGR_BLOCK2 = 'f1-c2-ab1'
 F1_TOR1 = 'f1-c1-ab1-s1i1'
+# F2 entities.
+F2_PATH1 = 'f2-c1-ab1:f2-c2-ab1'
+F2_PATH2 = 'f2-c1-ab1:f2-c5-ab1'
+F2_PATH3 = 'f2-c4-ab1:f2-c5-ab1'
+F2_LINK1 = 'f2-c1-ab1-s3i1-p1:f2-c2-ab1-s3i1-p1'
+F2_PORT1 = 'f2-c1-ab1-s3i1-p1'
+F2_PEER_PORT1 = 'f2-c2-ab1-s3i1-p1'
+F2_PORT2 = 'f2-c1-ab1-s3i1-p2'
+F2_PEER_PORT2 = 'f2-c1-ab1-s2i1-p1'
+F2_PORT3 = 'f2-c1-ab1-s2i1-p2'
+F2_PEER_PORT3 = 'f2-c1-ab1-s1i1-p1'
+F2_AGGR_BLOCK1 = 'f2-c1-ab1'
+F2_AGGR_BLOCK2 = 'f2-c2-ab1'
+F2_TOR1 = 'f2-c1-ab1-s1i1'
 
 class TestLoadToyNet(unittest.TestCase):
     def test_load_invalid_topo(self):
@@ -583,6 +598,60 @@ class TestLoadF1Net(unittest.TestCase):
                          f1.findAggrBlockOfToR(F1_TOR1).name)
         # Verify the stage and index of ToR1.
         self.assertEqual(1, f1.getNodeByName(F1_TOR1).stage)
+
+class TestLoadF2Net(unittest.TestCase):
+    def test_f2_topology_construction(self):
+        f2= Topology('', input_proto=generateF2())
+        self.assertEqual(5, f2.numClusters())
+        # 8 + 16 nodes per cluster
+        self.assertEqual(5 * 24, f2.numNodes())
+        self.assertEqual(5 * 4, len(f2.getAllPaths()))
+        # Path between a 40G cluster and a 100G cluster: 32 * 40
+        self.assertEqual(1280000, f2.findCapacityOfPath(F2_PATH1))
+        # Path between a 40G cluster and a 200G cluster: 32 * 40
+        self.assertEqual(1280000, f2.findCapacityOfPath(F2_PATH2))
+        # Path between two 200G clusters: 32 * 200
+        self.assertEqual(6400000, f2.findCapacityOfPath(F2_PATH3))
+        links = [l.name for l in f2.findLinksOfPath(F2_PATH1)]
+        self.assertTrue(F2_LINK1 in links)
+        # Verify S3-S3 port and peer.
+        self.assertEqual(F2_PEER_PORT1,
+                         f2.findPeerPortOfPort(F2_PORT1).name)
+        # Verify that DCN ports have odd port indices.
+        p1 = f2.getPortByName(F2_PORT1)
+        self.assertEqual(F2_PORT1, p1.name)
+        self.assertTrue(p1.dcn_facing)
+        self.assertEqual(1, p1.index % 2)
+        pp1 = f2.getPortByName(F2_PEER_PORT1)
+        self.assertTrue(pp1.dcn_facing)
+        self.assertEqual(1, pp1.index % 2)
+        # Verify S2-S3 port and peer.
+        self.assertEqual(F2_PEER_PORT2,
+                         f2.findPeerPortOfPort(F2_PORT2).name)
+        # Verify that S2-facing S3 ports have even indices.
+        p2 = f2.getPortByName(F2_PORT2)
+        self.assertFalse(p2.dcn_facing)
+        self.assertEqual(0, p2.index % 2)
+        # Verify that S3-facing S2 ports have odd indices.
+        pp2 = f2.getPortByName(F2_PEER_PORT2)
+        self.assertFalse(pp2.dcn_facing)
+        self.assertEqual(1, pp2.index % 2)
+        # Verify S1-S2 port and peer.
+        self.assertEqual(F2_PEER_PORT3,
+                         f2.findPeerPortOfPort(F2_PORT3).name)
+        # Verify that S1-facing S2 ports have even indices.
+        p3 = f2.getPortByName(F2_PORT3)
+        self.assertFalse(p3.dcn_facing)
+        self.assertEqual(0, p3.index % 2)
+        # Verify that S2-facing S1 ports have odd indices.
+        pp3 = f2.getPortByName(F2_PEER_PORT3)
+        self.assertFalse(pp3.dcn_facing)
+        self.assertEqual(1, pp3.index % 2)
+        # Verify the 'virutal' parent of ToRs.
+        self.assertEqual(F2_AGGR_BLOCK1,
+                         f2.findAggrBlockOfToR(F2_TOR1).name)
+        # Verify the stage and index of ToR1.
+        self.assertEqual(1, f2.getNodeByName(F2_TOR1).stage)
 
 if __name__ == "__main__":
     unittest.main()
