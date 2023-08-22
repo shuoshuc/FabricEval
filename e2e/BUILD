@@ -17,3 +17,16 @@ py_binary(
     ],
     python_version = 'PY3',
 )
+
+py_binary(
+    name = 'tracegen',
+    srcs = ['tracegen.py'],
+    deps = [
+        '//traffic:tmgen',
+        "//common:flags",
+    ],
+    data = [
+        "//traffic:tracedata",
+    ],
+    python_version = 'PY3',
+)

@@ -1,5 +1,3 @@
-import csv
-import io
 import itertools
 from math import floor
 
@@ -11,7 +9,8 @@ from scipy.stats import bernoulli, truncexpon, uniform
 import common.flags as FLAG
 
 
-def tmgen(tor_level, cluster_vector, num_nodes, model, dist='exp', netname=''):
+def tmgen(tor_level, cluster_vector, num_nodes, model, dist='exp', netname='',
+          raw_tm=False):
     '''
     Generates a traffic demand matrix according to `model`.
 
@@ -26,6 +25,8 @@ def tmgen(tor_level, cluster_vector, num_nodes, model, dist='exp', netname=''):
     dist: what distribution to use for sampling ingress/egress total demand, can
           be exp/uniform/pareto.
     netname: name of the fabric.
+    raw_tm: If True, returns the raw TM in Python list format instead of
+            protobuf format.
     '''
     rng = default_rng()
     num_clusters = cluster_vector.size
@@ -85,7 +86,7 @@ def tmgen(tor_level, cluster_vector, num_nodes, model, dist='exp', netname=''):
             # Gravity model.
             tm[r, c] = egress[r] * ingress[c] / ingress.sum()
 
-    return genProto(tor_level, num_clusters, num_nodes, tm, netname)
+    return genProto(tor_level, num_clusters, num_nodes, tm, netname, raw_tm)
 
 def genTotalDemand(tor_level, cluster_vector, num_nodes, dist, p_spike=0.0):
     '''
@@ -131,20 +132,21 @@ def genTotalDemand(tor_level, cluster_vector, num_nodes, dist, p_spike=0.0):
             tors_in_block / tors_in_block.sum() * upper_bound))
     return tor_demand
 
-def genProto(tor_level, num_clusters, num_nodes, TM, netname, csv_format=False):
+def genProto(tor_level, num_clusters, num_nodes, TM, netname, raw_tm):
     '''
     Returns a traffic proto using the given traffic matrix `TM`.
 
-    csv_format: if True, constructs the return file in csv format instead of
-                protobuf format. Note that S1 nodes follow a slightly different
-                naming scheme for convenience.
+    raw_tm: If True, constructs the return value in raw list format instead of
+            protobuf format. Note that S1 nodes follow a slightly different
+            naming scheme for convenience.
     '''
     tm_proto = traffic.TrafficDemand()
     tm_proto.type = traffic.TrafficDemand.DemandType.LEVEL_TOR if tor_level \
         else traffic.TrafficDemand.DemandType.LEVEL_AGGR_BLOCK
 
-    csv_file = io.StringIO()
-    writer = csv.writer(csv_file, lineterminator='\n')
+    # Each demand entry looks like:
+    # [src node, src cluster id, dst node, dst cluster id, demand (Mbps)].
+    rawTM = []
 
     for i, j in itertools.product(range(1, num_clusters + 1),
                                   range(1, num_clusters + 1)):
@@ -164,10 +166,10 @@ def genProto(tor_level, num_clusters, num_nodes, TM, netname, csv_format=False):
                 demand.dst = f'{netname}-c{j}-ab1-s1i{v}'
                 demand.volume_mbps = floor(TM[(i - 1) * num_nodes + u - 1,
                                               (j - 1) * num_nodes + v - 1])
-                if csv_format:
-                    writer.writerow([f'{netname}-c{i}-t{u}',
-                                     f'{netname}-c{j}-t{v}',
-                                     demand.volume_mbps])
+                if raw_tm:
+                    rawTM.append([f'{netname}-c{i}-t{u}', f'{i}',
+                                  f'{netname}-c{j}-t{v}', f'{j}',
+                                  demand.volume_mbps])
         else:
             # Populate AggrBlock-level demand matrix.
             if i == j:
@@ -179,7 +181,8 @@ def genProto(tor_level, num_clusters, num_nodes, TM, netname, csv_format=False):
             demand.src = f'{netname}-c{i}-ab1'
             demand.dst = f'{netname}-c{j}-ab1'
             demand.volume_mbps = floor(TM[i-1, j-1])
-            if csv_format:
-                writer.writerow([demand.src, demand.dst, demand.volume_mbps])
+            if raw_tm:
+                rawTM.append([demand.src, f'{i}', demand.dst, f'{j}',
+                              demand.volume_mbps])
 
-    return tm_proto if not csv_format else csv_file
+    return tm_proto if not raw_tm else rawTM

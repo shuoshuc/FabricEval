@@ -1,5 +1,12 @@
 package(default_visibility = ["//visibility:public"])
 
+filegroup(
+    name = "tracedata",
+    srcs = glob([
+        "data/*.txt",
+    ]),
+)
+
 py_library(
     name = 'traffic',
     srcs = ['traffic.py'],
