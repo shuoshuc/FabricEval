@@ -1,4 +1,5 @@
 import csv
+import io
 import sys
 from datetime import datetime
 from pathlib import Path
@@ -66,6 +67,10 @@ if __name__ == "__main__":
                               netname=NETWORK)
         with (logpath / 'TM.textproto').open('w') as tm:
             tm.write(text_format.MessageToString(traffic_proto))
+        '''
+        with open(logpath / 'tm.csv', mode='w', encoding='utf-8') as f:
+            print(traffic_proto.getvalue(), file=f)
+        '''
     toy_traffic = Traffic(toy_topo, TOY_TM, traffic_proto)
     print(f'{datetime.now()} [Step 2] traffic demand generated.', flush=True)
 

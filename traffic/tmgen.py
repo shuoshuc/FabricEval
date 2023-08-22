@@ -1,3 +1,5 @@
+import csv
+import io
 import itertools
 from math import floor
 
@@ -129,13 +131,20 @@ def genTotalDemand(tor_level, cluster_vector, num_nodes, dist, p_spike=0.0):
             tors_in_block / tors_in_block.sum() * upper_bound))
     return tor_demand
 
-def genProto(tor_level, num_clusters, num_nodes, TM, netname):
+def genProto(tor_level, num_clusters, num_nodes, TM, netname, csv_format=False):
     '''
     Returns a traffic proto using the given traffic matrix `TM`.
+
+    csv_format: if True, constructs the return file in csv format instead of
+                protobuf format. Note that S1 nodes follow a slightly different
+                naming scheme for convenience.
     '''
     tm_proto = traffic.TrafficDemand()
     tm_proto.type = traffic.TrafficDemand.DemandType.LEVEL_TOR if tor_level \
         else traffic.TrafficDemand.DemandType.LEVEL_AGGR_BLOCK
+
+    csv_file = io.StringIO()
+    writer = csv.writer(csv_file, lineterminator='\n')
 
     for i, j in itertools.product(range(1, num_clusters + 1),
                                   range(1, num_clusters + 1)):
@@ -155,6 +164,10 @@ def genProto(tor_level, num_clusters, num_nodes, TM, netname):
                 demand.dst = f'{netname}-c{j}-ab1-s1i{v}'
                 demand.volume_mbps = floor(TM[(i - 1) * num_nodes + u - 1,
                                               (j - 1) * num_nodes + v - 1])
+                if csv_format:
+                    writer.writerow([f'{netname}-c{i}-t{u}',
+                                     f'{netname}-c{j}-t{v}',
+                                     demand.volume_mbps])
         else:
             # Populate AggrBlock-level demand matrix.
             if i == j:
@@ -166,5 +179,7 @@ def genProto(tor_level, num_clusters, num_nodes, TM, netname):
             demand.src = f'{netname}-c{i}-ab1'
             demand.dst = f'{netname}-c{j}-ab1'
             demand.volume_mbps = floor(TM[i-1, j-1])
+            if csv_format:
+                writer.writerow([demand.src, demand.dst, demand.volume_mbps])
 
-    return tm_proto
+    return tm_proto if not csv_format else csv_file
