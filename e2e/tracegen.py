@@ -137,9 +137,9 @@ def tracegen(TM, cluster_vector, rv, duration, load):
 if __name__ == "__main__":
     # Selected workload type.
     WORKLOAD = MSFT_WEBSEARCH
-    # Trace duration.
+    # Trace duration 50 msec.
     DURATION = 50 * 1000 * 1000
-    # Link load.
+    # Link load 40%.
     LOAD = 0.4
 
     # Loads all workload CDFs.
