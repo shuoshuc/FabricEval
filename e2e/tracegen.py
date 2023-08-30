@@ -8,7 +8,7 @@ import numpy as np
 import common.flags as FLAG
 from traffic.tmgen import tmgen
 
-NETWORK = 'f2'
+NETWORK = 'f1'
 
 MSFT_WEBSEARCH = 'MsftWebSearch.txt'
 ALI_STORAGE = 'AliStorage.txt'
@@ -125,7 +125,7 @@ def tracegen(TM, cluster_vector, rv, duration, load):
             flow_size = int(rv.rand())
             iat_ns = int(np.random.exponential(avg_inter_arrival_nsec))
             prev_time += iat_ns
-            trace.append([src, dst, flow_size, prev_time])
+            trace.append([src, sidx, dst, didx, flow_size, prev_time])
             tot_size += flow_size
         if prev_time > duration:
             print(f'[WARN] trace {src} => {dst}: {target_size} exceeds '
@@ -136,9 +136,9 @@ def tracegen(TM, cluster_vector, rv, duration, load):
 
 if __name__ == "__main__":
     # Selected workload type.
-    WORKLOAD = MSFT_WEBSEARCH
+    WORKLOAD = GOOGLE_RPC
     # Trace duration 50 msec.
-    DURATION = 50 * 1000 * 1000
+    DURATION = 20 * 1000 * 1000
     # Link load 40%.
     LOAD = 0.4
 
@@ -156,7 +156,7 @@ if __name__ == "__main__":
             continue
 
     # Generates ToR-level traffic matrix in raw list format.
-    speed_vec = np.array([1]*11 + [2.5]*11 + [5]*11)
+    speed_vec = np.array([1]*22 + [2.5]*22 + [5]*21)
     TM = tmgen(tor_level=True, cluster_vector=speed_vec, num_nodes=32,
                model='gravity', dist='exp', netname=NETWORK, raw_tm=True)
 
