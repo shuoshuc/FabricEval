@@ -136,6 +136,9 @@ class WCMPWorker:
         #   ...
         # }
         self.groups = {}
+        # A map from UUID to a tuple of (src, dst). The same src-dst pair of
+        # type SRC and TRANSIT will be assigned different UUIDs.
+        self.uuid_src_dst = {}
 
     def sendIdealTraffic(self):
         '''
@@ -236,7 +239,8 @@ class WCMPWorker:
         group. Also no groups for DST/LOCAL traffic because they only require
         static groups that will be hardcoded on each node.
 
-        Returns `self.groups` for caller to run group reduction.
+        Returns `self.groups` for caller to run group reduction, and
+        `self.uuid_src_dst` for dumping the reduced groups to a file.
         '''
         # Each PrefixIntent is translated into a set of SRC/TRANSIT groups that
         # go to a certain dst.
@@ -249,6 +253,8 @@ class WCMPWorker:
             # Generates a UUID for each PrefixIntent. Groups constructed on all
             # S2/S3 will use this UUID.
             group_uuid = uuid.uuid4().hex
+            self.uuid_src_dst[group_uuid] = (self._te_intent.target_block,
+                                             prefix_intent.dst_name)
 
             # [Constructs S3 groups]
             # Goes through all nexthops in this prefix intent (to a particular
@@ -296,7 +302,7 @@ class WCMPWorker:
                 self.groups.setdefault((s2_obj.name, FG.g_type,
                                         s2_obj.ecmp_space()), []).append(FG)
 
-        return self.groups
+        return self.groups, self.uuid_src_dst
 
     def sendRealEgressTraffic(self):
         '''
@@ -507,6 +513,9 @@ class WCMPAllocation:
         # A map from AggrBlock name to the corresponding WCMP worker instance.
         self._worker_map = {}
         self.groups = {}
+        # A map from UUID to a tuple of (src, dst). The same src-dst pair of
+        # type SRC and TRANSIT will be assigned different UUIDs.
+        self.uuid_src_dst = {}
         self.path_div = {}
         # Stores the topology object in case we need to look up an element.
         self._topo = topo_obj
@@ -544,10 +553,12 @@ class WCMPAllocation:
                f'{time.time() - t} sec.')
 
         # Collect groups to be reduced from each WCMPWorker and merge them into
-        # a unified map.
+        # a unified map. Also merges the UUID map.
         t = time.time()
         for worker in self._worker_map.values():
-            self.groups.update(worker.populateGroups())
+            worker_groups, worker_uuids = worker.populateGroups()
+            self.groups.update(worker_groups)
+            self.uuid_src_dst.update(worker_uuids)
         PRINTV(1, f'{datetime.now()} [populateGroups] complete in '
                f'{time.time() - t} sec.')
 
