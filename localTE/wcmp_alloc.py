@@ -657,3 +657,18 @@ class WCMPAllocation:
             for G in groups:
                 groups_by_node.setdefault(node, []).append(G.orig_w)
         return groups_by_node
+
+    def dumpReducedGroups(self):
+        '''
+        Dumps reduced group in a structure similar to the TE solution.
+        '''
+        dumped_groups = []
+        for (node, g_type, _), groups in self.groups.items():
+            # We are interested in S3 nodes. s3i[1234] will be quite similar, so
+            # just takes groups from s3i1.
+            if 's3i1' not in node:
+                continue
+            for G in groups:
+                src, dst = self.uuid_src_dst[G.uuid]
+                dumped_groups.append((src, dst, g_type, G.reduced_w))
+        return dumped_groups
