@@ -143,8 +143,8 @@ if __name__ == "__main__":
     reduced_groups = wcmp_alloc.dumpReducedGroups()
     with (logpath / 'reduced_groups.csv').open('w') as g_dump:
         writer = csv.writer(g_dump)
-        writer.writerow(["src", "dst", "group type", "group"])
-        for src, dst, g_type, reduced_w in reduced_groups:
-            writer.writerow([src, dst, g_type, reduced_w])
+        writer.writerow(["#group type", "src", "dst", "group"])
+        for g_type, src, dst, reduced_w in reduced_groups:
+            writer.writerow([g_type, src, dst] + reduced_w)
     print(f'{datetime.now()} [Step 10] dump reduced groups to reduced_groups.csv',
           flush=True)

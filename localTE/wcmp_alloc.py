@@ -670,5 +670,5 @@ class WCMPAllocation:
                 continue
             for G in groups:
                 src, dst = self.uuid_src_dst[G.uuid]
-                dumped_groups.append((src, dst, g_type, G.reduced_w))
+                dumped_groups.append((g_type, src, dst, G.reduced_w))
         return dumped_groups
