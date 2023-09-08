@@ -23,10 +23,12 @@ py_binary(
     srcs = ['tracegen.py'],
     deps = [
         '//traffic:tmgen',
+        '//traffic:traffic',
         "//common:flags",
     ],
     data = [
         "//traffic:tracedata",
+        "//tests:testdata",
     ],
     python_version = 'PY3',
 )

@@ -1,5 +1,6 @@
 import csv
 import random
+import re
 import sys
 from pathlib import Path
 
@@ -7,8 +8,10 @@ import numpy as np
 
 import common.flags as FLAG
 from traffic.tmgen import tmgen
+from traffic.traffic import loadTraffic
 
-NETWORK = 'f1'
+NETWORK = 'toy3'
+TM_PATH = f'tests/data/{NETWORK}_traffic_gravity.textproto'
 
 MSFT_WEBSEARCH = 'MsftWebSearch.txt'
 ALI_STORAGE = 'AliStorage.txt'
@@ -136,7 +139,7 @@ def tracegen(TM, cluster_vector, rv, duration, load):
 
 if __name__ == "__main__":
     # Selected workload type.
-    WORKLOAD = GOOGLE_RPC
+    WORKLOAD = MSFT_WEBSEARCH
     # Trace duration 50 msec.
     DURATION = 20 * 1000 * 1000
     # Link load 40%.
@@ -155,13 +158,38 @@ if __name__ == "__main__":
             print(f"[ERROR] Invalid CDF, workload: {workload}")
             continue
 
-    # Generates ToR-level traffic matrix in raw list format.
-    speed_vec = np.array([1]*22 + [2.5]*22 + [5]*21)
-    TM = tmgen(tor_level=True, cluster_vector=speed_vec, num_nodes=32,
-               model='gravity', dist='exp', netname=NETWORK, raw_tm=True)
+    # Each demand entry looks like:
+    # [src node, src cluster id, dst node, dst cluster id, demand (Mbps)].
+    rawTM = []
+    proto_traffic = loadTraffic(TM_PATH)
+
+    pattern = re.compile("(.*)-c([0-9]+)-ab1-s1i([0-9]+)")
+    for demand_entry in proto_traffic.demands:
+        src, dst = demand_entry.src, demand_entry.dst
+        # Sanity check: src and dst cannot be the same.
+        if src == dst:
+            print(f'[ERROR] Traffic parsing: src {src} and dst {dst} cannot'
+                  f' be the same!')
+            break
+        # Sanity check: only positive demand allowed.
+        vol = demand_entry.volume_mbps
+        if vol <= 0:
+            print(f'[ERROR] Traffic parsing: encountered negative demand: '
+                  f'{vol} on {src} => {dst}.')
+            break
+
+        match_src, match_dst = pattern.search(src), pattern.search(dst)
+        if not match_src or not match_dst:
+            continue
+        netname = match_src.group(1)
+        src_cid, dst_cid = match_src.group(2), match_dst.group(2)
+        src_tid, dst_tid = match_src.group(3), match_dst.group(3)
+        rawTM.append([f'{netname}-c{src_cid}-t{src_tid}', f'{src_cid}',
+                      f'{netname}-c{dst_cid}-t{dst_tid}', f'{dst_cid}', vol])
 
     # Generates trace.
-    trace = tracegen(TM, speed_vec, CDF[WORKLOAD], DURATION, LOAD)
+    speed_vec = np.array([1]*22 + [2.5]*22 + [5]*21)
+    trace = tracegen(rawTM, speed_vec, CDF[WORKLOAD], DURATION, LOAD)
 
     # Writes trace to filesystem as a csv.
     logpath = Path(sys.argv[1])
