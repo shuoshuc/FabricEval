@@ -184,6 +184,9 @@ if __name__ == "__main__":
         netname = match_src.group(1)
         src_cid, dst_cid = match_src.group(2), match_dst.group(2)
         src_tid, dst_tid = match_src.group(3), match_dst.group(3)
+        # Skip cluster local demands if we only focus on DCN traffic.
+        if src_cid == dst_cid:
+            continue
         rawTM.append([f'{netname}-c{src_cid}-t{src_tid}', f'{src_cid}',
                       f'{netname}-c{dst_cid}-t{dst_tid}', f'{dst_cid}', vol])
 
