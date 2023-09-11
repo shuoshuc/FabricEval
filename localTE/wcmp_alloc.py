@@ -1,4 +1,3 @@
-import os
 import time
 import uuid
 from concurrent.futures import ProcessPoolExecutor, as_completed
@@ -535,11 +534,6 @@ class WCMPAllocation:
             # this case, it only manages one aggregation block.
             self._worker_map[aggr_block] = WCMPWorker(topo_obj, te_intent,
                 self._traffic.getBlockDemands(aggr_block))
-
-        # Use single process if invoking Gurobi. Gurobi is able to use all
-        # CPU cores, no need to multi-process, which adds extra overhead.
-        FLAG.PARALLELISM = 1 if FLAG.GR_ALGO in ['carving', 'gurobi'] else \
-            os.cpu_count()
 
     def run(self):
         '''

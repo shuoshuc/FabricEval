@@ -38,8 +38,12 @@ if __name__ == "__main__":
         FLAG.IMPROVED_HEURISTIC = True
     elif FLAG.GR_ALGO == 'carving':
         FLAG.IMPROVED_HEURISTIC = True
+        # Use single process if invoking Gurobi. Gurobi is able to use all CPU
+        # cores, no need to multi-process, which adds extra overhead.
+        FLAG.PARALLELISM = 1
     elif FLAG.GR_ALGO == 'gurobi':
         FLAG.IMPROVED_HEURISTIC = True
+        FLAG.PARALLELISM = 1
     else:
         print(f'[ERROR] unknown group reduction algorithm {FLAG.GR_ALGO}.')
 

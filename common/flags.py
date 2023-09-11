@@ -1,3 +1,5 @@
+import os
+
 # VERBOSE=0: no Gurobi log. No informational prints.
 # VERBOSE=1: Gurobi final log only. Informational prints.
 # VERBOSE=2: full Gubrobi log.
@@ -45,7 +47,7 @@ IMPROVED_HEURISTIC = False
 EUROSYS_MOD = False
 
 # Number of parallel group reductions allowed to run.
-PARALLELISM = 16
+PARALLELISM = os.cpu_count()
 
 # Timeout in seconds for a single Gurobi invocation.
 GUROBI_TIMEOUT = 120
