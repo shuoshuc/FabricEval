@@ -837,7 +837,7 @@ def generateF1():
                       {c_idx+1: CLUSTER_RADIX
                        for c_idx in range(NGEN1 + NGEN2 + NGEN3)},
                       NS3, getClusterGenByIndex, [NGEN1, NGEN2, NGEN3],
-                      PORT_SPEEDS)
+                      PORT_SPEEDS, set())
     paths, port_pairs = sp.solve()
 
     # Add paths under network.
@@ -1065,7 +1065,7 @@ def generateF2():
                       {c_idx+1: CLUSTER_RADIX
                        for c_idx in range(NGEN1 + NGEN2 + NGEN3)},
                       NS3, getClusterGenByIndex, [NGEN1, NGEN2, NGEN3],
-                      PORT_SPEEDS)
+                      PORT_SPEEDS, set())
     paths, port_pairs = sp.solve()
 
     # Add paths under network.

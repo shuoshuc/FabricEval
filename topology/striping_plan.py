@@ -32,7 +32,7 @@ class StripingPlan:
     explicitly requested otherwise).
     '''
     def __init__(self, net_name, num_clusters, cluster_radices, num_s3,
-                 getClusterGenByIndex, genlist, port_speeds):
+                 getClusterGenByIndex, genlist, port_speeds, no_connect_pairs):
         '''
         net_name: name of the network, used for constructing physical striping
                   plan.
@@ -54,6 +54,11 @@ class StripingPlan:
                  the second argument to getClusterGenByIndex().
 
         port_speeds: a map from Gen. ID to the port speed.
+
+        no_connect_pairs: a set of tuples that indicate whether two clusters
+                          should be connected. Pairs in the set should not. The
+                          tuple of cluster indices are always sorted in
+                          ascending order and deduplicated.
         '''
         self.net_name = net_name
         self.num_clusters = num_clusters
@@ -63,6 +68,7 @@ class StripingPlan:
         self.clusterGen = getClusterGenByIndex
         self.genlist = genlist
         self.port_speeds = port_speeds
+        self.no_connect_pairs = no_connect_pairs
         # A map from globally unique S3 index to its radix.
         self.s3_radices = {}
         # Distribute the cluster radix to each S3 switch. If the radix is
@@ -111,8 +117,14 @@ class StripingPlan:
                     # Add constraint: no self loops.
                     model.addConstr(x[i][i] == 0, "no_self_loop_{}".format(i+1))
                     continue
-                _, si = matrixIndexToSwitchIndex(i)
-                _, sj = matrixIndexToSwitchIndex(j)
+                ci, si = matrixIndexToSwitchIndex(i)
+                cj, sj = matrixIndexToSwitchIndex(j)
+                if tuple(sorted([ci + 1, cj + 1])) in self.no_connect_pairs:
+                    # Add constraint: no connection between this particular
+                    # pair of clusters.
+                    model.addConstr(x[i][j] == 0,
+                                    "disconnect_{}_{}".format(i+1, j+1))
+                    continue
                 if si != sj:
                     # Add constraint: no cross connect between S3 switches of
                     # different locations (intra-cluster indices).
