@@ -961,18 +961,26 @@ def generateToy6():
                         link_s2_s3.link_speed_mbps = PORT_SPEEDS[cluster_gen]
     # ===== Add S3-S3 inter-cluster links. =====
     for pu, pv, speed in port_pairs:
+        # With probability `P_LINK_FAILURE`, this link and its reverse fail,
+        # hence will not be added in the topology.
+        if rng.uniform(low=0, high=1) < FLAG.P_LINK_FAILURE:
+            continue
+        link_speed = speed
+        # Simulates channel failure, 1 out of 4 channels of a link fails.
+        if rng.uniform(low=0, high=1) < FLAG.P_LINK_FAILURE:
+            link_speed = int(link_speed / 4)
         # Add link pu => pv.
         link_uv= net.links.add()
         link_uv.src_port_id = pu
         link_uv.dst_port_id = pv
         link_uv.name = f'{pu}:{pv}'
-        link_uv.link_speed_mbps = speed
+        link_uv.link_speed_mbps = link_speed
         # Add link pv => pu.
         link_vu= net.links.add()
         link_vu.src_port_id = pv
         link_vu.dst_port_id = pu
         link_vu.name = f'{pu}:{pv}'
-        link_vu.link_speed_mbps = speed
+        link_vu.link_speed_mbps = link_speed
 
     return net
 
