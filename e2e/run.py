@@ -14,7 +14,7 @@ from topology.topology import Topology, filterPathSetWithSeg, loadTopo
 from traffic.tmgen import tmgen
 from traffic.traffic import Traffic
 
-NETWORK = 'toy3'
+NETWORK = 'toy6'
 
 TOY_TOPO = f'tests/data/{NETWORK}_topo.textproto'
 TOY_TM = f'tests/data/{NETWORK}_traffic_gravity.textproto'
@@ -63,7 +63,7 @@ if __name__ == "__main__":
     traffic_proto = None
     if not LOAD_TM:
         traffic_proto = tmgen(tor_level=True,
-                              cluster_vector=np.array([1]*22 + [2.5]*22 + [5]*21),
+                              cluster_vector=np.array([1]*21 + [2.5]*21 + [5]*22),
                               num_nodes=32,
                               model='gravity',
                               dist='exp',

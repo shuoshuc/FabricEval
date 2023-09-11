@@ -88,7 +88,7 @@ def tmgen(tor_level, cluster_vector, num_nodes, model, dist='exp', netname='',
 
     return genProto(tor_level, num_clusters, num_nodes, tm, netname, raw_tm)
 
-def genTotalDemand(tor_level, cluster_vector, num_nodes, dist, p_spike=0.0):
+def genTotalDemand(tor_level, cluster_vector, num_nodes, dist, p_spike=0.1):
     '''
     Generates total ingress/egress demand for all end points.
     Returns a 1-D NumPy array.
