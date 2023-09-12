@@ -761,8 +761,9 @@ def generateToy6():
     # Number of gen1/gen2/gen3 clusters. Half of the clusters are transit-only.
     NGEN1, NGEN2, NGEN3 = 21, 21, 22
     GENLIST = [1] * NGEN1 + [2] * NGEN2 + [3] * NGEN3
-    # The spine blocks are also Gen 1/2/3 mixed.
-    GENLIST += GENLIST
+    # The spine blocks are also Gen 1/2/3 mixed. Make spine slightly
+    # under-deployed - 61 blocks.
+    GENLIST += [1] * 20 + [2] * 20 + [3] * 21
     # Cluster radix, assuming uniform for all clusters.
     CLUSTER_RADIX = 256
     # Number of S1/S2/S3 nodes in each cluster.
@@ -787,8 +788,8 @@ def generateToy6():
     for i in range(1, 65):
         for j in range(i + 1, 65):
             NO_CONNECT_PAIRS.add((i, j))
-    for i in range(65, 129):
-        for j in range(i + 1, 129):
+    for i in range(65, 126):
+        for j in range(i + 1, 126):
             NO_CONNECT_PAIRS.add((i, j))
 
     net = topo.Network()
