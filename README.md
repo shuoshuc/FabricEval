@@ -43,10 +43,15 @@ is also modular, and can easily be replaced with the user's own choice.
 * [Gurobi](https://www.gurobi.com/). Everything is only tested on Gurobi 9.5.0+.
 * [NumPy](https://numpy.org/) and [SciPy](https://scipy.org/).
 * [Protobuf](https://developers.google.com/protocol-buffers).
+* [Git LFS](https://git-lfs.com/).
 
 Make sure the above dependencies are all installed.
 
 ## Usage
+Pull pre-generated topology and traffic demand protobuf files using git lfs. They will be placed under tests/data/*
+```bash
+git lfs pull
+```
 Run the following command to run all unit tests.
 ```bash
 bazel test //tests:all
