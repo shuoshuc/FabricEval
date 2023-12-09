@@ -6,7 +6,7 @@ description: >
   providing documentation and blog post pages.
 lang: en-US
 
-baseurl: "/FabricEval/" # the subpath of your site, e.g. /blog/
+baseurl: "/FabricEval" # the subpath of your site, e.g. /blog/
 url: https://shuoshuc.github.io/FabricEval # the base hostname & protocol for your site
 git_address: https://github.com/shuoshuc/FabricEval
 git_edit_address: https://github.com/shuoshuc/FabricEval/blob/gh-pages
