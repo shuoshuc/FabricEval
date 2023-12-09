@@ -1,19 +1,18 @@
 # Site settings
-title: Jekyll Doc Theme
-email: your-email@domain.com
+title: FabricEval
+email: shuoshuc@cs.cmu.edu
 description: >
-  Jekyll Template for Project Websites
-  providing documentation and blog post pages.
+  A traffic engineering evaluation framework.
 lang: en-US
 
 baseurl: "/FabricEval" # the subpath of your site, e.g. /blog/
 url: https://shuoshuc.github.io/FabricEval # the base hostname & protocol for your site
 git_address: https://github.com/shuoshuc/FabricEval
-git_edit_address: https://github.com/shuoshuc/FabricEval/blob/gh-pages
+git_edit_address: https://github.com/shuoshuc/FabricEval/tree/website
 
 # theme options from https://bootswatch.com/3/
 # comment out this to use default Bootstrap
-bootwatch: paper # cerulean cosmo custom cyborg darkly flatly journal lumen readable sandstone simplex slate solar spacelab superhero united yeti
+bootwatch: simplex # paper cerulean cosmo custom cyborg darkly flatly journal lumen readable sandstone slate solar spacelab superhero united yeti
 
 # Build settings
 markdown: kramdown
