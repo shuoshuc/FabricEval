@@ -38,7 +38,7 @@ defaults:
     type: posts
   values:
     layout: post
-    sectionid: blog
+    sectionid: team
 
 - scope:
     path: _docs
@@ -54,5 +54,5 @@ collections:
     permalink: /:collection/:path/
     output: true
   posts:
-    permalink: /blog/:year/:month/:day/:title/
+    permalink: /team/
     output: true
