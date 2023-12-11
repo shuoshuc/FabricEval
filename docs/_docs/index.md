@@ -28,3 +28,5 @@ $ python3 ./FabricEval/scripts/test_dep.py
 
 If all dependencies are met, the script would output:
 > All dependencies are met.
+
+Now it's time to start using FabricEval!
