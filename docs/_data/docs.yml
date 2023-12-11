@@ -1,10 +1,34 @@
-- title: Getting Started
+- title: Overview
   docs:
   - home
   - themes
   - customization
 
-- title: Examples
+- title: Topology
+  docs:
+  - cheatsheet
+  - font-awesome
+  - bootstrap
+
+- title: Traffic
+  docs:
+  - cheatsheet
+  - font-awesome
+  - bootstrap
+
+- title: GlobalTE
+  docs:
+  - cheatsheet
+  - font-awesome
+  - bootstrap
+
+- title: LocalTE
+  docs:
+  - cheatsheet
+  - font-awesome
+  - bootstrap
+
+- title: Metrics
   docs:
   - cheatsheet
   - font-awesome
