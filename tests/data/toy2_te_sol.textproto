@@ -1,0 +1,54 @@
+type: LEVEL_AGGR_BLOCK
+te_intents {
+  target_block: "toy2-c1-ab1"
+  prefix_intents {
+    dst_name: "toy2-c3-ab1"
+    type: SRC
+    nexthop_entries {
+      nexthop_port: "toy2-c1-ab1-s3i1-p4"
+      weight: 75000.0
+    }
+    nexthop_entries {
+      nexthop_port: "toy2-c1-ab1-s3i2-p4"
+      weight: 75000.0
+    }
+    nexthop_entries {
+      nexthop_port: "toy2-c1-ab1-s3i1-p3"
+      weight: 75000.0
+    }
+    nexthop_entries {
+      nexthop_port: "toy2-c1-ab1-s3i2-p3"
+      weight: 75000.0
+    }
+  }
+}
+te_intents {
+  target_block: "toy2-c2-ab1"
+  prefix_intents {
+    dst_name: "toy2-c3-ab1"
+    type: TRANSIT
+    nexthop_entries {
+      nexthop_port: "toy2-c2-ab1-s3i1-p4"
+      weight: 75000.0
+    }
+    nexthop_entries {
+      nexthop_port: "toy2-c2-ab1-s3i2-p4"
+      weight: 75000.0
+    }
+  }
+}
+te_intents {
+  target_block: "toy2-c3-ab1"
+  prefix_intents {
+    dst_name: "toy2-c1-ab1"
+    type: SRC
+    nexthop_entries {
+      nexthop_port: "toy2-c3-ab1-s3i1-p3"
+      weight: 50000.0
+    }
+    nexthop_entries {
+      nexthop_port: "toy2-c3-ab1-s3i2-p3"
+      weight: 50000.0
+    }
+  }
+}

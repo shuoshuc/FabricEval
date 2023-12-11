@@ -1,0 +1,6491 @@
+name: "toy4"
+clusters {
+  name: "toy4-c1"
+  aggr_blocks {
+    name: "toy4-c1-ab1"
+    nodes {
+      name: "toy4-c1-ab1-s3i1"
+      stage: 3
+      index: 1
+      ecmp_limit: 4096
+      group_limit: 256
+      ports {
+        name: "toy4-c1-ab1-s3i1-p1"
+        port_speed_mbps: 40000
+        dcn_facing: true
+        index: 1
+      }
+      ports {
+        name: "toy4-c1-ab1-s3i1-p2"
+        port_speed_mbps: 40000
+        index: 2
+      }
+      ports {
+        name: "toy4-c1-ab1-s3i1-p3"
+        port_speed_mbps: 40000
+        dcn_facing: true
+        index: 3
+      }
+      ports {
+        name: "toy4-c1-ab1-s3i1-p4"
+        port_speed_mbps: 40000
+        index: 4
+      }
+      ports {
+        name: "toy4-c1-ab1-s3i1-p5"
+        port_speed_mbps: 40000
+        dcn_facing: true
+        index: 5
+      }
+      ports {
+        name: "toy4-c1-ab1-s3i1-p6"
+        port_speed_mbps: 40000
+        index: 6
+      }
+      ports {
+        name: "toy4-c1-ab1-s3i1-p7"
+        port_speed_mbps: 40000
+        dcn_facing: true
+        index: 7
+      }
+      ports {
+        name: "toy4-c1-ab1-s3i1-p8"
+        port_speed_mbps: 40000
+        index: 8
+      }
+    }
+    nodes {
+      name: "toy4-c1-ab1-s3i2"
+      stage: 3
+      index: 2
+      ecmp_limit: 4096
+      group_limit: 256
+      ports {
+        name: "toy4-c1-ab1-s3i2-p1"
+        port_speed_mbps: 40000
+        dcn_facing: true
+        index: 1
+      }
+      ports {
+        name: "toy4-c1-ab1-s3i2-p2"
+        port_speed_mbps: 40000
+        index: 2
+      }
+      ports {
+        name: "toy4-c1-ab1-s3i2-p3"
+        port_speed_mbps: 40000
+        dcn_facing: true
+        index: 3
+      }
+      ports {
+        name: "toy4-c1-ab1-s3i2-p4"
+        port_speed_mbps: 40000
+        index: 4
+      }
+      ports {
+        name: "toy4-c1-ab1-s3i2-p5"
+        port_speed_mbps: 40000
+        dcn_facing: true
+        index: 5
+      }
+      ports {
+        name: "toy4-c1-ab1-s3i2-p6"
+        port_speed_mbps: 40000
+        index: 6
+      }
+      ports {
+        name: "toy4-c1-ab1-s3i2-p7"
+        port_speed_mbps: 40000
+        dcn_facing: true
+        index: 7
+      }
+      ports {
+        name: "toy4-c1-ab1-s3i2-p8"
+        port_speed_mbps: 40000
+        index: 8
+      }
+    }
+    nodes {
+      name: "toy4-c1-ab1-s3i3"
+      stage: 3
+      index: 3
+      ecmp_limit: 4096
+      group_limit: 256
+      ports {
+        name: "toy4-c1-ab1-s3i3-p1"
+        port_speed_mbps: 40000
+        dcn_facing: true
+        index: 1
+      }
+      ports {
+        name: "toy4-c1-ab1-s3i3-p2"
+        port_speed_mbps: 40000
+        index: 2
+      }
+      ports {
+        name: "toy4-c1-ab1-s3i3-p3"
+        port_speed_mbps: 40000
+        dcn_facing: true
+        index: 3
+      }
+      ports {
+        name: "toy4-c1-ab1-s3i3-p4"
+        port_speed_mbps: 40000
+        index: 4
+      }
+      ports {
+        name: "toy4-c1-ab1-s3i3-p5"
+        port_speed_mbps: 40000
+        dcn_facing: true
+        index: 5
+      }
+      ports {
+        name: "toy4-c1-ab1-s3i3-p6"
+        port_speed_mbps: 40000
+        index: 6
+      }
+      ports {
+        name: "toy4-c1-ab1-s3i3-p7"
+        port_speed_mbps: 40000
+        dcn_facing: true
+        index: 7
+      }
+      ports {
+        name: "toy4-c1-ab1-s3i3-p8"
+        port_speed_mbps: 40000
+        index: 8
+      }
+    }
+    nodes {
+      name: "toy4-c1-ab1-s3i4"
+      stage: 3
+      index: 4
+      ecmp_limit: 4096
+      group_limit: 256
+      ports {
+        name: "toy4-c1-ab1-s3i4-p1"
+        port_speed_mbps: 40000
+        dcn_facing: true
+        index: 1
+      }
+      ports {
+        name: "toy4-c1-ab1-s3i4-p2"
+        port_speed_mbps: 40000
+        index: 2
+      }
+      ports {
+        name: "toy4-c1-ab1-s3i4-p3"
+        port_speed_mbps: 40000
+        dcn_facing: true
+        index: 3
+      }
+      ports {
+        name: "toy4-c1-ab1-s3i4-p4"
+        port_speed_mbps: 40000
+        index: 4
+      }
+      ports {
+        name: "toy4-c1-ab1-s3i4-p5"
+        port_speed_mbps: 40000
+        dcn_facing: true
+        index: 5
+      }
+      ports {
+        name: "toy4-c1-ab1-s3i4-p6"
+        port_speed_mbps: 40000
+        index: 6
+      }
+      ports {
+        name: "toy4-c1-ab1-s3i4-p7"
+        port_speed_mbps: 40000
+        dcn_facing: true
+        index: 7
+      }
+      ports {
+        name: "toy4-c1-ab1-s3i4-p8"
+        port_speed_mbps: 40000
+        index: 8
+      }
+    }
+    nodes {
+      name: "toy4-c1-ab1-s2i1"
+      stage: 2
+      index: 1
+      ecmp_limit: 4096
+      group_limit: 256
+      ports {
+        name: "toy4-c1-ab1-s2i1-p1"
+        port_speed_mbps: 40000
+        index: 1
+      }
+      ports {
+        name: "toy4-c1-ab1-s2i1-p2"
+        port_speed_mbps: 40000
+        index: 2
+      }
+      ports {
+        name: "toy4-c1-ab1-s2i1-p3"
+        port_speed_mbps: 40000
+        index: 3
+      }
+      ports {
+        name: "toy4-c1-ab1-s2i1-p4"
+        port_speed_mbps: 40000
+        index: 4
+      }
+      ports {
+        name: "toy4-c1-ab1-s2i1-p5"
+        port_speed_mbps: 40000
+        index: 5
+      }
+      ports {
+        name: "toy4-c1-ab1-s2i1-p6"
+        port_speed_mbps: 40000
+        index: 6
+      }
+      ports {
+        name: "toy4-c1-ab1-s2i1-p7"
+        port_speed_mbps: 40000
+        index: 7
+      }
+      ports {
+        name: "toy4-c1-ab1-s2i1-p8"
+        port_speed_mbps: 40000
+        index: 8
+      }
+    }
+    nodes {
+      name: "toy4-c1-ab1-s2i2"
+      stage: 2
+      index: 2
+      ecmp_limit: 4096
+      group_limit: 256
+      ports {
+        name: "toy4-c1-ab1-s2i2-p1"
+        port_speed_mbps: 40000
+        index: 1
+      }
+      ports {
+        name: "toy4-c1-ab1-s2i2-p2"
+        port_speed_mbps: 40000
+        index: 2
+      }
+      ports {
+        name: "toy4-c1-ab1-s2i2-p3"
+        port_speed_mbps: 40000
+        index: 3
+      }
+      ports {
+        name: "toy4-c1-ab1-s2i2-p4"
+        port_speed_mbps: 40000
+        index: 4
+      }
+      ports {
+        name: "toy4-c1-ab1-s2i2-p5"
+        port_speed_mbps: 40000
+        index: 5
+      }
+      ports {
+        name: "toy4-c1-ab1-s2i2-p6"
+        port_speed_mbps: 40000
+        index: 6
+      }
+      ports {
+        name: "toy4-c1-ab1-s2i2-p7"
+        port_speed_mbps: 40000
+        index: 7
+      }
+      ports {
+        name: "toy4-c1-ab1-s2i2-p8"
+        port_speed_mbps: 40000
+        index: 8
+      }
+    }
+    nodes {
+      name: "toy4-c1-ab1-s2i3"
+      stage: 2
+      index: 3
+      ecmp_limit: 4096
+      group_limit: 256
+      ports {
+        name: "toy4-c1-ab1-s2i3-p1"
+        port_speed_mbps: 40000
+        index: 1
+      }
+      ports {
+        name: "toy4-c1-ab1-s2i3-p2"
+        port_speed_mbps: 40000
+        index: 2
+      }
+      ports {
+        name: "toy4-c1-ab1-s2i3-p3"
+        port_speed_mbps: 40000
+        index: 3
+      }
+      ports {
+        name: "toy4-c1-ab1-s2i3-p4"
+        port_speed_mbps: 40000
+        index: 4
+      }
+      ports {
+        name: "toy4-c1-ab1-s2i3-p5"
+        port_speed_mbps: 40000
+        index: 5
+      }
+      ports {
+        name: "toy4-c1-ab1-s2i3-p6"
+        port_speed_mbps: 40000
+        index: 6
+      }
+      ports {
+        name: "toy4-c1-ab1-s2i3-p7"
+        port_speed_mbps: 40000
+        index: 7
+      }
+      ports {
+        name: "toy4-c1-ab1-s2i3-p8"
+        port_speed_mbps: 40000
+        index: 8
+      }
+    }
+    nodes {
+      name: "toy4-c1-ab1-s2i4"
+      stage: 2
+      index: 4
+      ecmp_limit: 4096
+      group_limit: 256
+      ports {
+        name: "toy4-c1-ab1-s2i4-p1"
+        port_speed_mbps: 40000
+        index: 1
+      }
+      ports {
+        name: "toy4-c1-ab1-s2i4-p2"
+        port_speed_mbps: 40000
+        index: 2
+      }
+      ports {
+        name: "toy4-c1-ab1-s2i4-p3"
+        port_speed_mbps: 40000
+        index: 3
+      }
+      ports {
+        name: "toy4-c1-ab1-s2i4-p4"
+        port_speed_mbps: 40000
+        index: 4
+      }
+      ports {
+        name: "toy4-c1-ab1-s2i4-p5"
+        port_speed_mbps: 40000
+        index: 5
+      }
+      ports {
+        name: "toy4-c1-ab1-s2i4-p6"
+        port_speed_mbps: 40000
+        index: 6
+      }
+      ports {
+        name: "toy4-c1-ab1-s2i4-p7"
+        port_speed_mbps: 40000
+        index: 7
+      }
+      ports {
+        name: "toy4-c1-ab1-s2i4-p8"
+        port_speed_mbps: 40000
+        index: 8
+      }
+    }
+  }
+  nodes {
+    name: "toy4-c1-ab1-s1i1"
+    stage: 1
+    index: 1
+    ecmp_limit: 4096
+    group_limit: 256
+    ports {
+      name: "toy4-c1-ab1-s1i1-p1"
+      port_speed_mbps: 40000
+      index: 1
+    }
+    ports {
+      name: "toy4-c1-ab1-s1i1-p2"
+      port_speed_mbps: 40000
+      index: 2
+    }
+    ports {
+      name: "toy4-c1-ab1-s1i1-p3"
+      port_speed_mbps: 40000
+      index: 3
+    }
+    ports {
+      name: "toy4-c1-ab1-s1i1-p4"
+      port_speed_mbps: 40000
+      index: 4
+    }
+    ports {
+      name: "toy4-c1-ab1-s1i1-p5"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 5
+    }
+    ports {
+      name: "toy4-c1-ab1-s1i1-p6"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 6
+    }
+    ports {
+      name: "toy4-c1-ab1-s1i1-p7"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 7
+    }
+    ports {
+      name: "toy4-c1-ab1-s1i1-p8"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 8
+    }
+    ports {
+      name: "toy4-c1-ab1-s1i1-p9"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 9
+    }
+    ports {
+      name: "toy4-c1-ab1-s1i1-p10"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 10
+    }
+    ports {
+      name: "toy4-c1-ab1-s1i1-p11"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 11
+    }
+    ports {
+      name: "toy4-c1-ab1-s1i1-p12"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 12
+    }
+    ports {
+      name: "toy4-c1-ab1-s1i1-p13"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 13
+    }
+    ports {
+      name: "toy4-c1-ab1-s1i1-p14"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 14
+    }
+    ports {
+      name: "toy4-c1-ab1-s1i1-p15"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 15
+    }
+    ports {
+      name: "toy4-c1-ab1-s1i1-p16"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 16
+    }
+  }
+  nodes {
+    name: "toy4-c1-ab1-s1i2"
+    stage: 1
+    index: 2
+    ecmp_limit: 4096
+    group_limit: 256
+    ports {
+      name: "toy4-c1-ab1-s1i2-p1"
+      port_speed_mbps: 40000
+      index: 1
+    }
+    ports {
+      name: "toy4-c1-ab1-s1i2-p2"
+      port_speed_mbps: 40000
+      index: 2
+    }
+    ports {
+      name: "toy4-c1-ab1-s1i2-p3"
+      port_speed_mbps: 40000
+      index: 3
+    }
+    ports {
+      name: "toy4-c1-ab1-s1i2-p4"
+      port_speed_mbps: 40000
+      index: 4
+    }
+    ports {
+      name: "toy4-c1-ab1-s1i2-p5"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 5
+    }
+    ports {
+      name: "toy4-c1-ab1-s1i2-p6"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 6
+    }
+    ports {
+      name: "toy4-c1-ab1-s1i2-p7"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 7
+    }
+    ports {
+      name: "toy4-c1-ab1-s1i2-p8"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 8
+    }
+    ports {
+      name: "toy4-c1-ab1-s1i2-p9"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 9
+    }
+    ports {
+      name: "toy4-c1-ab1-s1i2-p10"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 10
+    }
+    ports {
+      name: "toy4-c1-ab1-s1i2-p11"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 11
+    }
+    ports {
+      name: "toy4-c1-ab1-s1i2-p12"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 12
+    }
+    ports {
+      name: "toy4-c1-ab1-s1i2-p13"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 13
+    }
+    ports {
+      name: "toy4-c1-ab1-s1i2-p14"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 14
+    }
+    ports {
+      name: "toy4-c1-ab1-s1i2-p15"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 15
+    }
+    ports {
+      name: "toy4-c1-ab1-s1i2-p16"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 16
+    }
+  }
+  nodes {
+    name: "toy4-c1-ab1-s1i3"
+    stage: 1
+    index: 3
+    ecmp_limit: 4096
+    group_limit: 256
+    ports {
+      name: "toy4-c1-ab1-s1i3-p1"
+      port_speed_mbps: 40000
+      index: 1
+    }
+    ports {
+      name: "toy4-c1-ab1-s1i3-p2"
+      port_speed_mbps: 40000
+      index: 2
+    }
+    ports {
+      name: "toy4-c1-ab1-s1i3-p3"
+      port_speed_mbps: 40000
+      index: 3
+    }
+    ports {
+      name: "toy4-c1-ab1-s1i3-p4"
+      port_speed_mbps: 40000
+      index: 4
+    }
+    ports {
+      name: "toy4-c1-ab1-s1i3-p5"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 5
+    }
+    ports {
+      name: "toy4-c1-ab1-s1i3-p6"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 6
+    }
+    ports {
+      name: "toy4-c1-ab1-s1i3-p7"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 7
+    }
+    ports {
+      name: "toy4-c1-ab1-s1i3-p8"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 8
+    }
+    ports {
+      name: "toy4-c1-ab1-s1i3-p9"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 9
+    }
+    ports {
+      name: "toy4-c1-ab1-s1i3-p10"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 10
+    }
+    ports {
+      name: "toy4-c1-ab1-s1i3-p11"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 11
+    }
+    ports {
+      name: "toy4-c1-ab1-s1i3-p12"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 12
+    }
+    ports {
+      name: "toy4-c1-ab1-s1i3-p13"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 13
+    }
+    ports {
+      name: "toy4-c1-ab1-s1i3-p14"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 14
+    }
+    ports {
+      name: "toy4-c1-ab1-s1i3-p15"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 15
+    }
+    ports {
+      name: "toy4-c1-ab1-s1i3-p16"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 16
+    }
+  }
+  nodes {
+    name: "toy4-c1-ab1-s1i4"
+    stage: 1
+    index: 4
+    ecmp_limit: 4096
+    group_limit: 256
+    ports {
+      name: "toy4-c1-ab1-s1i4-p1"
+      port_speed_mbps: 40000
+      index: 1
+    }
+    ports {
+      name: "toy4-c1-ab1-s1i4-p2"
+      port_speed_mbps: 40000
+      index: 2
+    }
+    ports {
+      name: "toy4-c1-ab1-s1i4-p3"
+      port_speed_mbps: 40000
+      index: 3
+    }
+    ports {
+      name: "toy4-c1-ab1-s1i4-p4"
+      port_speed_mbps: 40000
+      index: 4
+    }
+    ports {
+      name: "toy4-c1-ab1-s1i4-p5"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 5
+    }
+    ports {
+      name: "toy4-c1-ab1-s1i4-p6"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 6
+    }
+    ports {
+      name: "toy4-c1-ab1-s1i4-p7"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 7
+    }
+    ports {
+      name: "toy4-c1-ab1-s1i4-p8"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 8
+    }
+    ports {
+      name: "toy4-c1-ab1-s1i4-p9"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 9
+    }
+    ports {
+      name: "toy4-c1-ab1-s1i4-p10"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 10
+    }
+    ports {
+      name: "toy4-c1-ab1-s1i4-p11"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 11
+    }
+    ports {
+      name: "toy4-c1-ab1-s1i4-p12"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 12
+    }
+    ports {
+      name: "toy4-c1-ab1-s1i4-p13"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 13
+    }
+    ports {
+      name: "toy4-c1-ab1-s1i4-p14"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 14
+    }
+    ports {
+      name: "toy4-c1-ab1-s1i4-p15"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 15
+    }
+    ports {
+      name: "toy4-c1-ab1-s1i4-p16"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 16
+    }
+  }
+}
+clusters {
+  name: "toy4-c2"
+  aggr_blocks {
+    name: "toy4-c2-ab1"
+    nodes {
+      name: "toy4-c2-ab1-s3i1"
+      stage: 3
+      index: 1
+      ecmp_limit: 4096
+      group_limit: 256
+      ports {
+        name: "toy4-c2-ab1-s3i1-p1"
+        port_speed_mbps: 40000
+        dcn_facing: true
+        index: 1
+      }
+      ports {
+        name: "toy4-c2-ab1-s3i1-p2"
+        port_speed_mbps: 40000
+        index: 2
+      }
+      ports {
+        name: "toy4-c2-ab1-s3i1-p3"
+        port_speed_mbps: 40000
+        dcn_facing: true
+        index: 3
+      }
+      ports {
+        name: "toy4-c2-ab1-s3i1-p4"
+        port_speed_mbps: 40000
+        index: 4
+      }
+      ports {
+        name: "toy4-c2-ab1-s3i1-p5"
+        port_speed_mbps: 40000
+        dcn_facing: true
+        index: 5
+      }
+      ports {
+        name: "toy4-c2-ab1-s3i1-p6"
+        port_speed_mbps: 40000
+        index: 6
+      }
+      ports {
+        name: "toy4-c2-ab1-s3i1-p7"
+        port_speed_mbps: 40000
+        dcn_facing: true
+        index: 7
+      }
+      ports {
+        name: "toy4-c2-ab1-s3i1-p8"
+        port_speed_mbps: 40000
+        index: 8
+      }
+    }
+    nodes {
+      name: "toy4-c2-ab1-s3i2"
+      stage: 3
+      index: 2
+      ecmp_limit: 4096
+      group_limit: 256
+      ports {
+        name: "toy4-c2-ab1-s3i2-p1"
+        port_speed_mbps: 40000
+        dcn_facing: true
+        index: 1
+      }
+      ports {
+        name: "toy4-c2-ab1-s3i2-p2"
+        port_speed_mbps: 40000
+        index: 2
+      }
+      ports {
+        name: "toy4-c2-ab1-s3i2-p3"
+        port_speed_mbps: 40000
+        dcn_facing: true
+        index: 3
+      }
+      ports {
+        name: "toy4-c2-ab1-s3i2-p4"
+        port_speed_mbps: 40000
+        index: 4
+      }
+      ports {
+        name: "toy4-c2-ab1-s3i2-p5"
+        port_speed_mbps: 40000
+        dcn_facing: true
+        index: 5
+      }
+      ports {
+        name: "toy4-c2-ab1-s3i2-p6"
+        port_speed_mbps: 40000
+        index: 6
+      }
+      ports {
+        name: "toy4-c2-ab1-s3i2-p7"
+        port_speed_mbps: 40000
+        dcn_facing: true
+        index: 7
+      }
+      ports {
+        name: "toy4-c2-ab1-s3i2-p8"
+        port_speed_mbps: 40000
+        index: 8
+      }
+    }
+    nodes {
+      name: "toy4-c2-ab1-s3i3"
+      stage: 3
+      index: 3
+      ecmp_limit: 4096
+      group_limit: 256
+      ports {
+        name: "toy4-c2-ab1-s3i3-p1"
+        port_speed_mbps: 40000
+        dcn_facing: true
+        index: 1
+      }
+      ports {
+        name: "toy4-c2-ab1-s3i3-p2"
+        port_speed_mbps: 40000
+        index: 2
+      }
+      ports {
+        name: "toy4-c2-ab1-s3i3-p3"
+        port_speed_mbps: 40000
+        dcn_facing: true
+        index: 3
+      }
+      ports {
+        name: "toy4-c2-ab1-s3i3-p4"
+        port_speed_mbps: 40000
+        index: 4
+      }
+      ports {
+        name: "toy4-c2-ab1-s3i3-p5"
+        port_speed_mbps: 40000
+        dcn_facing: true
+        index: 5
+      }
+      ports {
+        name: "toy4-c2-ab1-s3i3-p6"
+        port_speed_mbps: 40000
+        index: 6
+      }
+      ports {
+        name: "toy4-c2-ab1-s3i3-p7"
+        port_speed_mbps: 40000
+        dcn_facing: true
+        index: 7
+      }
+      ports {
+        name: "toy4-c2-ab1-s3i3-p8"
+        port_speed_mbps: 40000
+        index: 8
+      }
+    }
+    nodes {
+      name: "toy4-c2-ab1-s3i4"
+      stage: 3
+      index: 4
+      ecmp_limit: 4096
+      group_limit: 256
+      ports {
+        name: "toy4-c2-ab1-s3i4-p1"
+        port_speed_mbps: 40000
+        dcn_facing: true
+        index: 1
+      }
+      ports {
+        name: "toy4-c2-ab1-s3i4-p2"
+        port_speed_mbps: 40000
+        index: 2
+      }
+      ports {
+        name: "toy4-c2-ab1-s3i4-p3"
+        port_speed_mbps: 40000
+        dcn_facing: true
+        index: 3
+      }
+      ports {
+        name: "toy4-c2-ab1-s3i4-p4"
+        port_speed_mbps: 40000
+        index: 4
+      }
+      ports {
+        name: "toy4-c2-ab1-s3i4-p5"
+        port_speed_mbps: 40000
+        dcn_facing: true
+        index: 5
+      }
+      ports {
+        name: "toy4-c2-ab1-s3i4-p6"
+        port_speed_mbps: 40000
+        index: 6
+      }
+      ports {
+        name: "toy4-c2-ab1-s3i4-p7"
+        port_speed_mbps: 40000
+        dcn_facing: true
+        index: 7
+      }
+      ports {
+        name: "toy4-c2-ab1-s3i4-p8"
+        port_speed_mbps: 40000
+        index: 8
+      }
+    }
+    nodes {
+      name: "toy4-c2-ab1-s2i1"
+      stage: 2
+      index: 1
+      ecmp_limit: 4096
+      group_limit: 256
+      ports {
+        name: "toy4-c2-ab1-s2i1-p1"
+        port_speed_mbps: 40000
+        index: 1
+      }
+      ports {
+        name: "toy4-c2-ab1-s2i1-p2"
+        port_speed_mbps: 40000
+        index: 2
+      }
+      ports {
+        name: "toy4-c2-ab1-s2i1-p3"
+        port_speed_mbps: 40000
+        index: 3
+      }
+      ports {
+        name: "toy4-c2-ab1-s2i1-p4"
+        port_speed_mbps: 40000
+        index: 4
+      }
+      ports {
+        name: "toy4-c2-ab1-s2i1-p5"
+        port_speed_mbps: 40000
+        index: 5
+      }
+      ports {
+        name: "toy4-c2-ab1-s2i1-p6"
+        port_speed_mbps: 40000
+        index: 6
+      }
+      ports {
+        name: "toy4-c2-ab1-s2i1-p7"
+        port_speed_mbps: 40000
+        index: 7
+      }
+      ports {
+        name: "toy4-c2-ab1-s2i1-p8"
+        port_speed_mbps: 40000
+        index: 8
+      }
+    }
+    nodes {
+      name: "toy4-c2-ab1-s2i2"
+      stage: 2
+      index: 2
+      ecmp_limit: 4096
+      group_limit: 256
+      ports {
+        name: "toy4-c2-ab1-s2i2-p1"
+        port_speed_mbps: 40000
+        index: 1
+      }
+      ports {
+        name: "toy4-c2-ab1-s2i2-p2"
+        port_speed_mbps: 40000
+        index: 2
+      }
+      ports {
+        name: "toy4-c2-ab1-s2i2-p3"
+        port_speed_mbps: 40000
+        index: 3
+      }
+      ports {
+        name: "toy4-c2-ab1-s2i2-p4"
+        port_speed_mbps: 40000
+        index: 4
+      }
+      ports {
+        name: "toy4-c2-ab1-s2i2-p5"
+        port_speed_mbps: 40000
+        index: 5
+      }
+      ports {
+        name: "toy4-c2-ab1-s2i2-p6"
+        port_speed_mbps: 40000
+        index: 6
+      }
+      ports {
+        name: "toy4-c2-ab1-s2i2-p7"
+        port_speed_mbps: 40000
+        index: 7
+      }
+      ports {
+        name: "toy4-c2-ab1-s2i2-p8"
+        port_speed_mbps: 40000
+        index: 8
+      }
+    }
+    nodes {
+      name: "toy4-c2-ab1-s2i3"
+      stage: 2
+      index: 3
+      ecmp_limit: 4096
+      group_limit: 256
+      ports {
+        name: "toy4-c2-ab1-s2i3-p1"
+        port_speed_mbps: 40000
+        index: 1
+      }
+      ports {
+        name: "toy4-c2-ab1-s2i3-p2"
+        port_speed_mbps: 40000
+        index: 2
+      }
+      ports {
+        name: "toy4-c2-ab1-s2i3-p3"
+        port_speed_mbps: 40000
+        index: 3
+      }
+      ports {
+        name: "toy4-c2-ab1-s2i3-p4"
+        port_speed_mbps: 40000
+        index: 4
+      }
+      ports {
+        name: "toy4-c2-ab1-s2i3-p5"
+        port_speed_mbps: 40000
+        index: 5
+      }
+      ports {
+        name: "toy4-c2-ab1-s2i3-p6"
+        port_speed_mbps: 40000
+        index: 6
+      }
+      ports {
+        name: "toy4-c2-ab1-s2i3-p7"
+        port_speed_mbps: 40000
+        index: 7
+      }
+      ports {
+        name: "toy4-c2-ab1-s2i3-p8"
+        port_speed_mbps: 40000
+        index: 8
+      }
+    }
+    nodes {
+      name: "toy4-c2-ab1-s2i4"
+      stage: 2
+      index: 4
+      ecmp_limit: 4096
+      group_limit: 256
+      ports {
+        name: "toy4-c2-ab1-s2i4-p1"
+        port_speed_mbps: 40000
+        index: 1
+      }
+      ports {
+        name: "toy4-c2-ab1-s2i4-p2"
+        port_speed_mbps: 40000
+        index: 2
+      }
+      ports {
+        name: "toy4-c2-ab1-s2i4-p3"
+        port_speed_mbps: 40000
+        index: 3
+      }
+      ports {
+        name: "toy4-c2-ab1-s2i4-p4"
+        port_speed_mbps: 40000
+        index: 4
+      }
+      ports {
+        name: "toy4-c2-ab1-s2i4-p5"
+        port_speed_mbps: 40000
+        index: 5
+      }
+      ports {
+        name: "toy4-c2-ab1-s2i4-p6"
+        port_speed_mbps: 40000
+        index: 6
+      }
+      ports {
+        name: "toy4-c2-ab1-s2i4-p7"
+        port_speed_mbps: 40000
+        index: 7
+      }
+      ports {
+        name: "toy4-c2-ab1-s2i4-p8"
+        port_speed_mbps: 40000
+        index: 8
+      }
+    }
+  }
+  nodes {
+    name: "toy4-c2-ab1-s1i1"
+    stage: 1
+    index: 1
+    ecmp_limit: 4096
+    group_limit: 256
+    ports {
+      name: "toy4-c2-ab1-s1i1-p1"
+      port_speed_mbps: 40000
+      index: 1
+    }
+    ports {
+      name: "toy4-c2-ab1-s1i1-p2"
+      port_speed_mbps: 40000
+      index: 2
+    }
+    ports {
+      name: "toy4-c2-ab1-s1i1-p3"
+      port_speed_mbps: 40000
+      index: 3
+    }
+    ports {
+      name: "toy4-c2-ab1-s1i1-p4"
+      port_speed_mbps: 40000
+      index: 4
+    }
+    ports {
+      name: "toy4-c2-ab1-s1i1-p5"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 5
+    }
+    ports {
+      name: "toy4-c2-ab1-s1i1-p6"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 6
+    }
+    ports {
+      name: "toy4-c2-ab1-s1i1-p7"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 7
+    }
+    ports {
+      name: "toy4-c2-ab1-s1i1-p8"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 8
+    }
+    ports {
+      name: "toy4-c2-ab1-s1i1-p9"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 9
+    }
+    ports {
+      name: "toy4-c2-ab1-s1i1-p10"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 10
+    }
+    ports {
+      name: "toy4-c2-ab1-s1i1-p11"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 11
+    }
+    ports {
+      name: "toy4-c2-ab1-s1i1-p12"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 12
+    }
+    ports {
+      name: "toy4-c2-ab1-s1i1-p13"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 13
+    }
+    ports {
+      name: "toy4-c2-ab1-s1i1-p14"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 14
+    }
+    ports {
+      name: "toy4-c2-ab1-s1i1-p15"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 15
+    }
+    ports {
+      name: "toy4-c2-ab1-s1i1-p16"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 16
+    }
+  }
+  nodes {
+    name: "toy4-c2-ab1-s1i2"
+    stage: 1
+    index: 2
+    ecmp_limit: 4096
+    group_limit: 256
+    ports {
+      name: "toy4-c2-ab1-s1i2-p1"
+      port_speed_mbps: 40000
+      index: 1
+    }
+    ports {
+      name: "toy4-c2-ab1-s1i2-p2"
+      port_speed_mbps: 40000
+      index: 2
+    }
+    ports {
+      name: "toy4-c2-ab1-s1i2-p3"
+      port_speed_mbps: 40000
+      index: 3
+    }
+    ports {
+      name: "toy4-c2-ab1-s1i2-p4"
+      port_speed_mbps: 40000
+      index: 4
+    }
+    ports {
+      name: "toy4-c2-ab1-s1i2-p5"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 5
+    }
+    ports {
+      name: "toy4-c2-ab1-s1i2-p6"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 6
+    }
+    ports {
+      name: "toy4-c2-ab1-s1i2-p7"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 7
+    }
+    ports {
+      name: "toy4-c2-ab1-s1i2-p8"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 8
+    }
+    ports {
+      name: "toy4-c2-ab1-s1i2-p9"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 9
+    }
+    ports {
+      name: "toy4-c2-ab1-s1i2-p10"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 10
+    }
+    ports {
+      name: "toy4-c2-ab1-s1i2-p11"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 11
+    }
+    ports {
+      name: "toy4-c2-ab1-s1i2-p12"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 12
+    }
+    ports {
+      name: "toy4-c2-ab1-s1i2-p13"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 13
+    }
+    ports {
+      name: "toy4-c2-ab1-s1i2-p14"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 14
+    }
+    ports {
+      name: "toy4-c2-ab1-s1i2-p15"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 15
+    }
+    ports {
+      name: "toy4-c2-ab1-s1i2-p16"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 16
+    }
+  }
+  nodes {
+    name: "toy4-c2-ab1-s1i3"
+    stage: 1
+    index: 3
+    ecmp_limit: 4096
+    group_limit: 256
+    ports {
+      name: "toy4-c2-ab1-s1i3-p1"
+      port_speed_mbps: 40000
+      index: 1
+    }
+    ports {
+      name: "toy4-c2-ab1-s1i3-p2"
+      port_speed_mbps: 40000
+      index: 2
+    }
+    ports {
+      name: "toy4-c2-ab1-s1i3-p3"
+      port_speed_mbps: 40000
+      index: 3
+    }
+    ports {
+      name: "toy4-c2-ab1-s1i3-p4"
+      port_speed_mbps: 40000
+      index: 4
+    }
+    ports {
+      name: "toy4-c2-ab1-s1i3-p5"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 5
+    }
+    ports {
+      name: "toy4-c2-ab1-s1i3-p6"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 6
+    }
+    ports {
+      name: "toy4-c2-ab1-s1i3-p7"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 7
+    }
+    ports {
+      name: "toy4-c2-ab1-s1i3-p8"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 8
+    }
+    ports {
+      name: "toy4-c2-ab1-s1i3-p9"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 9
+    }
+    ports {
+      name: "toy4-c2-ab1-s1i3-p10"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 10
+    }
+    ports {
+      name: "toy4-c2-ab1-s1i3-p11"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 11
+    }
+    ports {
+      name: "toy4-c2-ab1-s1i3-p12"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 12
+    }
+    ports {
+      name: "toy4-c2-ab1-s1i3-p13"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 13
+    }
+    ports {
+      name: "toy4-c2-ab1-s1i3-p14"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 14
+    }
+    ports {
+      name: "toy4-c2-ab1-s1i3-p15"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 15
+    }
+    ports {
+      name: "toy4-c2-ab1-s1i3-p16"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 16
+    }
+  }
+  nodes {
+    name: "toy4-c2-ab1-s1i4"
+    stage: 1
+    index: 4
+    ecmp_limit: 4096
+    group_limit: 256
+    ports {
+      name: "toy4-c2-ab1-s1i4-p1"
+      port_speed_mbps: 40000
+      index: 1
+    }
+    ports {
+      name: "toy4-c2-ab1-s1i4-p2"
+      port_speed_mbps: 40000
+      index: 2
+    }
+    ports {
+      name: "toy4-c2-ab1-s1i4-p3"
+      port_speed_mbps: 40000
+      index: 3
+    }
+    ports {
+      name: "toy4-c2-ab1-s1i4-p4"
+      port_speed_mbps: 40000
+      index: 4
+    }
+    ports {
+      name: "toy4-c2-ab1-s1i4-p5"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 5
+    }
+    ports {
+      name: "toy4-c2-ab1-s1i4-p6"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 6
+    }
+    ports {
+      name: "toy4-c2-ab1-s1i4-p7"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 7
+    }
+    ports {
+      name: "toy4-c2-ab1-s1i4-p8"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 8
+    }
+    ports {
+      name: "toy4-c2-ab1-s1i4-p9"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 9
+    }
+    ports {
+      name: "toy4-c2-ab1-s1i4-p10"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 10
+    }
+    ports {
+      name: "toy4-c2-ab1-s1i4-p11"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 11
+    }
+    ports {
+      name: "toy4-c2-ab1-s1i4-p12"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 12
+    }
+    ports {
+      name: "toy4-c2-ab1-s1i4-p13"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 13
+    }
+    ports {
+      name: "toy4-c2-ab1-s1i4-p14"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 14
+    }
+    ports {
+      name: "toy4-c2-ab1-s1i4-p15"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 15
+    }
+    ports {
+      name: "toy4-c2-ab1-s1i4-p16"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 16
+    }
+  }
+}
+clusters {
+  name: "toy4-c3"
+  aggr_blocks {
+    name: "toy4-c3-ab1"
+    nodes {
+      name: "toy4-c3-ab1-s3i1"
+      stage: 3
+      index: 1
+      ecmp_limit: 4096
+      group_limit: 256
+      ports {
+        name: "toy4-c3-ab1-s3i1-p1"
+        port_speed_mbps: 40000
+        dcn_facing: true
+        index: 1
+      }
+      ports {
+        name: "toy4-c3-ab1-s3i1-p2"
+        port_speed_mbps: 40000
+        index: 2
+      }
+      ports {
+        name: "toy4-c3-ab1-s3i1-p3"
+        port_speed_mbps: 40000
+        dcn_facing: true
+        index: 3
+      }
+      ports {
+        name: "toy4-c3-ab1-s3i1-p4"
+        port_speed_mbps: 40000
+        index: 4
+      }
+      ports {
+        name: "toy4-c3-ab1-s3i1-p5"
+        port_speed_mbps: 40000
+        dcn_facing: true
+        index: 5
+      }
+      ports {
+        name: "toy4-c3-ab1-s3i1-p6"
+        port_speed_mbps: 40000
+        index: 6
+      }
+      ports {
+        name: "toy4-c3-ab1-s3i1-p7"
+        port_speed_mbps: 40000
+        dcn_facing: true
+        index: 7
+      }
+      ports {
+        name: "toy4-c3-ab1-s3i1-p8"
+        port_speed_mbps: 40000
+        index: 8
+      }
+    }
+    nodes {
+      name: "toy4-c3-ab1-s3i2"
+      stage: 3
+      index: 2
+      ecmp_limit: 4096
+      group_limit: 256
+      ports {
+        name: "toy4-c3-ab1-s3i2-p1"
+        port_speed_mbps: 40000
+        dcn_facing: true
+        index: 1
+      }
+      ports {
+        name: "toy4-c3-ab1-s3i2-p2"
+        port_speed_mbps: 40000
+        index: 2
+      }
+      ports {
+        name: "toy4-c3-ab1-s3i2-p3"
+        port_speed_mbps: 40000
+        dcn_facing: true
+        index: 3
+      }
+      ports {
+        name: "toy4-c3-ab1-s3i2-p4"
+        port_speed_mbps: 40000
+        index: 4
+      }
+      ports {
+        name: "toy4-c3-ab1-s3i2-p5"
+        port_speed_mbps: 40000
+        dcn_facing: true
+        index: 5
+      }
+      ports {
+        name: "toy4-c3-ab1-s3i2-p6"
+        port_speed_mbps: 40000
+        index: 6
+      }
+      ports {
+        name: "toy4-c3-ab1-s3i2-p7"
+        port_speed_mbps: 40000
+        dcn_facing: true
+        index: 7
+      }
+      ports {
+        name: "toy4-c3-ab1-s3i2-p8"
+        port_speed_mbps: 40000
+        index: 8
+      }
+    }
+    nodes {
+      name: "toy4-c3-ab1-s3i3"
+      stage: 3
+      index: 3
+      ecmp_limit: 4096
+      group_limit: 256
+      ports {
+        name: "toy4-c3-ab1-s3i3-p1"
+        port_speed_mbps: 40000
+        dcn_facing: true
+        index: 1
+      }
+      ports {
+        name: "toy4-c3-ab1-s3i3-p2"
+        port_speed_mbps: 40000
+        index: 2
+      }
+      ports {
+        name: "toy4-c3-ab1-s3i3-p3"
+        port_speed_mbps: 40000
+        dcn_facing: true
+        index: 3
+      }
+      ports {
+        name: "toy4-c3-ab1-s3i3-p4"
+        port_speed_mbps: 40000
+        index: 4
+      }
+      ports {
+        name: "toy4-c3-ab1-s3i3-p5"
+        port_speed_mbps: 40000
+        dcn_facing: true
+        index: 5
+      }
+      ports {
+        name: "toy4-c3-ab1-s3i3-p6"
+        port_speed_mbps: 40000
+        index: 6
+      }
+      ports {
+        name: "toy4-c3-ab1-s3i3-p7"
+        port_speed_mbps: 40000
+        dcn_facing: true
+        index: 7
+      }
+      ports {
+        name: "toy4-c3-ab1-s3i3-p8"
+        port_speed_mbps: 40000
+        index: 8
+      }
+    }
+    nodes {
+      name: "toy4-c3-ab1-s3i4"
+      stage: 3
+      index: 4
+      ecmp_limit: 4096
+      group_limit: 256
+      ports {
+        name: "toy4-c3-ab1-s3i4-p1"
+        port_speed_mbps: 40000
+        dcn_facing: true
+        index: 1
+      }
+      ports {
+        name: "toy4-c3-ab1-s3i4-p2"
+        port_speed_mbps: 40000
+        index: 2
+      }
+      ports {
+        name: "toy4-c3-ab1-s3i4-p3"
+        port_speed_mbps: 40000
+        dcn_facing: true
+        index: 3
+      }
+      ports {
+        name: "toy4-c3-ab1-s3i4-p4"
+        port_speed_mbps: 40000
+        index: 4
+      }
+      ports {
+        name: "toy4-c3-ab1-s3i4-p5"
+        port_speed_mbps: 40000
+        dcn_facing: true
+        index: 5
+      }
+      ports {
+        name: "toy4-c3-ab1-s3i4-p6"
+        port_speed_mbps: 40000
+        index: 6
+      }
+      ports {
+        name: "toy4-c3-ab1-s3i4-p7"
+        port_speed_mbps: 40000
+        dcn_facing: true
+        index: 7
+      }
+      ports {
+        name: "toy4-c3-ab1-s3i4-p8"
+        port_speed_mbps: 40000
+        index: 8
+      }
+    }
+    nodes {
+      name: "toy4-c3-ab1-s2i1"
+      stage: 2
+      index: 1
+      ecmp_limit: 4096
+      group_limit: 256
+      ports {
+        name: "toy4-c3-ab1-s2i1-p1"
+        port_speed_mbps: 40000
+        index: 1
+      }
+      ports {
+        name: "toy4-c3-ab1-s2i1-p2"
+        port_speed_mbps: 40000
+        index: 2
+      }
+      ports {
+        name: "toy4-c3-ab1-s2i1-p3"
+        port_speed_mbps: 40000
+        index: 3
+      }
+      ports {
+        name: "toy4-c3-ab1-s2i1-p4"
+        port_speed_mbps: 40000
+        index: 4
+      }
+      ports {
+        name: "toy4-c3-ab1-s2i1-p5"
+        port_speed_mbps: 40000
+        index: 5
+      }
+      ports {
+        name: "toy4-c3-ab1-s2i1-p6"
+        port_speed_mbps: 40000
+        index: 6
+      }
+      ports {
+        name: "toy4-c3-ab1-s2i1-p7"
+        port_speed_mbps: 40000
+        index: 7
+      }
+      ports {
+        name: "toy4-c3-ab1-s2i1-p8"
+        port_speed_mbps: 40000
+        index: 8
+      }
+    }
+    nodes {
+      name: "toy4-c3-ab1-s2i2"
+      stage: 2
+      index: 2
+      ecmp_limit: 4096
+      group_limit: 256
+      ports {
+        name: "toy4-c3-ab1-s2i2-p1"
+        port_speed_mbps: 40000
+        index: 1
+      }
+      ports {
+        name: "toy4-c3-ab1-s2i2-p2"
+        port_speed_mbps: 40000
+        index: 2
+      }
+      ports {
+        name: "toy4-c3-ab1-s2i2-p3"
+        port_speed_mbps: 40000
+        index: 3
+      }
+      ports {
+        name: "toy4-c3-ab1-s2i2-p4"
+        port_speed_mbps: 40000
+        index: 4
+      }
+      ports {
+        name: "toy4-c3-ab1-s2i2-p5"
+        port_speed_mbps: 40000
+        index: 5
+      }
+      ports {
+        name: "toy4-c3-ab1-s2i2-p6"
+        port_speed_mbps: 40000
+        index: 6
+      }
+      ports {
+        name: "toy4-c3-ab1-s2i2-p7"
+        port_speed_mbps: 40000
+        index: 7
+      }
+      ports {
+        name: "toy4-c3-ab1-s2i2-p8"
+        port_speed_mbps: 40000
+        index: 8
+      }
+    }
+    nodes {
+      name: "toy4-c3-ab1-s2i3"
+      stage: 2
+      index: 3
+      ecmp_limit: 4096
+      group_limit: 256
+      ports {
+        name: "toy4-c3-ab1-s2i3-p1"
+        port_speed_mbps: 40000
+        index: 1
+      }
+      ports {
+        name: "toy4-c3-ab1-s2i3-p2"
+        port_speed_mbps: 40000
+        index: 2
+      }
+      ports {
+        name: "toy4-c3-ab1-s2i3-p3"
+        port_speed_mbps: 40000
+        index: 3
+      }
+      ports {
+        name: "toy4-c3-ab1-s2i3-p4"
+        port_speed_mbps: 40000
+        index: 4
+      }
+      ports {
+        name: "toy4-c3-ab1-s2i3-p5"
+        port_speed_mbps: 40000
+        index: 5
+      }
+      ports {
+        name: "toy4-c3-ab1-s2i3-p6"
+        port_speed_mbps: 40000
+        index: 6
+      }
+      ports {
+        name: "toy4-c3-ab1-s2i3-p7"
+        port_speed_mbps: 40000
+        index: 7
+      }
+      ports {
+        name: "toy4-c3-ab1-s2i3-p8"
+        port_speed_mbps: 40000
+        index: 8
+      }
+    }
+    nodes {
+      name: "toy4-c3-ab1-s2i4"
+      stage: 2
+      index: 4
+      ecmp_limit: 4096
+      group_limit: 256
+      ports {
+        name: "toy4-c3-ab1-s2i4-p1"
+        port_speed_mbps: 40000
+        index: 1
+      }
+      ports {
+        name: "toy4-c3-ab1-s2i4-p2"
+        port_speed_mbps: 40000
+        index: 2
+      }
+      ports {
+        name: "toy4-c3-ab1-s2i4-p3"
+        port_speed_mbps: 40000
+        index: 3
+      }
+      ports {
+        name: "toy4-c3-ab1-s2i4-p4"
+        port_speed_mbps: 40000
+        index: 4
+      }
+      ports {
+        name: "toy4-c3-ab1-s2i4-p5"
+        port_speed_mbps: 40000
+        index: 5
+      }
+      ports {
+        name: "toy4-c3-ab1-s2i4-p6"
+        port_speed_mbps: 40000
+        index: 6
+      }
+      ports {
+        name: "toy4-c3-ab1-s2i4-p7"
+        port_speed_mbps: 40000
+        index: 7
+      }
+      ports {
+        name: "toy4-c3-ab1-s2i4-p8"
+        port_speed_mbps: 40000
+        index: 8
+      }
+    }
+  }
+  nodes {
+    name: "toy4-c3-ab1-s1i1"
+    stage: 1
+    index: 1
+    ecmp_limit: 4096
+    group_limit: 256
+    ports {
+      name: "toy4-c3-ab1-s1i1-p1"
+      port_speed_mbps: 40000
+      index: 1
+    }
+    ports {
+      name: "toy4-c3-ab1-s1i1-p2"
+      port_speed_mbps: 40000
+      index: 2
+    }
+    ports {
+      name: "toy4-c3-ab1-s1i1-p3"
+      port_speed_mbps: 40000
+      index: 3
+    }
+    ports {
+      name: "toy4-c3-ab1-s1i1-p4"
+      port_speed_mbps: 40000
+      index: 4
+    }
+    ports {
+      name: "toy4-c3-ab1-s1i1-p5"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 5
+    }
+    ports {
+      name: "toy4-c3-ab1-s1i1-p6"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 6
+    }
+    ports {
+      name: "toy4-c3-ab1-s1i1-p7"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 7
+    }
+    ports {
+      name: "toy4-c3-ab1-s1i1-p8"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 8
+    }
+    ports {
+      name: "toy4-c3-ab1-s1i1-p9"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 9
+    }
+    ports {
+      name: "toy4-c3-ab1-s1i1-p10"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 10
+    }
+    ports {
+      name: "toy4-c3-ab1-s1i1-p11"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 11
+    }
+    ports {
+      name: "toy4-c3-ab1-s1i1-p12"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 12
+    }
+    ports {
+      name: "toy4-c3-ab1-s1i1-p13"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 13
+    }
+    ports {
+      name: "toy4-c3-ab1-s1i1-p14"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 14
+    }
+    ports {
+      name: "toy4-c3-ab1-s1i1-p15"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 15
+    }
+    ports {
+      name: "toy4-c3-ab1-s1i1-p16"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 16
+    }
+  }
+  nodes {
+    name: "toy4-c3-ab1-s1i2"
+    stage: 1
+    index: 2
+    ecmp_limit: 4096
+    group_limit: 256
+    ports {
+      name: "toy4-c3-ab1-s1i2-p1"
+      port_speed_mbps: 40000
+      index: 1
+    }
+    ports {
+      name: "toy4-c3-ab1-s1i2-p2"
+      port_speed_mbps: 40000
+      index: 2
+    }
+    ports {
+      name: "toy4-c3-ab1-s1i2-p3"
+      port_speed_mbps: 40000
+      index: 3
+    }
+    ports {
+      name: "toy4-c3-ab1-s1i2-p4"
+      port_speed_mbps: 40000
+      index: 4
+    }
+    ports {
+      name: "toy4-c3-ab1-s1i2-p5"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 5
+    }
+    ports {
+      name: "toy4-c3-ab1-s1i2-p6"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 6
+    }
+    ports {
+      name: "toy4-c3-ab1-s1i2-p7"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 7
+    }
+    ports {
+      name: "toy4-c3-ab1-s1i2-p8"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 8
+    }
+    ports {
+      name: "toy4-c3-ab1-s1i2-p9"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 9
+    }
+    ports {
+      name: "toy4-c3-ab1-s1i2-p10"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 10
+    }
+    ports {
+      name: "toy4-c3-ab1-s1i2-p11"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 11
+    }
+    ports {
+      name: "toy4-c3-ab1-s1i2-p12"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 12
+    }
+    ports {
+      name: "toy4-c3-ab1-s1i2-p13"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 13
+    }
+    ports {
+      name: "toy4-c3-ab1-s1i2-p14"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 14
+    }
+    ports {
+      name: "toy4-c3-ab1-s1i2-p15"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 15
+    }
+    ports {
+      name: "toy4-c3-ab1-s1i2-p16"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 16
+    }
+  }
+  nodes {
+    name: "toy4-c3-ab1-s1i3"
+    stage: 1
+    index: 3
+    ecmp_limit: 4096
+    group_limit: 256
+    ports {
+      name: "toy4-c3-ab1-s1i3-p1"
+      port_speed_mbps: 40000
+      index: 1
+    }
+    ports {
+      name: "toy4-c3-ab1-s1i3-p2"
+      port_speed_mbps: 40000
+      index: 2
+    }
+    ports {
+      name: "toy4-c3-ab1-s1i3-p3"
+      port_speed_mbps: 40000
+      index: 3
+    }
+    ports {
+      name: "toy4-c3-ab1-s1i3-p4"
+      port_speed_mbps: 40000
+      index: 4
+    }
+    ports {
+      name: "toy4-c3-ab1-s1i3-p5"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 5
+    }
+    ports {
+      name: "toy4-c3-ab1-s1i3-p6"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 6
+    }
+    ports {
+      name: "toy4-c3-ab1-s1i3-p7"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 7
+    }
+    ports {
+      name: "toy4-c3-ab1-s1i3-p8"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 8
+    }
+    ports {
+      name: "toy4-c3-ab1-s1i3-p9"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 9
+    }
+    ports {
+      name: "toy4-c3-ab1-s1i3-p10"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 10
+    }
+    ports {
+      name: "toy4-c3-ab1-s1i3-p11"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 11
+    }
+    ports {
+      name: "toy4-c3-ab1-s1i3-p12"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 12
+    }
+    ports {
+      name: "toy4-c3-ab1-s1i3-p13"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 13
+    }
+    ports {
+      name: "toy4-c3-ab1-s1i3-p14"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 14
+    }
+    ports {
+      name: "toy4-c3-ab1-s1i3-p15"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 15
+    }
+    ports {
+      name: "toy4-c3-ab1-s1i3-p16"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 16
+    }
+  }
+  nodes {
+    name: "toy4-c3-ab1-s1i4"
+    stage: 1
+    index: 4
+    ecmp_limit: 4096
+    group_limit: 256
+    ports {
+      name: "toy4-c3-ab1-s1i4-p1"
+      port_speed_mbps: 40000
+      index: 1
+    }
+    ports {
+      name: "toy4-c3-ab1-s1i4-p2"
+      port_speed_mbps: 40000
+      index: 2
+    }
+    ports {
+      name: "toy4-c3-ab1-s1i4-p3"
+      port_speed_mbps: 40000
+      index: 3
+    }
+    ports {
+      name: "toy4-c3-ab1-s1i4-p4"
+      port_speed_mbps: 40000
+      index: 4
+    }
+    ports {
+      name: "toy4-c3-ab1-s1i4-p5"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 5
+    }
+    ports {
+      name: "toy4-c3-ab1-s1i4-p6"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 6
+    }
+    ports {
+      name: "toy4-c3-ab1-s1i4-p7"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 7
+    }
+    ports {
+      name: "toy4-c3-ab1-s1i4-p8"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 8
+    }
+    ports {
+      name: "toy4-c3-ab1-s1i4-p9"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 9
+    }
+    ports {
+      name: "toy4-c3-ab1-s1i4-p10"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 10
+    }
+    ports {
+      name: "toy4-c3-ab1-s1i4-p11"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 11
+    }
+    ports {
+      name: "toy4-c3-ab1-s1i4-p12"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 12
+    }
+    ports {
+      name: "toy4-c3-ab1-s1i4-p13"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 13
+    }
+    ports {
+      name: "toy4-c3-ab1-s1i4-p14"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 14
+    }
+    ports {
+      name: "toy4-c3-ab1-s1i4-p15"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 15
+    }
+    ports {
+      name: "toy4-c3-ab1-s1i4-p16"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 16
+    }
+  }
+}
+clusters {
+  name: "toy4-c4"
+  aggr_blocks {
+    name: "toy4-c4-ab1"
+    nodes {
+      name: "toy4-c4-ab1-s3i1"
+      stage: 3
+      index: 1
+      ecmp_limit: 4096
+      group_limit: 256
+      ports {
+        name: "toy4-c4-ab1-s3i1-p1"
+        port_speed_mbps: 40000
+        dcn_facing: true
+        index: 1
+      }
+      ports {
+        name: "toy4-c4-ab1-s3i1-p2"
+        port_speed_mbps: 40000
+        index: 2
+      }
+      ports {
+        name: "toy4-c4-ab1-s3i1-p3"
+        port_speed_mbps: 40000
+        dcn_facing: true
+        index: 3
+      }
+      ports {
+        name: "toy4-c4-ab1-s3i1-p4"
+        port_speed_mbps: 40000
+        index: 4
+      }
+      ports {
+        name: "toy4-c4-ab1-s3i1-p5"
+        port_speed_mbps: 40000
+        dcn_facing: true
+        index: 5
+      }
+      ports {
+        name: "toy4-c4-ab1-s3i1-p6"
+        port_speed_mbps: 40000
+        index: 6
+      }
+      ports {
+        name: "toy4-c4-ab1-s3i1-p7"
+        port_speed_mbps: 40000
+        dcn_facing: true
+        index: 7
+      }
+      ports {
+        name: "toy4-c4-ab1-s3i1-p8"
+        port_speed_mbps: 40000
+        index: 8
+      }
+    }
+    nodes {
+      name: "toy4-c4-ab1-s3i2"
+      stage: 3
+      index: 2
+      ecmp_limit: 4096
+      group_limit: 256
+      ports {
+        name: "toy4-c4-ab1-s3i2-p1"
+        port_speed_mbps: 40000
+        dcn_facing: true
+        index: 1
+      }
+      ports {
+        name: "toy4-c4-ab1-s3i2-p2"
+        port_speed_mbps: 40000
+        index: 2
+      }
+      ports {
+        name: "toy4-c4-ab1-s3i2-p3"
+        port_speed_mbps: 40000
+        dcn_facing: true
+        index: 3
+      }
+      ports {
+        name: "toy4-c4-ab1-s3i2-p4"
+        port_speed_mbps: 40000
+        index: 4
+      }
+      ports {
+        name: "toy4-c4-ab1-s3i2-p5"
+        port_speed_mbps: 40000
+        dcn_facing: true
+        index: 5
+      }
+      ports {
+        name: "toy4-c4-ab1-s3i2-p6"
+        port_speed_mbps: 40000
+        index: 6
+      }
+      ports {
+        name: "toy4-c4-ab1-s3i2-p7"
+        port_speed_mbps: 40000
+        dcn_facing: true
+        index: 7
+      }
+      ports {
+        name: "toy4-c4-ab1-s3i2-p8"
+        port_speed_mbps: 40000
+        index: 8
+      }
+    }
+    nodes {
+      name: "toy4-c4-ab1-s3i3"
+      stage: 3
+      index: 3
+      ecmp_limit: 4096
+      group_limit: 256
+      ports {
+        name: "toy4-c4-ab1-s3i3-p1"
+        port_speed_mbps: 40000
+        dcn_facing: true
+        index: 1
+      }
+      ports {
+        name: "toy4-c4-ab1-s3i3-p2"
+        port_speed_mbps: 40000
+        index: 2
+      }
+      ports {
+        name: "toy4-c4-ab1-s3i3-p3"
+        port_speed_mbps: 40000
+        dcn_facing: true
+        index: 3
+      }
+      ports {
+        name: "toy4-c4-ab1-s3i3-p4"
+        port_speed_mbps: 40000
+        index: 4
+      }
+      ports {
+        name: "toy4-c4-ab1-s3i3-p5"
+        port_speed_mbps: 40000
+        dcn_facing: true
+        index: 5
+      }
+      ports {
+        name: "toy4-c4-ab1-s3i3-p6"
+        port_speed_mbps: 40000
+        index: 6
+      }
+      ports {
+        name: "toy4-c4-ab1-s3i3-p7"
+        port_speed_mbps: 40000
+        dcn_facing: true
+        index: 7
+      }
+      ports {
+        name: "toy4-c4-ab1-s3i3-p8"
+        port_speed_mbps: 40000
+        index: 8
+      }
+    }
+    nodes {
+      name: "toy4-c4-ab1-s3i4"
+      stage: 3
+      index: 4
+      ecmp_limit: 4096
+      group_limit: 256
+      ports {
+        name: "toy4-c4-ab1-s3i4-p1"
+        port_speed_mbps: 40000
+        dcn_facing: true
+        index: 1
+      }
+      ports {
+        name: "toy4-c4-ab1-s3i4-p2"
+        port_speed_mbps: 40000
+        index: 2
+      }
+      ports {
+        name: "toy4-c4-ab1-s3i4-p3"
+        port_speed_mbps: 40000
+        dcn_facing: true
+        index: 3
+      }
+      ports {
+        name: "toy4-c4-ab1-s3i4-p4"
+        port_speed_mbps: 40000
+        index: 4
+      }
+      ports {
+        name: "toy4-c4-ab1-s3i4-p5"
+        port_speed_mbps: 40000
+        dcn_facing: true
+        index: 5
+      }
+      ports {
+        name: "toy4-c4-ab1-s3i4-p6"
+        port_speed_mbps: 40000
+        index: 6
+      }
+      ports {
+        name: "toy4-c4-ab1-s3i4-p7"
+        port_speed_mbps: 40000
+        dcn_facing: true
+        index: 7
+      }
+      ports {
+        name: "toy4-c4-ab1-s3i4-p8"
+        port_speed_mbps: 40000
+        index: 8
+      }
+    }
+    nodes {
+      name: "toy4-c4-ab1-s2i1"
+      stage: 2
+      index: 1
+      ecmp_limit: 4096
+      group_limit: 256
+      ports {
+        name: "toy4-c4-ab1-s2i1-p1"
+        port_speed_mbps: 40000
+        index: 1
+      }
+      ports {
+        name: "toy4-c4-ab1-s2i1-p2"
+        port_speed_mbps: 40000
+        index: 2
+      }
+      ports {
+        name: "toy4-c4-ab1-s2i1-p3"
+        port_speed_mbps: 40000
+        index: 3
+      }
+      ports {
+        name: "toy4-c4-ab1-s2i1-p4"
+        port_speed_mbps: 40000
+        index: 4
+      }
+      ports {
+        name: "toy4-c4-ab1-s2i1-p5"
+        port_speed_mbps: 40000
+        index: 5
+      }
+      ports {
+        name: "toy4-c4-ab1-s2i1-p6"
+        port_speed_mbps: 40000
+        index: 6
+      }
+      ports {
+        name: "toy4-c4-ab1-s2i1-p7"
+        port_speed_mbps: 40000
+        index: 7
+      }
+      ports {
+        name: "toy4-c4-ab1-s2i1-p8"
+        port_speed_mbps: 40000
+        index: 8
+      }
+    }
+    nodes {
+      name: "toy4-c4-ab1-s2i2"
+      stage: 2
+      index: 2
+      ecmp_limit: 4096
+      group_limit: 256
+      ports {
+        name: "toy4-c4-ab1-s2i2-p1"
+        port_speed_mbps: 40000
+        index: 1
+      }
+      ports {
+        name: "toy4-c4-ab1-s2i2-p2"
+        port_speed_mbps: 40000
+        index: 2
+      }
+      ports {
+        name: "toy4-c4-ab1-s2i2-p3"
+        port_speed_mbps: 40000
+        index: 3
+      }
+      ports {
+        name: "toy4-c4-ab1-s2i2-p4"
+        port_speed_mbps: 40000
+        index: 4
+      }
+      ports {
+        name: "toy4-c4-ab1-s2i2-p5"
+        port_speed_mbps: 40000
+        index: 5
+      }
+      ports {
+        name: "toy4-c4-ab1-s2i2-p6"
+        port_speed_mbps: 40000
+        index: 6
+      }
+      ports {
+        name: "toy4-c4-ab1-s2i2-p7"
+        port_speed_mbps: 40000
+        index: 7
+      }
+      ports {
+        name: "toy4-c4-ab1-s2i2-p8"
+        port_speed_mbps: 40000
+        index: 8
+      }
+    }
+    nodes {
+      name: "toy4-c4-ab1-s2i3"
+      stage: 2
+      index: 3
+      ecmp_limit: 4096
+      group_limit: 256
+      ports {
+        name: "toy4-c4-ab1-s2i3-p1"
+        port_speed_mbps: 40000
+        index: 1
+      }
+      ports {
+        name: "toy4-c4-ab1-s2i3-p2"
+        port_speed_mbps: 40000
+        index: 2
+      }
+      ports {
+        name: "toy4-c4-ab1-s2i3-p3"
+        port_speed_mbps: 40000
+        index: 3
+      }
+      ports {
+        name: "toy4-c4-ab1-s2i3-p4"
+        port_speed_mbps: 40000
+        index: 4
+      }
+      ports {
+        name: "toy4-c4-ab1-s2i3-p5"
+        port_speed_mbps: 40000
+        index: 5
+      }
+      ports {
+        name: "toy4-c4-ab1-s2i3-p6"
+        port_speed_mbps: 40000
+        index: 6
+      }
+      ports {
+        name: "toy4-c4-ab1-s2i3-p7"
+        port_speed_mbps: 40000
+        index: 7
+      }
+      ports {
+        name: "toy4-c4-ab1-s2i3-p8"
+        port_speed_mbps: 40000
+        index: 8
+      }
+    }
+    nodes {
+      name: "toy4-c4-ab1-s2i4"
+      stage: 2
+      index: 4
+      ecmp_limit: 4096
+      group_limit: 256
+      ports {
+        name: "toy4-c4-ab1-s2i4-p1"
+        port_speed_mbps: 40000
+        index: 1
+      }
+      ports {
+        name: "toy4-c4-ab1-s2i4-p2"
+        port_speed_mbps: 40000
+        index: 2
+      }
+      ports {
+        name: "toy4-c4-ab1-s2i4-p3"
+        port_speed_mbps: 40000
+        index: 3
+      }
+      ports {
+        name: "toy4-c4-ab1-s2i4-p4"
+        port_speed_mbps: 40000
+        index: 4
+      }
+      ports {
+        name: "toy4-c4-ab1-s2i4-p5"
+        port_speed_mbps: 40000
+        index: 5
+      }
+      ports {
+        name: "toy4-c4-ab1-s2i4-p6"
+        port_speed_mbps: 40000
+        index: 6
+      }
+      ports {
+        name: "toy4-c4-ab1-s2i4-p7"
+        port_speed_mbps: 40000
+        index: 7
+      }
+      ports {
+        name: "toy4-c4-ab1-s2i4-p8"
+        port_speed_mbps: 40000
+        index: 8
+      }
+    }
+  }
+  nodes {
+    name: "toy4-c4-ab1-s1i1"
+    stage: 1
+    index: 1
+    ecmp_limit: 4096
+    group_limit: 256
+    ports {
+      name: "toy4-c4-ab1-s1i1-p1"
+      port_speed_mbps: 40000
+      index: 1
+    }
+    ports {
+      name: "toy4-c4-ab1-s1i1-p2"
+      port_speed_mbps: 40000
+      index: 2
+    }
+    ports {
+      name: "toy4-c4-ab1-s1i1-p3"
+      port_speed_mbps: 40000
+      index: 3
+    }
+    ports {
+      name: "toy4-c4-ab1-s1i1-p4"
+      port_speed_mbps: 40000
+      index: 4
+    }
+    ports {
+      name: "toy4-c4-ab1-s1i1-p5"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 5
+    }
+    ports {
+      name: "toy4-c4-ab1-s1i1-p6"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 6
+    }
+    ports {
+      name: "toy4-c4-ab1-s1i1-p7"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 7
+    }
+    ports {
+      name: "toy4-c4-ab1-s1i1-p8"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 8
+    }
+    ports {
+      name: "toy4-c4-ab1-s1i1-p9"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 9
+    }
+    ports {
+      name: "toy4-c4-ab1-s1i1-p10"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 10
+    }
+    ports {
+      name: "toy4-c4-ab1-s1i1-p11"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 11
+    }
+    ports {
+      name: "toy4-c4-ab1-s1i1-p12"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 12
+    }
+    ports {
+      name: "toy4-c4-ab1-s1i1-p13"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 13
+    }
+    ports {
+      name: "toy4-c4-ab1-s1i1-p14"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 14
+    }
+    ports {
+      name: "toy4-c4-ab1-s1i1-p15"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 15
+    }
+    ports {
+      name: "toy4-c4-ab1-s1i1-p16"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 16
+    }
+  }
+  nodes {
+    name: "toy4-c4-ab1-s1i2"
+    stage: 1
+    index: 2
+    ecmp_limit: 4096
+    group_limit: 256
+    ports {
+      name: "toy4-c4-ab1-s1i2-p1"
+      port_speed_mbps: 40000
+      index: 1
+    }
+    ports {
+      name: "toy4-c4-ab1-s1i2-p2"
+      port_speed_mbps: 40000
+      index: 2
+    }
+    ports {
+      name: "toy4-c4-ab1-s1i2-p3"
+      port_speed_mbps: 40000
+      index: 3
+    }
+    ports {
+      name: "toy4-c4-ab1-s1i2-p4"
+      port_speed_mbps: 40000
+      index: 4
+    }
+    ports {
+      name: "toy4-c4-ab1-s1i2-p5"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 5
+    }
+    ports {
+      name: "toy4-c4-ab1-s1i2-p6"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 6
+    }
+    ports {
+      name: "toy4-c4-ab1-s1i2-p7"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 7
+    }
+    ports {
+      name: "toy4-c4-ab1-s1i2-p8"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 8
+    }
+    ports {
+      name: "toy4-c4-ab1-s1i2-p9"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 9
+    }
+    ports {
+      name: "toy4-c4-ab1-s1i2-p10"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 10
+    }
+    ports {
+      name: "toy4-c4-ab1-s1i2-p11"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 11
+    }
+    ports {
+      name: "toy4-c4-ab1-s1i2-p12"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 12
+    }
+    ports {
+      name: "toy4-c4-ab1-s1i2-p13"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 13
+    }
+    ports {
+      name: "toy4-c4-ab1-s1i2-p14"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 14
+    }
+    ports {
+      name: "toy4-c4-ab1-s1i2-p15"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 15
+    }
+    ports {
+      name: "toy4-c4-ab1-s1i2-p16"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 16
+    }
+  }
+  nodes {
+    name: "toy4-c4-ab1-s1i3"
+    stage: 1
+    index: 3
+    ecmp_limit: 4096
+    group_limit: 256
+    ports {
+      name: "toy4-c4-ab1-s1i3-p1"
+      port_speed_mbps: 40000
+      index: 1
+    }
+    ports {
+      name: "toy4-c4-ab1-s1i3-p2"
+      port_speed_mbps: 40000
+      index: 2
+    }
+    ports {
+      name: "toy4-c4-ab1-s1i3-p3"
+      port_speed_mbps: 40000
+      index: 3
+    }
+    ports {
+      name: "toy4-c4-ab1-s1i3-p4"
+      port_speed_mbps: 40000
+      index: 4
+    }
+    ports {
+      name: "toy4-c4-ab1-s1i3-p5"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 5
+    }
+    ports {
+      name: "toy4-c4-ab1-s1i3-p6"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 6
+    }
+    ports {
+      name: "toy4-c4-ab1-s1i3-p7"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 7
+    }
+    ports {
+      name: "toy4-c4-ab1-s1i3-p8"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 8
+    }
+    ports {
+      name: "toy4-c4-ab1-s1i3-p9"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 9
+    }
+    ports {
+      name: "toy4-c4-ab1-s1i3-p10"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 10
+    }
+    ports {
+      name: "toy4-c4-ab1-s1i3-p11"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 11
+    }
+    ports {
+      name: "toy4-c4-ab1-s1i3-p12"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 12
+    }
+    ports {
+      name: "toy4-c4-ab1-s1i3-p13"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 13
+    }
+    ports {
+      name: "toy4-c4-ab1-s1i3-p14"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 14
+    }
+    ports {
+      name: "toy4-c4-ab1-s1i3-p15"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 15
+    }
+    ports {
+      name: "toy4-c4-ab1-s1i3-p16"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 16
+    }
+  }
+  nodes {
+    name: "toy4-c4-ab1-s1i4"
+    stage: 1
+    index: 4
+    ecmp_limit: 4096
+    group_limit: 256
+    ports {
+      name: "toy4-c4-ab1-s1i4-p1"
+      port_speed_mbps: 40000
+      index: 1
+    }
+    ports {
+      name: "toy4-c4-ab1-s1i4-p2"
+      port_speed_mbps: 40000
+      index: 2
+    }
+    ports {
+      name: "toy4-c4-ab1-s1i4-p3"
+      port_speed_mbps: 40000
+      index: 3
+    }
+    ports {
+      name: "toy4-c4-ab1-s1i4-p4"
+      port_speed_mbps: 40000
+      index: 4
+    }
+    ports {
+      name: "toy4-c4-ab1-s1i4-p5"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 5
+    }
+    ports {
+      name: "toy4-c4-ab1-s1i4-p6"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 6
+    }
+    ports {
+      name: "toy4-c4-ab1-s1i4-p7"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 7
+    }
+    ports {
+      name: "toy4-c4-ab1-s1i4-p8"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 8
+    }
+    ports {
+      name: "toy4-c4-ab1-s1i4-p9"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 9
+    }
+    ports {
+      name: "toy4-c4-ab1-s1i4-p10"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 10
+    }
+    ports {
+      name: "toy4-c4-ab1-s1i4-p11"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 11
+    }
+    ports {
+      name: "toy4-c4-ab1-s1i4-p12"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 12
+    }
+    ports {
+      name: "toy4-c4-ab1-s1i4-p13"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 13
+    }
+    ports {
+      name: "toy4-c4-ab1-s1i4-p14"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 14
+    }
+    ports {
+      name: "toy4-c4-ab1-s1i4-p15"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 15
+    }
+    ports {
+      name: "toy4-c4-ab1-s1i4-p16"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 16
+    }
+  }
+}
+clusters {
+  name: "toy4-c5"
+  aggr_blocks {
+    name: "toy4-c5-ab1"
+    nodes {
+      name: "toy4-c5-ab1-s3i1"
+      stage: 3
+      index: 1
+      ecmp_limit: 4096
+      group_limit: 256
+      ports {
+        name: "toy4-c5-ab1-s3i1-p1"
+        port_speed_mbps: 40000
+        dcn_facing: true
+        index: 1
+      }
+      ports {
+        name: "toy4-c5-ab1-s3i1-p2"
+        port_speed_mbps: 40000
+        index: 2
+      }
+      ports {
+        name: "toy4-c5-ab1-s3i1-p3"
+        port_speed_mbps: 40000
+        dcn_facing: true
+        index: 3
+      }
+      ports {
+        name: "toy4-c5-ab1-s3i1-p4"
+        port_speed_mbps: 40000
+        index: 4
+      }
+      ports {
+        name: "toy4-c5-ab1-s3i1-p5"
+        port_speed_mbps: 40000
+        dcn_facing: true
+        index: 5
+      }
+      ports {
+        name: "toy4-c5-ab1-s3i1-p6"
+        port_speed_mbps: 40000
+        index: 6
+      }
+      ports {
+        name: "toy4-c5-ab1-s3i1-p7"
+        port_speed_mbps: 40000
+        dcn_facing: true
+        index: 7
+      }
+      ports {
+        name: "toy4-c5-ab1-s3i1-p8"
+        port_speed_mbps: 40000
+        index: 8
+      }
+    }
+    nodes {
+      name: "toy4-c5-ab1-s3i2"
+      stage: 3
+      index: 2
+      ecmp_limit: 4096
+      group_limit: 256
+      ports {
+        name: "toy4-c5-ab1-s3i2-p1"
+        port_speed_mbps: 40000
+        dcn_facing: true
+        index: 1
+      }
+      ports {
+        name: "toy4-c5-ab1-s3i2-p2"
+        port_speed_mbps: 40000
+        index: 2
+      }
+      ports {
+        name: "toy4-c5-ab1-s3i2-p3"
+        port_speed_mbps: 40000
+        dcn_facing: true
+        index: 3
+      }
+      ports {
+        name: "toy4-c5-ab1-s3i2-p4"
+        port_speed_mbps: 40000
+        index: 4
+      }
+      ports {
+        name: "toy4-c5-ab1-s3i2-p5"
+        port_speed_mbps: 40000
+        dcn_facing: true
+        index: 5
+      }
+      ports {
+        name: "toy4-c5-ab1-s3i2-p6"
+        port_speed_mbps: 40000
+        index: 6
+      }
+      ports {
+        name: "toy4-c5-ab1-s3i2-p7"
+        port_speed_mbps: 40000
+        dcn_facing: true
+        index: 7
+      }
+      ports {
+        name: "toy4-c5-ab1-s3i2-p8"
+        port_speed_mbps: 40000
+        index: 8
+      }
+    }
+    nodes {
+      name: "toy4-c5-ab1-s3i3"
+      stage: 3
+      index: 3
+      ecmp_limit: 4096
+      group_limit: 256
+      ports {
+        name: "toy4-c5-ab1-s3i3-p1"
+        port_speed_mbps: 40000
+        dcn_facing: true
+        index: 1
+      }
+      ports {
+        name: "toy4-c5-ab1-s3i3-p2"
+        port_speed_mbps: 40000
+        index: 2
+      }
+      ports {
+        name: "toy4-c5-ab1-s3i3-p3"
+        port_speed_mbps: 40000
+        dcn_facing: true
+        index: 3
+      }
+      ports {
+        name: "toy4-c5-ab1-s3i3-p4"
+        port_speed_mbps: 40000
+        index: 4
+      }
+      ports {
+        name: "toy4-c5-ab1-s3i3-p5"
+        port_speed_mbps: 40000
+        dcn_facing: true
+        index: 5
+      }
+      ports {
+        name: "toy4-c5-ab1-s3i3-p6"
+        port_speed_mbps: 40000
+        index: 6
+      }
+      ports {
+        name: "toy4-c5-ab1-s3i3-p7"
+        port_speed_mbps: 40000
+        dcn_facing: true
+        index: 7
+      }
+      ports {
+        name: "toy4-c5-ab1-s3i3-p8"
+        port_speed_mbps: 40000
+        index: 8
+      }
+    }
+    nodes {
+      name: "toy4-c5-ab1-s3i4"
+      stage: 3
+      index: 4
+      ecmp_limit: 4096
+      group_limit: 256
+      ports {
+        name: "toy4-c5-ab1-s3i4-p1"
+        port_speed_mbps: 40000
+        dcn_facing: true
+        index: 1
+      }
+      ports {
+        name: "toy4-c5-ab1-s3i4-p2"
+        port_speed_mbps: 40000
+        index: 2
+      }
+      ports {
+        name: "toy4-c5-ab1-s3i4-p3"
+        port_speed_mbps: 40000
+        dcn_facing: true
+        index: 3
+      }
+      ports {
+        name: "toy4-c5-ab1-s3i4-p4"
+        port_speed_mbps: 40000
+        index: 4
+      }
+      ports {
+        name: "toy4-c5-ab1-s3i4-p5"
+        port_speed_mbps: 40000
+        dcn_facing: true
+        index: 5
+      }
+      ports {
+        name: "toy4-c5-ab1-s3i4-p6"
+        port_speed_mbps: 40000
+        index: 6
+      }
+      ports {
+        name: "toy4-c5-ab1-s3i4-p7"
+        port_speed_mbps: 40000
+        dcn_facing: true
+        index: 7
+      }
+      ports {
+        name: "toy4-c5-ab1-s3i4-p8"
+        port_speed_mbps: 40000
+        index: 8
+      }
+    }
+    nodes {
+      name: "toy4-c5-ab1-s2i1"
+      stage: 2
+      index: 1
+      ecmp_limit: 4096
+      group_limit: 256
+      ports {
+        name: "toy4-c5-ab1-s2i1-p1"
+        port_speed_mbps: 40000
+        index: 1
+      }
+      ports {
+        name: "toy4-c5-ab1-s2i1-p2"
+        port_speed_mbps: 40000
+        index: 2
+      }
+      ports {
+        name: "toy4-c5-ab1-s2i1-p3"
+        port_speed_mbps: 40000
+        index: 3
+      }
+      ports {
+        name: "toy4-c5-ab1-s2i1-p4"
+        port_speed_mbps: 40000
+        index: 4
+      }
+      ports {
+        name: "toy4-c5-ab1-s2i1-p5"
+        port_speed_mbps: 40000
+        index: 5
+      }
+      ports {
+        name: "toy4-c5-ab1-s2i1-p6"
+        port_speed_mbps: 40000
+        index: 6
+      }
+      ports {
+        name: "toy4-c5-ab1-s2i1-p7"
+        port_speed_mbps: 40000
+        index: 7
+      }
+      ports {
+        name: "toy4-c5-ab1-s2i1-p8"
+        port_speed_mbps: 40000
+        index: 8
+      }
+    }
+    nodes {
+      name: "toy4-c5-ab1-s2i2"
+      stage: 2
+      index: 2
+      ecmp_limit: 4096
+      group_limit: 256
+      ports {
+        name: "toy4-c5-ab1-s2i2-p1"
+        port_speed_mbps: 40000
+        index: 1
+      }
+      ports {
+        name: "toy4-c5-ab1-s2i2-p2"
+        port_speed_mbps: 40000
+        index: 2
+      }
+      ports {
+        name: "toy4-c5-ab1-s2i2-p3"
+        port_speed_mbps: 40000
+        index: 3
+      }
+      ports {
+        name: "toy4-c5-ab1-s2i2-p4"
+        port_speed_mbps: 40000
+        index: 4
+      }
+      ports {
+        name: "toy4-c5-ab1-s2i2-p5"
+        port_speed_mbps: 40000
+        index: 5
+      }
+      ports {
+        name: "toy4-c5-ab1-s2i2-p6"
+        port_speed_mbps: 40000
+        index: 6
+      }
+      ports {
+        name: "toy4-c5-ab1-s2i2-p7"
+        port_speed_mbps: 40000
+        index: 7
+      }
+      ports {
+        name: "toy4-c5-ab1-s2i2-p8"
+        port_speed_mbps: 40000
+        index: 8
+      }
+    }
+    nodes {
+      name: "toy4-c5-ab1-s2i3"
+      stage: 2
+      index: 3
+      ecmp_limit: 4096
+      group_limit: 256
+      ports {
+        name: "toy4-c5-ab1-s2i3-p1"
+        port_speed_mbps: 40000
+        index: 1
+      }
+      ports {
+        name: "toy4-c5-ab1-s2i3-p2"
+        port_speed_mbps: 40000
+        index: 2
+      }
+      ports {
+        name: "toy4-c5-ab1-s2i3-p3"
+        port_speed_mbps: 40000
+        index: 3
+      }
+      ports {
+        name: "toy4-c5-ab1-s2i3-p4"
+        port_speed_mbps: 40000
+        index: 4
+      }
+      ports {
+        name: "toy4-c5-ab1-s2i3-p5"
+        port_speed_mbps: 40000
+        index: 5
+      }
+      ports {
+        name: "toy4-c5-ab1-s2i3-p6"
+        port_speed_mbps: 40000
+        index: 6
+      }
+      ports {
+        name: "toy4-c5-ab1-s2i3-p7"
+        port_speed_mbps: 40000
+        index: 7
+      }
+      ports {
+        name: "toy4-c5-ab1-s2i3-p8"
+        port_speed_mbps: 40000
+        index: 8
+      }
+    }
+    nodes {
+      name: "toy4-c5-ab1-s2i4"
+      stage: 2
+      index: 4
+      ecmp_limit: 4096
+      group_limit: 256
+      ports {
+        name: "toy4-c5-ab1-s2i4-p1"
+        port_speed_mbps: 40000
+        index: 1
+      }
+      ports {
+        name: "toy4-c5-ab1-s2i4-p2"
+        port_speed_mbps: 40000
+        index: 2
+      }
+      ports {
+        name: "toy4-c5-ab1-s2i4-p3"
+        port_speed_mbps: 40000
+        index: 3
+      }
+      ports {
+        name: "toy4-c5-ab1-s2i4-p4"
+        port_speed_mbps: 40000
+        index: 4
+      }
+      ports {
+        name: "toy4-c5-ab1-s2i4-p5"
+        port_speed_mbps: 40000
+        index: 5
+      }
+      ports {
+        name: "toy4-c5-ab1-s2i4-p6"
+        port_speed_mbps: 40000
+        index: 6
+      }
+      ports {
+        name: "toy4-c5-ab1-s2i4-p7"
+        port_speed_mbps: 40000
+        index: 7
+      }
+      ports {
+        name: "toy4-c5-ab1-s2i4-p8"
+        port_speed_mbps: 40000
+        index: 8
+      }
+    }
+  }
+  nodes {
+    name: "toy4-c5-ab1-s1i1"
+    stage: 1
+    index: 1
+    ecmp_limit: 4096
+    group_limit: 256
+    ports {
+      name: "toy4-c5-ab1-s1i1-p1"
+      port_speed_mbps: 40000
+      index: 1
+    }
+    ports {
+      name: "toy4-c5-ab1-s1i1-p2"
+      port_speed_mbps: 40000
+      index: 2
+    }
+    ports {
+      name: "toy4-c5-ab1-s1i1-p3"
+      port_speed_mbps: 40000
+      index: 3
+    }
+    ports {
+      name: "toy4-c5-ab1-s1i1-p4"
+      port_speed_mbps: 40000
+      index: 4
+    }
+    ports {
+      name: "toy4-c5-ab1-s1i1-p5"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 5
+    }
+    ports {
+      name: "toy4-c5-ab1-s1i1-p6"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 6
+    }
+    ports {
+      name: "toy4-c5-ab1-s1i1-p7"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 7
+    }
+    ports {
+      name: "toy4-c5-ab1-s1i1-p8"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 8
+    }
+    ports {
+      name: "toy4-c5-ab1-s1i1-p9"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 9
+    }
+    ports {
+      name: "toy4-c5-ab1-s1i1-p10"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 10
+    }
+    ports {
+      name: "toy4-c5-ab1-s1i1-p11"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 11
+    }
+    ports {
+      name: "toy4-c5-ab1-s1i1-p12"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 12
+    }
+    ports {
+      name: "toy4-c5-ab1-s1i1-p13"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 13
+    }
+    ports {
+      name: "toy4-c5-ab1-s1i1-p14"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 14
+    }
+    ports {
+      name: "toy4-c5-ab1-s1i1-p15"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 15
+    }
+    ports {
+      name: "toy4-c5-ab1-s1i1-p16"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 16
+    }
+  }
+  nodes {
+    name: "toy4-c5-ab1-s1i2"
+    stage: 1
+    index: 2
+    ecmp_limit: 4096
+    group_limit: 256
+    ports {
+      name: "toy4-c5-ab1-s1i2-p1"
+      port_speed_mbps: 40000
+      index: 1
+    }
+    ports {
+      name: "toy4-c5-ab1-s1i2-p2"
+      port_speed_mbps: 40000
+      index: 2
+    }
+    ports {
+      name: "toy4-c5-ab1-s1i2-p3"
+      port_speed_mbps: 40000
+      index: 3
+    }
+    ports {
+      name: "toy4-c5-ab1-s1i2-p4"
+      port_speed_mbps: 40000
+      index: 4
+    }
+    ports {
+      name: "toy4-c5-ab1-s1i2-p5"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 5
+    }
+    ports {
+      name: "toy4-c5-ab1-s1i2-p6"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 6
+    }
+    ports {
+      name: "toy4-c5-ab1-s1i2-p7"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 7
+    }
+    ports {
+      name: "toy4-c5-ab1-s1i2-p8"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 8
+    }
+    ports {
+      name: "toy4-c5-ab1-s1i2-p9"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 9
+    }
+    ports {
+      name: "toy4-c5-ab1-s1i2-p10"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 10
+    }
+    ports {
+      name: "toy4-c5-ab1-s1i2-p11"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 11
+    }
+    ports {
+      name: "toy4-c5-ab1-s1i2-p12"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 12
+    }
+    ports {
+      name: "toy4-c5-ab1-s1i2-p13"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 13
+    }
+    ports {
+      name: "toy4-c5-ab1-s1i2-p14"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 14
+    }
+    ports {
+      name: "toy4-c5-ab1-s1i2-p15"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 15
+    }
+    ports {
+      name: "toy4-c5-ab1-s1i2-p16"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 16
+    }
+  }
+  nodes {
+    name: "toy4-c5-ab1-s1i3"
+    stage: 1
+    index: 3
+    ecmp_limit: 4096
+    group_limit: 256
+    ports {
+      name: "toy4-c5-ab1-s1i3-p1"
+      port_speed_mbps: 40000
+      index: 1
+    }
+    ports {
+      name: "toy4-c5-ab1-s1i3-p2"
+      port_speed_mbps: 40000
+      index: 2
+    }
+    ports {
+      name: "toy4-c5-ab1-s1i3-p3"
+      port_speed_mbps: 40000
+      index: 3
+    }
+    ports {
+      name: "toy4-c5-ab1-s1i3-p4"
+      port_speed_mbps: 40000
+      index: 4
+    }
+    ports {
+      name: "toy4-c5-ab1-s1i3-p5"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 5
+    }
+    ports {
+      name: "toy4-c5-ab1-s1i3-p6"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 6
+    }
+    ports {
+      name: "toy4-c5-ab1-s1i3-p7"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 7
+    }
+    ports {
+      name: "toy4-c5-ab1-s1i3-p8"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 8
+    }
+    ports {
+      name: "toy4-c5-ab1-s1i3-p9"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 9
+    }
+    ports {
+      name: "toy4-c5-ab1-s1i3-p10"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 10
+    }
+    ports {
+      name: "toy4-c5-ab1-s1i3-p11"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 11
+    }
+    ports {
+      name: "toy4-c5-ab1-s1i3-p12"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 12
+    }
+    ports {
+      name: "toy4-c5-ab1-s1i3-p13"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 13
+    }
+    ports {
+      name: "toy4-c5-ab1-s1i3-p14"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 14
+    }
+    ports {
+      name: "toy4-c5-ab1-s1i3-p15"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 15
+    }
+    ports {
+      name: "toy4-c5-ab1-s1i3-p16"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 16
+    }
+  }
+  nodes {
+    name: "toy4-c5-ab1-s1i4"
+    stage: 1
+    index: 4
+    ecmp_limit: 4096
+    group_limit: 256
+    ports {
+      name: "toy4-c5-ab1-s1i4-p1"
+      port_speed_mbps: 40000
+      index: 1
+    }
+    ports {
+      name: "toy4-c5-ab1-s1i4-p2"
+      port_speed_mbps: 40000
+      index: 2
+    }
+    ports {
+      name: "toy4-c5-ab1-s1i4-p3"
+      port_speed_mbps: 40000
+      index: 3
+    }
+    ports {
+      name: "toy4-c5-ab1-s1i4-p4"
+      port_speed_mbps: 40000
+      index: 4
+    }
+    ports {
+      name: "toy4-c5-ab1-s1i4-p5"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 5
+    }
+    ports {
+      name: "toy4-c5-ab1-s1i4-p6"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 6
+    }
+    ports {
+      name: "toy4-c5-ab1-s1i4-p7"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 7
+    }
+    ports {
+      name: "toy4-c5-ab1-s1i4-p8"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 8
+    }
+    ports {
+      name: "toy4-c5-ab1-s1i4-p9"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 9
+    }
+    ports {
+      name: "toy4-c5-ab1-s1i4-p10"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 10
+    }
+    ports {
+      name: "toy4-c5-ab1-s1i4-p11"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 11
+    }
+    ports {
+      name: "toy4-c5-ab1-s1i4-p12"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 12
+    }
+    ports {
+      name: "toy4-c5-ab1-s1i4-p13"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 13
+    }
+    ports {
+      name: "toy4-c5-ab1-s1i4-p14"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 14
+    }
+    ports {
+      name: "toy4-c5-ab1-s1i4-p15"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 15
+    }
+    ports {
+      name: "toy4-c5-ab1-s1i4-p16"
+      port_speed_mbps: 40000
+      host_facing: true
+      index: 16
+    }
+  }
+}
+paths {
+  name: "toy4-c1-ab1:toy4-c2-ab1"
+  src_aggr_block: "toy4-c1-ab1"
+  dst_aggr_block: "toy4-c2-ab1"
+  capacity_mbps: 160000
+}
+paths {
+  name: "toy4-c1-ab1:toy4-c3-ab1"
+  src_aggr_block: "toy4-c1-ab1"
+  dst_aggr_block: "toy4-c3-ab1"
+  capacity_mbps: 160000
+}
+paths {
+  name: "toy4-c1-ab1:toy4-c4-ab1"
+  src_aggr_block: "toy4-c1-ab1"
+  dst_aggr_block: "toy4-c4-ab1"
+  capacity_mbps: 160000
+}
+paths {
+  name: "toy4-c1-ab1:toy4-c5-ab1"
+  src_aggr_block: "toy4-c1-ab1"
+  dst_aggr_block: "toy4-c5-ab1"
+  capacity_mbps: 160000
+}
+paths {
+  name: "toy4-c2-ab1:toy4-c1-ab1"
+  src_aggr_block: "toy4-c2-ab1"
+  dst_aggr_block: "toy4-c1-ab1"
+  capacity_mbps: 160000
+}
+paths {
+  name: "toy4-c2-ab1:toy4-c3-ab1"
+  src_aggr_block: "toy4-c2-ab1"
+  dst_aggr_block: "toy4-c3-ab1"
+  capacity_mbps: 160000
+}
+paths {
+  name: "toy4-c2-ab1:toy4-c4-ab1"
+  src_aggr_block: "toy4-c2-ab1"
+  dst_aggr_block: "toy4-c4-ab1"
+  capacity_mbps: 160000
+}
+paths {
+  name: "toy4-c2-ab1:toy4-c5-ab1"
+  src_aggr_block: "toy4-c2-ab1"
+  dst_aggr_block: "toy4-c5-ab1"
+  capacity_mbps: 160000
+}
+paths {
+  name: "toy4-c3-ab1:toy4-c1-ab1"
+  src_aggr_block: "toy4-c3-ab1"
+  dst_aggr_block: "toy4-c1-ab1"
+  capacity_mbps: 160000
+}
+paths {
+  name: "toy4-c3-ab1:toy4-c2-ab1"
+  src_aggr_block: "toy4-c3-ab1"
+  dst_aggr_block: "toy4-c2-ab1"
+  capacity_mbps: 160000
+}
+paths {
+  name: "toy4-c3-ab1:toy4-c4-ab1"
+  src_aggr_block: "toy4-c3-ab1"
+  dst_aggr_block: "toy4-c4-ab1"
+  capacity_mbps: 160000
+}
+paths {
+  name: "toy4-c3-ab1:toy4-c5-ab1"
+  src_aggr_block: "toy4-c3-ab1"
+  dst_aggr_block: "toy4-c5-ab1"
+  capacity_mbps: 160000
+}
+paths {
+  name: "toy4-c4-ab1:toy4-c1-ab1"
+  src_aggr_block: "toy4-c4-ab1"
+  dst_aggr_block: "toy4-c1-ab1"
+  capacity_mbps: 160000
+}
+paths {
+  name: "toy4-c4-ab1:toy4-c2-ab1"
+  src_aggr_block: "toy4-c4-ab1"
+  dst_aggr_block: "toy4-c2-ab1"
+  capacity_mbps: 160000
+}
+paths {
+  name: "toy4-c4-ab1:toy4-c3-ab1"
+  src_aggr_block: "toy4-c4-ab1"
+  dst_aggr_block: "toy4-c3-ab1"
+  capacity_mbps: 160000
+}
+paths {
+  name: "toy4-c4-ab1:toy4-c5-ab1"
+  src_aggr_block: "toy4-c4-ab1"
+  dst_aggr_block: "toy4-c5-ab1"
+  capacity_mbps: 160000
+}
+paths {
+  name: "toy4-c5-ab1:toy4-c1-ab1"
+  src_aggr_block: "toy4-c5-ab1"
+  dst_aggr_block: "toy4-c1-ab1"
+  capacity_mbps: 160000
+}
+paths {
+  name: "toy4-c5-ab1:toy4-c2-ab1"
+  src_aggr_block: "toy4-c5-ab1"
+  dst_aggr_block: "toy4-c2-ab1"
+  capacity_mbps: 160000
+}
+paths {
+  name: "toy4-c5-ab1:toy4-c3-ab1"
+  src_aggr_block: "toy4-c5-ab1"
+  dst_aggr_block: "toy4-c3-ab1"
+  capacity_mbps: 160000
+}
+paths {
+  name: "toy4-c5-ab1:toy4-c4-ab1"
+  src_aggr_block: "toy4-c5-ab1"
+  dst_aggr_block: "toy4-c4-ab1"
+  capacity_mbps: 160000
+}
+links {
+  name: "toy4-c1-ab1-s3i1-p2:toy4-c1-ab1-s2i1-p1"
+  src_port_id: "toy4-c1-ab1-s3i1-p2"
+  dst_port_id: "toy4-c1-ab1-s2i1-p1"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c1-ab1-s2i1-p1:toy4-c1-ab1-s3i1-p2"
+  src_port_id: "toy4-c1-ab1-s2i1-p1"
+  dst_port_id: "toy4-c1-ab1-s3i1-p2"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c1-ab1-s3i1-p4:toy4-c1-ab1-s2i2-p1"
+  src_port_id: "toy4-c1-ab1-s3i1-p4"
+  dst_port_id: "toy4-c1-ab1-s2i2-p1"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c1-ab1-s2i2-p1:toy4-c1-ab1-s3i1-p4"
+  src_port_id: "toy4-c1-ab1-s2i2-p1"
+  dst_port_id: "toy4-c1-ab1-s3i1-p4"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c1-ab1-s3i1-p6:toy4-c1-ab1-s2i3-p1"
+  src_port_id: "toy4-c1-ab1-s3i1-p6"
+  dst_port_id: "toy4-c1-ab1-s2i3-p1"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c1-ab1-s2i3-p1:toy4-c1-ab1-s3i1-p6"
+  src_port_id: "toy4-c1-ab1-s2i3-p1"
+  dst_port_id: "toy4-c1-ab1-s3i1-p6"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c1-ab1-s3i1-p8:toy4-c1-ab1-s2i4-p1"
+  src_port_id: "toy4-c1-ab1-s3i1-p8"
+  dst_port_id: "toy4-c1-ab1-s2i4-p1"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c1-ab1-s2i4-p1:toy4-c1-ab1-s3i1-p8"
+  src_port_id: "toy4-c1-ab1-s2i4-p1"
+  dst_port_id: "toy4-c1-ab1-s3i1-p8"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c1-ab1-s3i1-p1:toy4-c2-ab1-s3i1-p1"
+  src_port_id: "toy4-c1-ab1-s3i1-p1"
+  dst_port_id: "toy4-c2-ab1-s3i1-p1"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c2-ab1-s3i1-p1:toy4-c1-ab1-s3i1-p1"
+  src_port_id: "toy4-c2-ab1-s3i1-p1"
+  dst_port_id: "toy4-c1-ab1-s3i1-p1"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c1-ab1-s3i1-p3:toy4-c3-ab1-s3i1-p1"
+  src_port_id: "toy4-c1-ab1-s3i1-p3"
+  dst_port_id: "toy4-c3-ab1-s3i1-p1"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c3-ab1-s3i1-p1:toy4-c1-ab1-s3i1-p3"
+  src_port_id: "toy4-c3-ab1-s3i1-p1"
+  dst_port_id: "toy4-c1-ab1-s3i1-p3"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c1-ab1-s3i1-p5:toy4-c4-ab1-s3i1-p1"
+  src_port_id: "toy4-c1-ab1-s3i1-p5"
+  dst_port_id: "toy4-c4-ab1-s3i1-p1"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c4-ab1-s3i1-p1:toy4-c1-ab1-s3i1-p5"
+  src_port_id: "toy4-c4-ab1-s3i1-p1"
+  dst_port_id: "toy4-c1-ab1-s3i1-p5"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c1-ab1-s3i1-p7:toy4-c5-ab1-s3i1-p1"
+  src_port_id: "toy4-c1-ab1-s3i1-p7"
+  dst_port_id: "toy4-c5-ab1-s3i1-p1"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c5-ab1-s3i1-p1:toy4-c1-ab1-s3i1-p7"
+  src_port_id: "toy4-c5-ab1-s3i1-p1"
+  dst_port_id: "toy4-c1-ab1-s3i1-p7"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c1-ab1-s3i2-p2:toy4-c1-ab1-s2i1-p3"
+  src_port_id: "toy4-c1-ab1-s3i2-p2"
+  dst_port_id: "toy4-c1-ab1-s2i1-p3"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c1-ab1-s2i1-p3:toy4-c1-ab1-s3i2-p2"
+  src_port_id: "toy4-c1-ab1-s2i1-p3"
+  dst_port_id: "toy4-c1-ab1-s3i2-p2"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c1-ab1-s3i2-p4:toy4-c1-ab1-s2i2-p3"
+  src_port_id: "toy4-c1-ab1-s3i2-p4"
+  dst_port_id: "toy4-c1-ab1-s2i2-p3"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c1-ab1-s2i2-p3:toy4-c1-ab1-s3i2-p4"
+  src_port_id: "toy4-c1-ab1-s2i2-p3"
+  dst_port_id: "toy4-c1-ab1-s3i2-p4"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c1-ab1-s3i2-p6:toy4-c1-ab1-s2i3-p3"
+  src_port_id: "toy4-c1-ab1-s3i2-p6"
+  dst_port_id: "toy4-c1-ab1-s2i3-p3"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c1-ab1-s2i3-p3:toy4-c1-ab1-s3i2-p6"
+  src_port_id: "toy4-c1-ab1-s2i3-p3"
+  dst_port_id: "toy4-c1-ab1-s3i2-p6"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c1-ab1-s3i2-p8:toy4-c1-ab1-s2i4-p3"
+  src_port_id: "toy4-c1-ab1-s3i2-p8"
+  dst_port_id: "toy4-c1-ab1-s2i4-p3"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c1-ab1-s2i4-p3:toy4-c1-ab1-s3i2-p8"
+  src_port_id: "toy4-c1-ab1-s2i4-p3"
+  dst_port_id: "toy4-c1-ab1-s3i2-p8"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c1-ab1-s3i2-p1:toy4-c2-ab1-s3i2-p1"
+  src_port_id: "toy4-c1-ab1-s3i2-p1"
+  dst_port_id: "toy4-c2-ab1-s3i2-p1"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c2-ab1-s3i2-p1:toy4-c1-ab1-s3i2-p1"
+  src_port_id: "toy4-c2-ab1-s3i2-p1"
+  dst_port_id: "toy4-c1-ab1-s3i2-p1"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c1-ab1-s3i2-p3:toy4-c3-ab1-s3i2-p1"
+  src_port_id: "toy4-c1-ab1-s3i2-p3"
+  dst_port_id: "toy4-c3-ab1-s3i2-p1"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c3-ab1-s3i2-p1:toy4-c1-ab1-s3i2-p3"
+  src_port_id: "toy4-c3-ab1-s3i2-p1"
+  dst_port_id: "toy4-c1-ab1-s3i2-p3"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c1-ab1-s3i2-p5:toy4-c4-ab1-s3i2-p1"
+  src_port_id: "toy4-c1-ab1-s3i2-p5"
+  dst_port_id: "toy4-c4-ab1-s3i2-p1"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c4-ab1-s3i2-p1:toy4-c1-ab1-s3i2-p5"
+  src_port_id: "toy4-c4-ab1-s3i2-p1"
+  dst_port_id: "toy4-c1-ab1-s3i2-p5"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c1-ab1-s3i2-p7:toy4-c5-ab1-s3i2-p1"
+  src_port_id: "toy4-c1-ab1-s3i2-p7"
+  dst_port_id: "toy4-c5-ab1-s3i2-p1"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c5-ab1-s3i2-p1:toy4-c1-ab1-s3i2-p7"
+  src_port_id: "toy4-c5-ab1-s3i2-p1"
+  dst_port_id: "toy4-c1-ab1-s3i2-p7"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c1-ab1-s3i3-p2:toy4-c1-ab1-s2i1-p5"
+  src_port_id: "toy4-c1-ab1-s3i3-p2"
+  dst_port_id: "toy4-c1-ab1-s2i1-p5"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c1-ab1-s2i1-p5:toy4-c1-ab1-s3i3-p2"
+  src_port_id: "toy4-c1-ab1-s2i1-p5"
+  dst_port_id: "toy4-c1-ab1-s3i3-p2"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c1-ab1-s3i3-p4:toy4-c1-ab1-s2i2-p5"
+  src_port_id: "toy4-c1-ab1-s3i3-p4"
+  dst_port_id: "toy4-c1-ab1-s2i2-p5"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c1-ab1-s2i2-p5:toy4-c1-ab1-s3i3-p4"
+  src_port_id: "toy4-c1-ab1-s2i2-p5"
+  dst_port_id: "toy4-c1-ab1-s3i3-p4"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c1-ab1-s3i3-p6:toy4-c1-ab1-s2i3-p5"
+  src_port_id: "toy4-c1-ab1-s3i3-p6"
+  dst_port_id: "toy4-c1-ab1-s2i3-p5"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c1-ab1-s2i3-p5:toy4-c1-ab1-s3i3-p6"
+  src_port_id: "toy4-c1-ab1-s2i3-p5"
+  dst_port_id: "toy4-c1-ab1-s3i3-p6"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c1-ab1-s3i3-p8:toy4-c1-ab1-s2i4-p5"
+  src_port_id: "toy4-c1-ab1-s3i3-p8"
+  dst_port_id: "toy4-c1-ab1-s2i4-p5"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c1-ab1-s2i4-p5:toy4-c1-ab1-s3i3-p8"
+  src_port_id: "toy4-c1-ab1-s2i4-p5"
+  dst_port_id: "toy4-c1-ab1-s3i3-p8"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c1-ab1-s3i3-p1:toy4-c2-ab1-s3i3-p1"
+  src_port_id: "toy4-c1-ab1-s3i3-p1"
+  dst_port_id: "toy4-c2-ab1-s3i3-p1"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c2-ab1-s3i3-p1:toy4-c1-ab1-s3i3-p1"
+  src_port_id: "toy4-c2-ab1-s3i3-p1"
+  dst_port_id: "toy4-c1-ab1-s3i3-p1"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c1-ab1-s3i3-p3:toy4-c3-ab1-s3i3-p1"
+  src_port_id: "toy4-c1-ab1-s3i3-p3"
+  dst_port_id: "toy4-c3-ab1-s3i3-p1"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c3-ab1-s3i3-p1:toy4-c1-ab1-s3i3-p3"
+  src_port_id: "toy4-c3-ab1-s3i3-p1"
+  dst_port_id: "toy4-c1-ab1-s3i3-p3"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c1-ab1-s3i3-p5:toy4-c4-ab1-s3i3-p1"
+  src_port_id: "toy4-c1-ab1-s3i3-p5"
+  dst_port_id: "toy4-c4-ab1-s3i3-p1"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c4-ab1-s3i3-p1:toy4-c1-ab1-s3i3-p5"
+  src_port_id: "toy4-c4-ab1-s3i3-p1"
+  dst_port_id: "toy4-c1-ab1-s3i3-p5"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c1-ab1-s3i3-p7:toy4-c5-ab1-s3i3-p1"
+  src_port_id: "toy4-c1-ab1-s3i3-p7"
+  dst_port_id: "toy4-c5-ab1-s3i3-p1"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c5-ab1-s3i3-p1:toy4-c1-ab1-s3i3-p7"
+  src_port_id: "toy4-c5-ab1-s3i3-p1"
+  dst_port_id: "toy4-c1-ab1-s3i3-p7"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c1-ab1-s3i4-p2:toy4-c1-ab1-s2i1-p7"
+  src_port_id: "toy4-c1-ab1-s3i4-p2"
+  dst_port_id: "toy4-c1-ab1-s2i1-p7"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c1-ab1-s2i1-p7:toy4-c1-ab1-s3i4-p2"
+  src_port_id: "toy4-c1-ab1-s2i1-p7"
+  dst_port_id: "toy4-c1-ab1-s3i4-p2"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c1-ab1-s3i4-p4:toy4-c1-ab1-s2i2-p7"
+  src_port_id: "toy4-c1-ab1-s3i4-p4"
+  dst_port_id: "toy4-c1-ab1-s2i2-p7"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c1-ab1-s2i2-p7:toy4-c1-ab1-s3i4-p4"
+  src_port_id: "toy4-c1-ab1-s2i2-p7"
+  dst_port_id: "toy4-c1-ab1-s3i4-p4"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c1-ab1-s3i4-p6:toy4-c1-ab1-s2i3-p7"
+  src_port_id: "toy4-c1-ab1-s3i4-p6"
+  dst_port_id: "toy4-c1-ab1-s2i3-p7"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c1-ab1-s2i3-p7:toy4-c1-ab1-s3i4-p6"
+  src_port_id: "toy4-c1-ab1-s2i3-p7"
+  dst_port_id: "toy4-c1-ab1-s3i4-p6"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c1-ab1-s3i4-p8:toy4-c1-ab1-s2i4-p7"
+  src_port_id: "toy4-c1-ab1-s3i4-p8"
+  dst_port_id: "toy4-c1-ab1-s2i4-p7"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c1-ab1-s2i4-p7:toy4-c1-ab1-s3i4-p8"
+  src_port_id: "toy4-c1-ab1-s2i4-p7"
+  dst_port_id: "toy4-c1-ab1-s3i4-p8"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c1-ab1-s3i4-p1:toy4-c2-ab1-s3i4-p1"
+  src_port_id: "toy4-c1-ab1-s3i4-p1"
+  dst_port_id: "toy4-c2-ab1-s3i4-p1"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c2-ab1-s3i4-p1:toy4-c1-ab1-s3i4-p1"
+  src_port_id: "toy4-c2-ab1-s3i4-p1"
+  dst_port_id: "toy4-c1-ab1-s3i4-p1"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c1-ab1-s3i4-p3:toy4-c3-ab1-s3i4-p1"
+  src_port_id: "toy4-c1-ab1-s3i4-p3"
+  dst_port_id: "toy4-c3-ab1-s3i4-p1"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c3-ab1-s3i4-p1:toy4-c1-ab1-s3i4-p3"
+  src_port_id: "toy4-c3-ab1-s3i4-p1"
+  dst_port_id: "toy4-c1-ab1-s3i4-p3"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c1-ab1-s3i4-p5:toy4-c4-ab1-s3i4-p1"
+  src_port_id: "toy4-c1-ab1-s3i4-p5"
+  dst_port_id: "toy4-c4-ab1-s3i4-p1"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c4-ab1-s3i4-p1:toy4-c1-ab1-s3i4-p5"
+  src_port_id: "toy4-c4-ab1-s3i4-p1"
+  dst_port_id: "toy4-c1-ab1-s3i4-p5"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c1-ab1-s3i4-p7:toy4-c5-ab1-s3i4-p1"
+  src_port_id: "toy4-c1-ab1-s3i4-p7"
+  dst_port_id: "toy4-c5-ab1-s3i4-p1"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c5-ab1-s3i4-p1:toy4-c1-ab1-s3i4-p7"
+  src_port_id: "toy4-c5-ab1-s3i4-p1"
+  dst_port_id: "toy4-c1-ab1-s3i4-p7"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c1-ab1-s2i1-p2:toy4-c1-ab1-s1i1-p1"
+  src_port_id: "toy4-c1-ab1-s2i1-p2"
+  dst_port_id: "toy4-c1-ab1-s1i1-p1"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c1-ab1-s1i1-p1:toy4-c1-ab1-s2i1-p2"
+  src_port_id: "toy4-c1-ab1-s1i1-p1"
+  dst_port_id: "toy4-c1-ab1-s2i1-p2"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c1-ab1-s2i1-p4:toy4-c1-ab1-s1i2-p1"
+  src_port_id: "toy4-c1-ab1-s2i1-p4"
+  dst_port_id: "toy4-c1-ab1-s1i2-p1"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c1-ab1-s1i2-p1:toy4-c1-ab1-s2i1-p4"
+  src_port_id: "toy4-c1-ab1-s1i2-p1"
+  dst_port_id: "toy4-c1-ab1-s2i1-p4"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c1-ab1-s2i1-p6:toy4-c1-ab1-s1i3-p1"
+  src_port_id: "toy4-c1-ab1-s2i1-p6"
+  dst_port_id: "toy4-c1-ab1-s1i3-p1"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c1-ab1-s1i3-p1:toy4-c1-ab1-s2i1-p6"
+  src_port_id: "toy4-c1-ab1-s1i3-p1"
+  dst_port_id: "toy4-c1-ab1-s2i1-p6"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c1-ab1-s2i1-p8:toy4-c1-ab1-s1i4-p1"
+  src_port_id: "toy4-c1-ab1-s2i1-p8"
+  dst_port_id: "toy4-c1-ab1-s1i4-p1"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c1-ab1-s1i4-p1:toy4-c1-ab1-s2i1-p8"
+  src_port_id: "toy4-c1-ab1-s1i4-p1"
+  dst_port_id: "toy4-c1-ab1-s2i1-p8"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c1-ab1-s2i2-p2:toy4-c1-ab1-s1i1-p2"
+  src_port_id: "toy4-c1-ab1-s2i2-p2"
+  dst_port_id: "toy4-c1-ab1-s1i1-p2"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c1-ab1-s1i1-p2:toy4-c1-ab1-s2i2-p2"
+  src_port_id: "toy4-c1-ab1-s1i1-p2"
+  dst_port_id: "toy4-c1-ab1-s2i2-p2"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c1-ab1-s2i2-p4:toy4-c1-ab1-s1i2-p2"
+  src_port_id: "toy4-c1-ab1-s2i2-p4"
+  dst_port_id: "toy4-c1-ab1-s1i2-p2"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c1-ab1-s1i2-p2:toy4-c1-ab1-s2i2-p4"
+  src_port_id: "toy4-c1-ab1-s1i2-p2"
+  dst_port_id: "toy4-c1-ab1-s2i2-p4"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c1-ab1-s2i2-p6:toy4-c1-ab1-s1i3-p2"
+  src_port_id: "toy4-c1-ab1-s2i2-p6"
+  dst_port_id: "toy4-c1-ab1-s1i3-p2"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c1-ab1-s1i3-p2:toy4-c1-ab1-s2i2-p6"
+  src_port_id: "toy4-c1-ab1-s1i3-p2"
+  dst_port_id: "toy4-c1-ab1-s2i2-p6"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c1-ab1-s2i2-p8:toy4-c1-ab1-s1i4-p2"
+  src_port_id: "toy4-c1-ab1-s2i2-p8"
+  dst_port_id: "toy4-c1-ab1-s1i4-p2"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c1-ab1-s1i4-p2:toy4-c1-ab1-s2i2-p8"
+  src_port_id: "toy4-c1-ab1-s1i4-p2"
+  dst_port_id: "toy4-c1-ab1-s2i2-p8"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c1-ab1-s2i3-p2:toy4-c1-ab1-s1i1-p3"
+  src_port_id: "toy4-c1-ab1-s2i3-p2"
+  dst_port_id: "toy4-c1-ab1-s1i1-p3"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c1-ab1-s1i1-p3:toy4-c1-ab1-s2i3-p2"
+  src_port_id: "toy4-c1-ab1-s1i1-p3"
+  dst_port_id: "toy4-c1-ab1-s2i3-p2"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c1-ab1-s2i3-p4:toy4-c1-ab1-s1i2-p3"
+  src_port_id: "toy4-c1-ab1-s2i3-p4"
+  dst_port_id: "toy4-c1-ab1-s1i2-p3"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c1-ab1-s1i2-p3:toy4-c1-ab1-s2i3-p4"
+  src_port_id: "toy4-c1-ab1-s1i2-p3"
+  dst_port_id: "toy4-c1-ab1-s2i3-p4"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c1-ab1-s2i3-p6:toy4-c1-ab1-s1i3-p3"
+  src_port_id: "toy4-c1-ab1-s2i3-p6"
+  dst_port_id: "toy4-c1-ab1-s1i3-p3"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c1-ab1-s1i3-p3:toy4-c1-ab1-s2i3-p6"
+  src_port_id: "toy4-c1-ab1-s1i3-p3"
+  dst_port_id: "toy4-c1-ab1-s2i3-p6"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c1-ab1-s2i3-p8:toy4-c1-ab1-s1i4-p3"
+  src_port_id: "toy4-c1-ab1-s2i3-p8"
+  dst_port_id: "toy4-c1-ab1-s1i4-p3"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c1-ab1-s1i4-p3:toy4-c1-ab1-s2i3-p8"
+  src_port_id: "toy4-c1-ab1-s1i4-p3"
+  dst_port_id: "toy4-c1-ab1-s2i3-p8"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c1-ab1-s2i4-p2:toy4-c1-ab1-s1i1-p4"
+  src_port_id: "toy4-c1-ab1-s2i4-p2"
+  dst_port_id: "toy4-c1-ab1-s1i1-p4"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c1-ab1-s1i1-p4:toy4-c1-ab1-s2i4-p2"
+  src_port_id: "toy4-c1-ab1-s1i1-p4"
+  dst_port_id: "toy4-c1-ab1-s2i4-p2"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c1-ab1-s2i4-p4:toy4-c1-ab1-s1i2-p4"
+  src_port_id: "toy4-c1-ab1-s2i4-p4"
+  dst_port_id: "toy4-c1-ab1-s1i2-p4"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c1-ab1-s1i2-p4:toy4-c1-ab1-s2i4-p4"
+  src_port_id: "toy4-c1-ab1-s1i2-p4"
+  dst_port_id: "toy4-c1-ab1-s2i4-p4"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c1-ab1-s2i4-p6:toy4-c1-ab1-s1i3-p4"
+  src_port_id: "toy4-c1-ab1-s2i4-p6"
+  dst_port_id: "toy4-c1-ab1-s1i3-p4"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c1-ab1-s1i3-p4:toy4-c1-ab1-s2i4-p6"
+  src_port_id: "toy4-c1-ab1-s1i3-p4"
+  dst_port_id: "toy4-c1-ab1-s2i4-p6"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c1-ab1-s2i4-p8:toy4-c1-ab1-s1i4-p4"
+  src_port_id: "toy4-c1-ab1-s2i4-p8"
+  dst_port_id: "toy4-c1-ab1-s1i4-p4"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c1-ab1-s1i4-p4:toy4-c1-ab1-s2i4-p8"
+  src_port_id: "toy4-c1-ab1-s1i4-p4"
+  dst_port_id: "toy4-c1-ab1-s2i4-p8"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c2-ab1-s3i1-p2:toy4-c2-ab1-s2i1-p1"
+  src_port_id: "toy4-c2-ab1-s3i1-p2"
+  dst_port_id: "toy4-c2-ab1-s2i1-p1"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c2-ab1-s2i1-p1:toy4-c2-ab1-s3i1-p2"
+  src_port_id: "toy4-c2-ab1-s2i1-p1"
+  dst_port_id: "toy4-c2-ab1-s3i1-p2"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c2-ab1-s3i1-p4:toy4-c2-ab1-s2i2-p1"
+  src_port_id: "toy4-c2-ab1-s3i1-p4"
+  dst_port_id: "toy4-c2-ab1-s2i2-p1"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c2-ab1-s2i2-p1:toy4-c2-ab1-s3i1-p4"
+  src_port_id: "toy4-c2-ab1-s2i2-p1"
+  dst_port_id: "toy4-c2-ab1-s3i1-p4"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c2-ab1-s3i1-p6:toy4-c2-ab1-s2i3-p1"
+  src_port_id: "toy4-c2-ab1-s3i1-p6"
+  dst_port_id: "toy4-c2-ab1-s2i3-p1"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c2-ab1-s2i3-p1:toy4-c2-ab1-s3i1-p6"
+  src_port_id: "toy4-c2-ab1-s2i3-p1"
+  dst_port_id: "toy4-c2-ab1-s3i1-p6"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c2-ab1-s3i1-p8:toy4-c2-ab1-s2i4-p1"
+  src_port_id: "toy4-c2-ab1-s3i1-p8"
+  dst_port_id: "toy4-c2-ab1-s2i4-p1"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c2-ab1-s2i4-p1:toy4-c2-ab1-s3i1-p8"
+  src_port_id: "toy4-c2-ab1-s2i4-p1"
+  dst_port_id: "toy4-c2-ab1-s3i1-p8"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c2-ab1-s3i1-p3:toy4-c3-ab1-s3i1-p3"
+  src_port_id: "toy4-c2-ab1-s3i1-p3"
+  dst_port_id: "toy4-c3-ab1-s3i1-p3"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c3-ab1-s3i1-p3:toy4-c2-ab1-s3i1-p3"
+  src_port_id: "toy4-c3-ab1-s3i1-p3"
+  dst_port_id: "toy4-c2-ab1-s3i1-p3"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c2-ab1-s3i1-p5:toy4-c4-ab1-s3i1-p3"
+  src_port_id: "toy4-c2-ab1-s3i1-p5"
+  dst_port_id: "toy4-c4-ab1-s3i1-p3"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c4-ab1-s3i1-p3:toy4-c2-ab1-s3i1-p5"
+  src_port_id: "toy4-c4-ab1-s3i1-p3"
+  dst_port_id: "toy4-c2-ab1-s3i1-p5"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c2-ab1-s3i1-p7:toy4-c5-ab1-s3i1-p3"
+  src_port_id: "toy4-c2-ab1-s3i1-p7"
+  dst_port_id: "toy4-c5-ab1-s3i1-p3"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c5-ab1-s3i1-p3:toy4-c2-ab1-s3i1-p7"
+  src_port_id: "toy4-c5-ab1-s3i1-p3"
+  dst_port_id: "toy4-c2-ab1-s3i1-p7"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c2-ab1-s3i2-p2:toy4-c2-ab1-s2i1-p3"
+  src_port_id: "toy4-c2-ab1-s3i2-p2"
+  dst_port_id: "toy4-c2-ab1-s2i1-p3"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c2-ab1-s2i1-p3:toy4-c2-ab1-s3i2-p2"
+  src_port_id: "toy4-c2-ab1-s2i1-p3"
+  dst_port_id: "toy4-c2-ab1-s3i2-p2"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c2-ab1-s3i2-p4:toy4-c2-ab1-s2i2-p3"
+  src_port_id: "toy4-c2-ab1-s3i2-p4"
+  dst_port_id: "toy4-c2-ab1-s2i2-p3"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c2-ab1-s2i2-p3:toy4-c2-ab1-s3i2-p4"
+  src_port_id: "toy4-c2-ab1-s2i2-p3"
+  dst_port_id: "toy4-c2-ab1-s3i2-p4"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c2-ab1-s3i2-p6:toy4-c2-ab1-s2i3-p3"
+  src_port_id: "toy4-c2-ab1-s3i2-p6"
+  dst_port_id: "toy4-c2-ab1-s2i3-p3"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c2-ab1-s2i3-p3:toy4-c2-ab1-s3i2-p6"
+  src_port_id: "toy4-c2-ab1-s2i3-p3"
+  dst_port_id: "toy4-c2-ab1-s3i2-p6"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c2-ab1-s3i2-p8:toy4-c2-ab1-s2i4-p3"
+  src_port_id: "toy4-c2-ab1-s3i2-p8"
+  dst_port_id: "toy4-c2-ab1-s2i4-p3"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c2-ab1-s2i4-p3:toy4-c2-ab1-s3i2-p8"
+  src_port_id: "toy4-c2-ab1-s2i4-p3"
+  dst_port_id: "toy4-c2-ab1-s3i2-p8"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c2-ab1-s3i2-p3:toy4-c3-ab1-s3i2-p3"
+  src_port_id: "toy4-c2-ab1-s3i2-p3"
+  dst_port_id: "toy4-c3-ab1-s3i2-p3"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c3-ab1-s3i2-p3:toy4-c2-ab1-s3i2-p3"
+  src_port_id: "toy4-c3-ab1-s3i2-p3"
+  dst_port_id: "toy4-c2-ab1-s3i2-p3"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c2-ab1-s3i2-p5:toy4-c4-ab1-s3i2-p3"
+  src_port_id: "toy4-c2-ab1-s3i2-p5"
+  dst_port_id: "toy4-c4-ab1-s3i2-p3"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c4-ab1-s3i2-p3:toy4-c2-ab1-s3i2-p5"
+  src_port_id: "toy4-c4-ab1-s3i2-p3"
+  dst_port_id: "toy4-c2-ab1-s3i2-p5"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c2-ab1-s3i2-p7:toy4-c5-ab1-s3i2-p3"
+  src_port_id: "toy4-c2-ab1-s3i2-p7"
+  dst_port_id: "toy4-c5-ab1-s3i2-p3"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c5-ab1-s3i2-p3:toy4-c2-ab1-s3i2-p7"
+  src_port_id: "toy4-c5-ab1-s3i2-p3"
+  dst_port_id: "toy4-c2-ab1-s3i2-p7"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c2-ab1-s3i3-p2:toy4-c2-ab1-s2i1-p5"
+  src_port_id: "toy4-c2-ab1-s3i3-p2"
+  dst_port_id: "toy4-c2-ab1-s2i1-p5"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c2-ab1-s2i1-p5:toy4-c2-ab1-s3i3-p2"
+  src_port_id: "toy4-c2-ab1-s2i1-p5"
+  dst_port_id: "toy4-c2-ab1-s3i3-p2"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c2-ab1-s3i3-p4:toy4-c2-ab1-s2i2-p5"
+  src_port_id: "toy4-c2-ab1-s3i3-p4"
+  dst_port_id: "toy4-c2-ab1-s2i2-p5"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c2-ab1-s2i2-p5:toy4-c2-ab1-s3i3-p4"
+  src_port_id: "toy4-c2-ab1-s2i2-p5"
+  dst_port_id: "toy4-c2-ab1-s3i3-p4"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c2-ab1-s3i3-p6:toy4-c2-ab1-s2i3-p5"
+  src_port_id: "toy4-c2-ab1-s3i3-p6"
+  dst_port_id: "toy4-c2-ab1-s2i3-p5"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c2-ab1-s2i3-p5:toy4-c2-ab1-s3i3-p6"
+  src_port_id: "toy4-c2-ab1-s2i3-p5"
+  dst_port_id: "toy4-c2-ab1-s3i3-p6"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c2-ab1-s3i3-p8:toy4-c2-ab1-s2i4-p5"
+  src_port_id: "toy4-c2-ab1-s3i3-p8"
+  dst_port_id: "toy4-c2-ab1-s2i4-p5"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c2-ab1-s2i4-p5:toy4-c2-ab1-s3i3-p8"
+  src_port_id: "toy4-c2-ab1-s2i4-p5"
+  dst_port_id: "toy4-c2-ab1-s3i3-p8"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c2-ab1-s3i3-p3:toy4-c3-ab1-s3i3-p3"
+  src_port_id: "toy4-c2-ab1-s3i3-p3"
+  dst_port_id: "toy4-c3-ab1-s3i3-p3"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c3-ab1-s3i3-p3:toy4-c2-ab1-s3i3-p3"
+  src_port_id: "toy4-c3-ab1-s3i3-p3"
+  dst_port_id: "toy4-c2-ab1-s3i3-p3"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c2-ab1-s3i3-p5:toy4-c4-ab1-s3i3-p3"
+  src_port_id: "toy4-c2-ab1-s3i3-p5"
+  dst_port_id: "toy4-c4-ab1-s3i3-p3"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c4-ab1-s3i3-p3:toy4-c2-ab1-s3i3-p5"
+  src_port_id: "toy4-c4-ab1-s3i3-p3"
+  dst_port_id: "toy4-c2-ab1-s3i3-p5"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c2-ab1-s3i3-p7:toy4-c5-ab1-s3i3-p3"
+  src_port_id: "toy4-c2-ab1-s3i3-p7"
+  dst_port_id: "toy4-c5-ab1-s3i3-p3"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c5-ab1-s3i3-p3:toy4-c2-ab1-s3i3-p7"
+  src_port_id: "toy4-c5-ab1-s3i3-p3"
+  dst_port_id: "toy4-c2-ab1-s3i3-p7"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c2-ab1-s3i4-p2:toy4-c2-ab1-s2i1-p7"
+  src_port_id: "toy4-c2-ab1-s3i4-p2"
+  dst_port_id: "toy4-c2-ab1-s2i1-p7"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c2-ab1-s2i1-p7:toy4-c2-ab1-s3i4-p2"
+  src_port_id: "toy4-c2-ab1-s2i1-p7"
+  dst_port_id: "toy4-c2-ab1-s3i4-p2"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c2-ab1-s3i4-p4:toy4-c2-ab1-s2i2-p7"
+  src_port_id: "toy4-c2-ab1-s3i4-p4"
+  dst_port_id: "toy4-c2-ab1-s2i2-p7"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c2-ab1-s2i2-p7:toy4-c2-ab1-s3i4-p4"
+  src_port_id: "toy4-c2-ab1-s2i2-p7"
+  dst_port_id: "toy4-c2-ab1-s3i4-p4"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c2-ab1-s3i4-p6:toy4-c2-ab1-s2i3-p7"
+  src_port_id: "toy4-c2-ab1-s3i4-p6"
+  dst_port_id: "toy4-c2-ab1-s2i3-p7"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c2-ab1-s2i3-p7:toy4-c2-ab1-s3i4-p6"
+  src_port_id: "toy4-c2-ab1-s2i3-p7"
+  dst_port_id: "toy4-c2-ab1-s3i4-p6"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c2-ab1-s3i4-p8:toy4-c2-ab1-s2i4-p7"
+  src_port_id: "toy4-c2-ab1-s3i4-p8"
+  dst_port_id: "toy4-c2-ab1-s2i4-p7"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c2-ab1-s2i4-p7:toy4-c2-ab1-s3i4-p8"
+  src_port_id: "toy4-c2-ab1-s2i4-p7"
+  dst_port_id: "toy4-c2-ab1-s3i4-p8"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c2-ab1-s3i4-p3:toy4-c3-ab1-s3i4-p3"
+  src_port_id: "toy4-c2-ab1-s3i4-p3"
+  dst_port_id: "toy4-c3-ab1-s3i4-p3"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c3-ab1-s3i4-p3:toy4-c2-ab1-s3i4-p3"
+  src_port_id: "toy4-c3-ab1-s3i4-p3"
+  dst_port_id: "toy4-c2-ab1-s3i4-p3"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c2-ab1-s3i4-p5:toy4-c4-ab1-s3i4-p3"
+  src_port_id: "toy4-c2-ab1-s3i4-p5"
+  dst_port_id: "toy4-c4-ab1-s3i4-p3"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c4-ab1-s3i4-p3:toy4-c2-ab1-s3i4-p5"
+  src_port_id: "toy4-c4-ab1-s3i4-p3"
+  dst_port_id: "toy4-c2-ab1-s3i4-p5"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c2-ab1-s3i4-p7:toy4-c5-ab1-s3i4-p3"
+  src_port_id: "toy4-c2-ab1-s3i4-p7"
+  dst_port_id: "toy4-c5-ab1-s3i4-p3"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c5-ab1-s3i4-p3:toy4-c2-ab1-s3i4-p7"
+  src_port_id: "toy4-c5-ab1-s3i4-p3"
+  dst_port_id: "toy4-c2-ab1-s3i4-p7"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c2-ab1-s2i1-p2:toy4-c2-ab1-s1i1-p1"
+  src_port_id: "toy4-c2-ab1-s2i1-p2"
+  dst_port_id: "toy4-c2-ab1-s1i1-p1"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c2-ab1-s1i1-p1:toy4-c2-ab1-s2i1-p2"
+  src_port_id: "toy4-c2-ab1-s1i1-p1"
+  dst_port_id: "toy4-c2-ab1-s2i1-p2"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c2-ab1-s2i1-p4:toy4-c2-ab1-s1i2-p1"
+  src_port_id: "toy4-c2-ab1-s2i1-p4"
+  dst_port_id: "toy4-c2-ab1-s1i2-p1"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c2-ab1-s1i2-p1:toy4-c2-ab1-s2i1-p4"
+  src_port_id: "toy4-c2-ab1-s1i2-p1"
+  dst_port_id: "toy4-c2-ab1-s2i1-p4"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c2-ab1-s2i1-p6:toy4-c2-ab1-s1i3-p1"
+  src_port_id: "toy4-c2-ab1-s2i1-p6"
+  dst_port_id: "toy4-c2-ab1-s1i3-p1"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c2-ab1-s1i3-p1:toy4-c2-ab1-s2i1-p6"
+  src_port_id: "toy4-c2-ab1-s1i3-p1"
+  dst_port_id: "toy4-c2-ab1-s2i1-p6"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c2-ab1-s2i1-p8:toy4-c2-ab1-s1i4-p1"
+  src_port_id: "toy4-c2-ab1-s2i1-p8"
+  dst_port_id: "toy4-c2-ab1-s1i4-p1"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c2-ab1-s1i4-p1:toy4-c2-ab1-s2i1-p8"
+  src_port_id: "toy4-c2-ab1-s1i4-p1"
+  dst_port_id: "toy4-c2-ab1-s2i1-p8"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c2-ab1-s2i2-p2:toy4-c2-ab1-s1i1-p2"
+  src_port_id: "toy4-c2-ab1-s2i2-p2"
+  dst_port_id: "toy4-c2-ab1-s1i1-p2"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c2-ab1-s1i1-p2:toy4-c2-ab1-s2i2-p2"
+  src_port_id: "toy4-c2-ab1-s1i1-p2"
+  dst_port_id: "toy4-c2-ab1-s2i2-p2"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c2-ab1-s2i2-p4:toy4-c2-ab1-s1i2-p2"
+  src_port_id: "toy4-c2-ab1-s2i2-p4"
+  dst_port_id: "toy4-c2-ab1-s1i2-p2"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c2-ab1-s1i2-p2:toy4-c2-ab1-s2i2-p4"
+  src_port_id: "toy4-c2-ab1-s1i2-p2"
+  dst_port_id: "toy4-c2-ab1-s2i2-p4"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c2-ab1-s2i2-p6:toy4-c2-ab1-s1i3-p2"
+  src_port_id: "toy4-c2-ab1-s2i2-p6"
+  dst_port_id: "toy4-c2-ab1-s1i3-p2"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c2-ab1-s1i3-p2:toy4-c2-ab1-s2i2-p6"
+  src_port_id: "toy4-c2-ab1-s1i3-p2"
+  dst_port_id: "toy4-c2-ab1-s2i2-p6"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c2-ab1-s2i2-p8:toy4-c2-ab1-s1i4-p2"
+  src_port_id: "toy4-c2-ab1-s2i2-p8"
+  dst_port_id: "toy4-c2-ab1-s1i4-p2"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c2-ab1-s1i4-p2:toy4-c2-ab1-s2i2-p8"
+  src_port_id: "toy4-c2-ab1-s1i4-p2"
+  dst_port_id: "toy4-c2-ab1-s2i2-p8"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c2-ab1-s2i3-p2:toy4-c2-ab1-s1i1-p3"
+  src_port_id: "toy4-c2-ab1-s2i3-p2"
+  dst_port_id: "toy4-c2-ab1-s1i1-p3"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c2-ab1-s1i1-p3:toy4-c2-ab1-s2i3-p2"
+  src_port_id: "toy4-c2-ab1-s1i1-p3"
+  dst_port_id: "toy4-c2-ab1-s2i3-p2"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c2-ab1-s2i3-p4:toy4-c2-ab1-s1i2-p3"
+  src_port_id: "toy4-c2-ab1-s2i3-p4"
+  dst_port_id: "toy4-c2-ab1-s1i2-p3"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c2-ab1-s1i2-p3:toy4-c2-ab1-s2i3-p4"
+  src_port_id: "toy4-c2-ab1-s1i2-p3"
+  dst_port_id: "toy4-c2-ab1-s2i3-p4"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c2-ab1-s2i3-p6:toy4-c2-ab1-s1i3-p3"
+  src_port_id: "toy4-c2-ab1-s2i3-p6"
+  dst_port_id: "toy4-c2-ab1-s1i3-p3"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c2-ab1-s1i3-p3:toy4-c2-ab1-s2i3-p6"
+  src_port_id: "toy4-c2-ab1-s1i3-p3"
+  dst_port_id: "toy4-c2-ab1-s2i3-p6"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c2-ab1-s2i3-p8:toy4-c2-ab1-s1i4-p3"
+  src_port_id: "toy4-c2-ab1-s2i3-p8"
+  dst_port_id: "toy4-c2-ab1-s1i4-p3"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c2-ab1-s1i4-p3:toy4-c2-ab1-s2i3-p8"
+  src_port_id: "toy4-c2-ab1-s1i4-p3"
+  dst_port_id: "toy4-c2-ab1-s2i3-p8"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c2-ab1-s2i4-p2:toy4-c2-ab1-s1i1-p4"
+  src_port_id: "toy4-c2-ab1-s2i4-p2"
+  dst_port_id: "toy4-c2-ab1-s1i1-p4"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c2-ab1-s1i1-p4:toy4-c2-ab1-s2i4-p2"
+  src_port_id: "toy4-c2-ab1-s1i1-p4"
+  dst_port_id: "toy4-c2-ab1-s2i4-p2"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c2-ab1-s2i4-p4:toy4-c2-ab1-s1i2-p4"
+  src_port_id: "toy4-c2-ab1-s2i4-p4"
+  dst_port_id: "toy4-c2-ab1-s1i2-p4"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c2-ab1-s1i2-p4:toy4-c2-ab1-s2i4-p4"
+  src_port_id: "toy4-c2-ab1-s1i2-p4"
+  dst_port_id: "toy4-c2-ab1-s2i4-p4"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c2-ab1-s2i4-p6:toy4-c2-ab1-s1i3-p4"
+  src_port_id: "toy4-c2-ab1-s2i4-p6"
+  dst_port_id: "toy4-c2-ab1-s1i3-p4"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c2-ab1-s1i3-p4:toy4-c2-ab1-s2i4-p6"
+  src_port_id: "toy4-c2-ab1-s1i3-p4"
+  dst_port_id: "toy4-c2-ab1-s2i4-p6"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c2-ab1-s2i4-p8:toy4-c2-ab1-s1i4-p4"
+  src_port_id: "toy4-c2-ab1-s2i4-p8"
+  dst_port_id: "toy4-c2-ab1-s1i4-p4"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c2-ab1-s1i4-p4:toy4-c2-ab1-s2i4-p8"
+  src_port_id: "toy4-c2-ab1-s1i4-p4"
+  dst_port_id: "toy4-c2-ab1-s2i4-p8"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c3-ab1-s3i1-p2:toy4-c3-ab1-s2i1-p1"
+  src_port_id: "toy4-c3-ab1-s3i1-p2"
+  dst_port_id: "toy4-c3-ab1-s2i1-p1"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c3-ab1-s2i1-p1:toy4-c3-ab1-s3i1-p2"
+  src_port_id: "toy4-c3-ab1-s2i1-p1"
+  dst_port_id: "toy4-c3-ab1-s3i1-p2"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c3-ab1-s3i1-p4:toy4-c3-ab1-s2i2-p1"
+  src_port_id: "toy4-c3-ab1-s3i1-p4"
+  dst_port_id: "toy4-c3-ab1-s2i2-p1"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c3-ab1-s2i2-p1:toy4-c3-ab1-s3i1-p4"
+  src_port_id: "toy4-c3-ab1-s2i2-p1"
+  dst_port_id: "toy4-c3-ab1-s3i1-p4"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c3-ab1-s3i1-p6:toy4-c3-ab1-s2i3-p1"
+  src_port_id: "toy4-c3-ab1-s3i1-p6"
+  dst_port_id: "toy4-c3-ab1-s2i3-p1"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c3-ab1-s2i3-p1:toy4-c3-ab1-s3i1-p6"
+  src_port_id: "toy4-c3-ab1-s2i3-p1"
+  dst_port_id: "toy4-c3-ab1-s3i1-p6"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c3-ab1-s3i1-p8:toy4-c3-ab1-s2i4-p1"
+  src_port_id: "toy4-c3-ab1-s3i1-p8"
+  dst_port_id: "toy4-c3-ab1-s2i4-p1"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c3-ab1-s2i4-p1:toy4-c3-ab1-s3i1-p8"
+  src_port_id: "toy4-c3-ab1-s2i4-p1"
+  dst_port_id: "toy4-c3-ab1-s3i1-p8"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c3-ab1-s3i1-p5:toy4-c4-ab1-s3i1-p5"
+  src_port_id: "toy4-c3-ab1-s3i1-p5"
+  dst_port_id: "toy4-c4-ab1-s3i1-p5"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c4-ab1-s3i1-p5:toy4-c3-ab1-s3i1-p5"
+  src_port_id: "toy4-c4-ab1-s3i1-p5"
+  dst_port_id: "toy4-c3-ab1-s3i1-p5"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c3-ab1-s3i1-p7:toy4-c5-ab1-s3i1-p5"
+  src_port_id: "toy4-c3-ab1-s3i1-p7"
+  dst_port_id: "toy4-c5-ab1-s3i1-p5"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c5-ab1-s3i1-p5:toy4-c3-ab1-s3i1-p7"
+  src_port_id: "toy4-c5-ab1-s3i1-p5"
+  dst_port_id: "toy4-c3-ab1-s3i1-p7"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c3-ab1-s3i2-p2:toy4-c3-ab1-s2i1-p3"
+  src_port_id: "toy4-c3-ab1-s3i2-p2"
+  dst_port_id: "toy4-c3-ab1-s2i1-p3"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c3-ab1-s2i1-p3:toy4-c3-ab1-s3i2-p2"
+  src_port_id: "toy4-c3-ab1-s2i1-p3"
+  dst_port_id: "toy4-c3-ab1-s3i2-p2"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c3-ab1-s3i2-p4:toy4-c3-ab1-s2i2-p3"
+  src_port_id: "toy4-c3-ab1-s3i2-p4"
+  dst_port_id: "toy4-c3-ab1-s2i2-p3"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c3-ab1-s2i2-p3:toy4-c3-ab1-s3i2-p4"
+  src_port_id: "toy4-c3-ab1-s2i2-p3"
+  dst_port_id: "toy4-c3-ab1-s3i2-p4"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c3-ab1-s3i2-p6:toy4-c3-ab1-s2i3-p3"
+  src_port_id: "toy4-c3-ab1-s3i2-p6"
+  dst_port_id: "toy4-c3-ab1-s2i3-p3"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c3-ab1-s2i3-p3:toy4-c3-ab1-s3i2-p6"
+  src_port_id: "toy4-c3-ab1-s2i3-p3"
+  dst_port_id: "toy4-c3-ab1-s3i2-p6"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c3-ab1-s3i2-p8:toy4-c3-ab1-s2i4-p3"
+  src_port_id: "toy4-c3-ab1-s3i2-p8"
+  dst_port_id: "toy4-c3-ab1-s2i4-p3"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c3-ab1-s2i4-p3:toy4-c3-ab1-s3i2-p8"
+  src_port_id: "toy4-c3-ab1-s2i4-p3"
+  dst_port_id: "toy4-c3-ab1-s3i2-p8"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c3-ab1-s3i2-p5:toy4-c4-ab1-s3i2-p5"
+  src_port_id: "toy4-c3-ab1-s3i2-p5"
+  dst_port_id: "toy4-c4-ab1-s3i2-p5"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c4-ab1-s3i2-p5:toy4-c3-ab1-s3i2-p5"
+  src_port_id: "toy4-c4-ab1-s3i2-p5"
+  dst_port_id: "toy4-c3-ab1-s3i2-p5"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c3-ab1-s3i2-p7:toy4-c5-ab1-s3i2-p5"
+  src_port_id: "toy4-c3-ab1-s3i2-p7"
+  dst_port_id: "toy4-c5-ab1-s3i2-p5"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c5-ab1-s3i2-p5:toy4-c3-ab1-s3i2-p7"
+  src_port_id: "toy4-c5-ab1-s3i2-p5"
+  dst_port_id: "toy4-c3-ab1-s3i2-p7"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c3-ab1-s3i3-p2:toy4-c3-ab1-s2i1-p5"
+  src_port_id: "toy4-c3-ab1-s3i3-p2"
+  dst_port_id: "toy4-c3-ab1-s2i1-p5"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c3-ab1-s2i1-p5:toy4-c3-ab1-s3i3-p2"
+  src_port_id: "toy4-c3-ab1-s2i1-p5"
+  dst_port_id: "toy4-c3-ab1-s3i3-p2"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c3-ab1-s3i3-p4:toy4-c3-ab1-s2i2-p5"
+  src_port_id: "toy4-c3-ab1-s3i3-p4"
+  dst_port_id: "toy4-c3-ab1-s2i2-p5"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c3-ab1-s2i2-p5:toy4-c3-ab1-s3i3-p4"
+  src_port_id: "toy4-c3-ab1-s2i2-p5"
+  dst_port_id: "toy4-c3-ab1-s3i3-p4"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c3-ab1-s3i3-p6:toy4-c3-ab1-s2i3-p5"
+  src_port_id: "toy4-c3-ab1-s3i3-p6"
+  dst_port_id: "toy4-c3-ab1-s2i3-p5"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c3-ab1-s2i3-p5:toy4-c3-ab1-s3i3-p6"
+  src_port_id: "toy4-c3-ab1-s2i3-p5"
+  dst_port_id: "toy4-c3-ab1-s3i3-p6"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c3-ab1-s3i3-p8:toy4-c3-ab1-s2i4-p5"
+  src_port_id: "toy4-c3-ab1-s3i3-p8"
+  dst_port_id: "toy4-c3-ab1-s2i4-p5"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c3-ab1-s2i4-p5:toy4-c3-ab1-s3i3-p8"
+  src_port_id: "toy4-c3-ab1-s2i4-p5"
+  dst_port_id: "toy4-c3-ab1-s3i3-p8"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c3-ab1-s3i3-p5:toy4-c4-ab1-s3i3-p5"
+  src_port_id: "toy4-c3-ab1-s3i3-p5"
+  dst_port_id: "toy4-c4-ab1-s3i3-p5"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c4-ab1-s3i3-p5:toy4-c3-ab1-s3i3-p5"
+  src_port_id: "toy4-c4-ab1-s3i3-p5"
+  dst_port_id: "toy4-c3-ab1-s3i3-p5"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c3-ab1-s3i3-p7:toy4-c5-ab1-s3i3-p5"
+  src_port_id: "toy4-c3-ab1-s3i3-p7"
+  dst_port_id: "toy4-c5-ab1-s3i3-p5"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c5-ab1-s3i3-p5:toy4-c3-ab1-s3i3-p7"
+  src_port_id: "toy4-c5-ab1-s3i3-p5"
+  dst_port_id: "toy4-c3-ab1-s3i3-p7"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c3-ab1-s3i4-p2:toy4-c3-ab1-s2i1-p7"
+  src_port_id: "toy4-c3-ab1-s3i4-p2"
+  dst_port_id: "toy4-c3-ab1-s2i1-p7"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c3-ab1-s2i1-p7:toy4-c3-ab1-s3i4-p2"
+  src_port_id: "toy4-c3-ab1-s2i1-p7"
+  dst_port_id: "toy4-c3-ab1-s3i4-p2"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c3-ab1-s3i4-p4:toy4-c3-ab1-s2i2-p7"
+  src_port_id: "toy4-c3-ab1-s3i4-p4"
+  dst_port_id: "toy4-c3-ab1-s2i2-p7"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c3-ab1-s2i2-p7:toy4-c3-ab1-s3i4-p4"
+  src_port_id: "toy4-c3-ab1-s2i2-p7"
+  dst_port_id: "toy4-c3-ab1-s3i4-p4"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c3-ab1-s3i4-p6:toy4-c3-ab1-s2i3-p7"
+  src_port_id: "toy4-c3-ab1-s3i4-p6"
+  dst_port_id: "toy4-c3-ab1-s2i3-p7"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c3-ab1-s2i3-p7:toy4-c3-ab1-s3i4-p6"
+  src_port_id: "toy4-c3-ab1-s2i3-p7"
+  dst_port_id: "toy4-c3-ab1-s3i4-p6"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c3-ab1-s3i4-p8:toy4-c3-ab1-s2i4-p7"
+  src_port_id: "toy4-c3-ab1-s3i4-p8"
+  dst_port_id: "toy4-c3-ab1-s2i4-p7"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c3-ab1-s2i4-p7:toy4-c3-ab1-s3i4-p8"
+  src_port_id: "toy4-c3-ab1-s2i4-p7"
+  dst_port_id: "toy4-c3-ab1-s3i4-p8"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c3-ab1-s3i4-p5:toy4-c4-ab1-s3i4-p5"
+  src_port_id: "toy4-c3-ab1-s3i4-p5"
+  dst_port_id: "toy4-c4-ab1-s3i4-p5"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c4-ab1-s3i4-p5:toy4-c3-ab1-s3i4-p5"
+  src_port_id: "toy4-c4-ab1-s3i4-p5"
+  dst_port_id: "toy4-c3-ab1-s3i4-p5"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c3-ab1-s3i4-p7:toy4-c5-ab1-s3i4-p5"
+  src_port_id: "toy4-c3-ab1-s3i4-p7"
+  dst_port_id: "toy4-c5-ab1-s3i4-p5"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c5-ab1-s3i4-p5:toy4-c3-ab1-s3i4-p7"
+  src_port_id: "toy4-c5-ab1-s3i4-p5"
+  dst_port_id: "toy4-c3-ab1-s3i4-p7"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c3-ab1-s2i1-p2:toy4-c3-ab1-s1i1-p1"
+  src_port_id: "toy4-c3-ab1-s2i1-p2"
+  dst_port_id: "toy4-c3-ab1-s1i1-p1"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c3-ab1-s1i1-p1:toy4-c3-ab1-s2i1-p2"
+  src_port_id: "toy4-c3-ab1-s1i1-p1"
+  dst_port_id: "toy4-c3-ab1-s2i1-p2"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c3-ab1-s2i1-p4:toy4-c3-ab1-s1i2-p1"
+  src_port_id: "toy4-c3-ab1-s2i1-p4"
+  dst_port_id: "toy4-c3-ab1-s1i2-p1"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c3-ab1-s1i2-p1:toy4-c3-ab1-s2i1-p4"
+  src_port_id: "toy4-c3-ab1-s1i2-p1"
+  dst_port_id: "toy4-c3-ab1-s2i1-p4"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c3-ab1-s2i1-p6:toy4-c3-ab1-s1i3-p1"
+  src_port_id: "toy4-c3-ab1-s2i1-p6"
+  dst_port_id: "toy4-c3-ab1-s1i3-p1"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c3-ab1-s1i3-p1:toy4-c3-ab1-s2i1-p6"
+  src_port_id: "toy4-c3-ab1-s1i3-p1"
+  dst_port_id: "toy4-c3-ab1-s2i1-p6"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c3-ab1-s2i1-p8:toy4-c3-ab1-s1i4-p1"
+  src_port_id: "toy4-c3-ab1-s2i1-p8"
+  dst_port_id: "toy4-c3-ab1-s1i4-p1"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c3-ab1-s1i4-p1:toy4-c3-ab1-s2i1-p8"
+  src_port_id: "toy4-c3-ab1-s1i4-p1"
+  dst_port_id: "toy4-c3-ab1-s2i1-p8"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c3-ab1-s2i2-p2:toy4-c3-ab1-s1i1-p2"
+  src_port_id: "toy4-c3-ab1-s2i2-p2"
+  dst_port_id: "toy4-c3-ab1-s1i1-p2"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c3-ab1-s1i1-p2:toy4-c3-ab1-s2i2-p2"
+  src_port_id: "toy4-c3-ab1-s1i1-p2"
+  dst_port_id: "toy4-c3-ab1-s2i2-p2"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c3-ab1-s2i2-p4:toy4-c3-ab1-s1i2-p2"
+  src_port_id: "toy4-c3-ab1-s2i2-p4"
+  dst_port_id: "toy4-c3-ab1-s1i2-p2"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c3-ab1-s1i2-p2:toy4-c3-ab1-s2i2-p4"
+  src_port_id: "toy4-c3-ab1-s1i2-p2"
+  dst_port_id: "toy4-c3-ab1-s2i2-p4"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c3-ab1-s2i2-p6:toy4-c3-ab1-s1i3-p2"
+  src_port_id: "toy4-c3-ab1-s2i2-p6"
+  dst_port_id: "toy4-c3-ab1-s1i3-p2"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c3-ab1-s1i3-p2:toy4-c3-ab1-s2i2-p6"
+  src_port_id: "toy4-c3-ab1-s1i3-p2"
+  dst_port_id: "toy4-c3-ab1-s2i2-p6"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c3-ab1-s2i2-p8:toy4-c3-ab1-s1i4-p2"
+  src_port_id: "toy4-c3-ab1-s2i2-p8"
+  dst_port_id: "toy4-c3-ab1-s1i4-p2"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c3-ab1-s1i4-p2:toy4-c3-ab1-s2i2-p8"
+  src_port_id: "toy4-c3-ab1-s1i4-p2"
+  dst_port_id: "toy4-c3-ab1-s2i2-p8"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c3-ab1-s2i3-p2:toy4-c3-ab1-s1i1-p3"
+  src_port_id: "toy4-c3-ab1-s2i3-p2"
+  dst_port_id: "toy4-c3-ab1-s1i1-p3"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c3-ab1-s1i1-p3:toy4-c3-ab1-s2i3-p2"
+  src_port_id: "toy4-c3-ab1-s1i1-p3"
+  dst_port_id: "toy4-c3-ab1-s2i3-p2"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c3-ab1-s2i3-p4:toy4-c3-ab1-s1i2-p3"
+  src_port_id: "toy4-c3-ab1-s2i3-p4"
+  dst_port_id: "toy4-c3-ab1-s1i2-p3"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c3-ab1-s1i2-p3:toy4-c3-ab1-s2i3-p4"
+  src_port_id: "toy4-c3-ab1-s1i2-p3"
+  dst_port_id: "toy4-c3-ab1-s2i3-p4"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c3-ab1-s2i3-p6:toy4-c3-ab1-s1i3-p3"
+  src_port_id: "toy4-c3-ab1-s2i3-p6"
+  dst_port_id: "toy4-c3-ab1-s1i3-p3"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c3-ab1-s1i3-p3:toy4-c3-ab1-s2i3-p6"
+  src_port_id: "toy4-c3-ab1-s1i3-p3"
+  dst_port_id: "toy4-c3-ab1-s2i3-p6"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c3-ab1-s2i3-p8:toy4-c3-ab1-s1i4-p3"
+  src_port_id: "toy4-c3-ab1-s2i3-p8"
+  dst_port_id: "toy4-c3-ab1-s1i4-p3"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c3-ab1-s1i4-p3:toy4-c3-ab1-s2i3-p8"
+  src_port_id: "toy4-c3-ab1-s1i4-p3"
+  dst_port_id: "toy4-c3-ab1-s2i3-p8"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c3-ab1-s2i4-p2:toy4-c3-ab1-s1i1-p4"
+  src_port_id: "toy4-c3-ab1-s2i4-p2"
+  dst_port_id: "toy4-c3-ab1-s1i1-p4"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c3-ab1-s1i1-p4:toy4-c3-ab1-s2i4-p2"
+  src_port_id: "toy4-c3-ab1-s1i1-p4"
+  dst_port_id: "toy4-c3-ab1-s2i4-p2"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c3-ab1-s2i4-p4:toy4-c3-ab1-s1i2-p4"
+  src_port_id: "toy4-c3-ab1-s2i4-p4"
+  dst_port_id: "toy4-c3-ab1-s1i2-p4"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c3-ab1-s1i2-p4:toy4-c3-ab1-s2i4-p4"
+  src_port_id: "toy4-c3-ab1-s1i2-p4"
+  dst_port_id: "toy4-c3-ab1-s2i4-p4"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c3-ab1-s2i4-p6:toy4-c3-ab1-s1i3-p4"
+  src_port_id: "toy4-c3-ab1-s2i4-p6"
+  dst_port_id: "toy4-c3-ab1-s1i3-p4"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c3-ab1-s1i3-p4:toy4-c3-ab1-s2i4-p6"
+  src_port_id: "toy4-c3-ab1-s1i3-p4"
+  dst_port_id: "toy4-c3-ab1-s2i4-p6"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c3-ab1-s2i4-p8:toy4-c3-ab1-s1i4-p4"
+  src_port_id: "toy4-c3-ab1-s2i4-p8"
+  dst_port_id: "toy4-c3-ab1-s1i4-p4"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c3-ab1-s1i4-p4:toy4-c3-ab1-s2i4-p8"
+  src_port_id: "toy4-c3-ab1-s1i4-p4"
+  dst_port_id: "toy4-c3-ab1-s2i4-p8"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c4-ab1-s3i1-p2:toy4-c4-ab1-s2i1-p1"
+  src_port_id: "toy4-c4-ab1-s3i1-p2"
+  dst_port_id: "toy4-c4-ab1-s2i1-p1"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c4-ab1-s2i1-p1:toy4-c4-ab1-s3i1-p2"
+  src_port_id: "toy4-c4-ab1-s2i1-p1"
+  dst_port_id: "toy4-c4-ab1-s3i1-p2"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c4-ab1-s3i1-p4:toy4-c4-ab1-s2i2-p1"
+  src_port_id: "toy4-c4-ab1-s3i1-p4"
+  dst_port_id: "toy4-c4-ab1-s2i2-p1"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c4-ab1-s2i2-p1:toy4-c4-ab1-s3i1-p4"
+  src_port_id: "toy4-c4-ab1-s2i2-p1"
+  dst_port_id: "toy4-c4-ab1-s3i1-p4"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c4-ab1-s3i1-p6:toy4-c4-ab1-s2i3-p1"
+  src_port_id: "toy4-c4-ab1-s3i1-p6"
+  dst_port_id: "toy4-c4-ab1-s2i3-p1"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c4-ab1-s2i3-p1:toy4-c4-ab1-s3i1-p6"
+  src_port_id: "toy4-c4-ab1-s2i3-p1"
+  dst_port_id: "toy4-c4-ab1-s3i1-p6"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c4-ab1-s3i1-p8:toy4-c4-ab1-s2i4-p1"
+  src_port_id: "toy4-c4-ab1-s3i1-p8"
+  dst_port_id: "toy4-c4-ab1-s2i4-p1"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c4-ab1-s2i4-p1:toy4-c4-ab1-s3i1-p8"
+  src_port_id: "toy4-c4-ab1-s2i4-p1"
+  dst_port_id: "toy4-c4-ab1-s3i1-p8"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c4-ab1-s3i1-p7:toy4-c5-ab1-s3i1-p7"
+  src_port_id: "toy4-c4-ab1-s3i1-p7"
+  dst_port_id: "toy4-c5-ab1-s3i1-p7"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c5-ab1-s3i1-p7:toy4-c4-ab1-s3i1-p7"
+  src_port_id: "toy4-c5-ab1-s3i1-p7"
+  dst_port_id: "toy4-c4-ab1-s3i1-p7"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c4-ab1-s3i2-p2:toy4-c4-ab1-s2i1-p3"
+  src_port_id: "toy4-c4-ab1-s3i2-p2"
+  dst_port_id: "toy4-c4-ab1-s2i1-p3"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c4-ab1-s2i1-p3:toy4-c4-ab1-s3i2-p2"
+  src_port_id: "toy4-c4-ab1-s2i1-p3"
+  dst_port_id: "toy4-c4-ab1-s3i2-p2"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c4-ab1-s3i2-p4:toy4-c4-ab1-s2i2-p3"
+  src_port_id: "toy4-c4-ab1-s3i2-p4"
+  dst_port_id: "toy4-c4-ab1-s2i2-p3"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c4-ab1-s2i2-p3:toy4-c4-ab1-s3i2-p4"
+  src_port_id: "toy4-c4-ab1-s2i2-p3"
+  dst_port_id: "toy4-c4-ab1-s3i2-p4"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c4-ab1-s3i2-p6:toy4-c4-ab1-s2i3-p3"
+  src_port_id: "toy4-c4-ab1-s3i2-p6"
+  dst_port_id: "toy4-c4-ab1-s2i3-p3"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c4-ab1-s2i3-p3:toy4-c4-ab1-s3i2-p6"
+  src_port_id: "toy4-c4-ab1-s2i3-p3"
+  dst_port_id: "toy4-c4-ab1-s3i2-p6"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c4-ab1-s3i2-p8:toy4-c4-ab1-s2i4-p3"
+  src_port_id: "toy4-c4-ab1-s3i2-p8"
+  dst_port_id: "toy4-c4-ab1-s2i4-p3"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c4-ab1-s2i4-p3:toy4-c4-ab1-s3i2-p8"
+  src_port_id: "toy4-c4-ab1-s2i4-p3"
+  dst_port_id: "toy4-c4-ab1-s3i2-p8"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c4-ab1-s3i2-p7:toy4-c5-ab1-s3i2-p7"
+  src_port_id: "toy4-c4-ab1-s3i2-p7"
+  dst_port_id: "toy4-c5-ab1-s3i2-p7"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c5-ab1-s3i2-p7:toy4-c4-ab1-s3i2-p7"
+  src_port_id: "toy4-c5-ab1-s3i2-p7"
+  dst_port_id: "toy4-c4-ab1-s3i2-p7"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c4-ab1-s3i3-p2:toy4-c4-ab1-s2i1-p5"
+  src_port_id: "toy4-c4-ab1-s3i3-p2"
+  dst_port_id: "toy4-c4-ab1-s2i1-p5"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c4-ab1-s2i1-p5:toy4-c4-ab1-s3i3-p2"
+  src_port_id: "toy4-c4-ab1-s2i1-p5"
+  dst_port_id: "toy4-c4-ab1-s3i3-p2"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c4-ab1-s3i3-p4:toy4-c4-ab1-s2i2-p5"
+  src_port_id: "toy4-c4-ab1-s3i3-p4"
+  dst_port_id: "toy4-c4-ab1-s2i2-p5"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c4-ab1-s2i2-p5:toy4-c4-ab1-s3i3-p4"
+  src_port_id: "toy4-c4-ab1-s2i2-p5"
+  dst_port_id: "toy4-c4-ab1-s3i3-p4"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c4-ab1-s3i3-p6:toy4-c4-ab1-s2i3-p5"
+  src_port_id: "toy4-c4-ab1-s3i3-p6"
+  dst_port_id: "toy4-c4-ab1-s2i3-p5"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c4-ab1-s2i3-p5:toy4-c4-ab1-s3i3-p6"
+  src_port_id: "toy4-c4-ab1-s2i3-p5"
+  dst_port_id: "toy4-c4-ab1-s3i3-p6"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c4-ab1-s3i3-p8:toy4-c4-ab1-s2i4-p5"
+  src_port_id: "toy4-c4-ab1-s3i3-p8"
+  dst_port_id: "toy4-c4-ab1-s2i4-p5"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c4-ab1-s2i4-p5:toy4-c4-ab1-s3i3-p8"
+  src_port_id: "toy4-c4-ab1-s2i4-p5"
+  dst_port_id: "toy4-c4-ab1-s3i3-p8"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c4-ab1-s3i3-p7:toy4-c5-ab1-s3i3-p7"
+  src_port_id: "toy4-c4-ab1-s3i3-p7"
+  dst_port_id: "toy4-c5-ab1-s3i3-p7"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c5-ab1-s3i3-p7:toy4-c4-ab1-s3i3-p7"
+  src_port_id: "toy4-c5-ab1-s3i3-p7"
+  dst_port_id: "toy4-c4-ab1-s3i3-p7"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c4-ab1-s3i4-p2:toy4-c4-ab1-s2i1-p7"
+  src_port_id: "toy4-c4-ab1-s3i4-p2"
+  dst_port_id: "toy4-c4-ab1-s2i1-p7"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c4-ab1-s2i1-p7:toy4-c4-ab1-s3i4-p2"
+  src_port_id: "toy4-c4-ab1-s2i1-p7"
+  dst_port_id: "toy4-c4-ab1-s3i4-p2"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c4-ab1-s3i4-p4:toy4-c4-ab1-s2i2-p7"
+  src_port_id: "toy4-c4-ab1-s3i4-p4"
+  dst_port_id: "toy4-c4-ab1-s2i2-p7"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c4-ab1-s2i2-p7:toy4-c4-ab1-s3i4-p4"
+  src_port_id: "toy4-c4-ab1-s2i2-p7"
+  dst_port_id: "toy4-c4-ab1-s3i4-p4"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c4-ab1-s3i4-p6:toy4-c4-ab1-s2i3-p7"
+  src_port_id: "toy4-c4-ab1-s3i4-p6"
+  dst_port_id: "toy4-c4-ab1-s2i3-p7"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c4-ab1-s2i3-p7:toy4-c4-ab1-s3i4-p6"
+  src_port_id: "toy4-c4-ab1-s2i3-p7"
+  dst_port_id: "toy4-c4-ab1-s3i4-p6"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c4-ab1-s3i4-p8:toy4-c4-ab1-s2i4-p7"
+  src_port_id: "toy4-c4-ab1-s3i4-p8"
+  dst_port_id: "toy4-c4-ab1-s2i4-p7"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c4-ab1-s2i4-p7:toy4-c4-ab1-s3i4-p8"
+  src_port_id: "toy4-c4-ab1-s2i4-p7"
+  dst_port_id: "toy4-c4-ab1-s3i4-p8"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c4-ab1-s3i4-p7:toy4-c5-ab1-s3i4-p7"
+  src_port_id: "toy4-c4-ab1-s3i4-p7"
+  dst_port_id: "toy4-c5-ab1-s3i4-p7"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c5-ab1-s3i4-p7:toy4-c4-ab1-s3i4-p7"
+  src_port_id: "toy4-c5-ab1-s3i4-p7"
+  dst_port_id: "toy4-c4-ab1-s3i4-p7"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c4-ab1-s2i1-p2:toy4-c4-ab1-s1i1-p1"
+  src_port_id: "toy4-c4-ab1-s2i1-p2"
+  dst_port_id: "toy4-c4-ab1-s1i1-p1"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c4-ab1-s1i1-p1:toy4-c4-ab1-s2i1-p2"
+  src_port_id: "toy4-c4-ab1-s1i1-p1"
+  dst_port_id: "toy4-c4-ab1-s2i1-p2"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c4-ab1-s2i1-p4:toy4-c4-ab1-s1i2-p1"
+  src_port_id: "toy4-c4-ab1-s2i1-p4"
+  dst_port_id: "toy4-c4-ab1-s1i2-p1"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c4-ab1-s1i2-p1:toy4-c4-ab1-s2i1-p4"
+  src_port_id: "toy4-c4-ab1-s1i2-p1"
+  dst_port_id: "toy4-c4-ab1-s2i1-p4"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c4-ab1-s2i1-p6:toy4-c4-ab1-s1i3-p1"
+  src_port_id: "toy4-c4-ab1-s2i1-p6"
+  dst_port_id: "toy4-c4-ab1-s1i3-p1"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c4-ab1-s1i3-p1:toy4-c4-ab1-s2i1-p6"
+  src_port_id: "toy4-c4-ab1-s1i3-p1"
+  dst_port_id: "toy4-c4-ab1-s2i1-p6"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c4-ab1-s2i1-p8:toy4-c4-ab1-s1i4-p1"
+  src_port_id: "toy4-c4-ab1-s2i1-p8"
+  dst_port_id: "toy4-c4-ab1-s1i4-p1"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c4-ab1-s1i4-p1:toy4-c4-ab1-s2i1-p8"
+  src_port_id: "toy4-c4-ab1-s1i4-p1"
+  dst_port_id: "toy4-c4-ab1-s2i1-p8"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c4-ab1-s2i2-p2:toy4-c4-ab1-s1i1-p2"
+  src_port_id: "toy4-c4-ab1-s2i2-p2"
+  dst_port_id: "toy4-c4-ab1-s1i1-p2"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c4-ab1-s1i1-p2:toy4-c4-ab1-s2i2-p2"
+  src_port_id: "toy4-c4-ab1-s1i1-p2"
+  dst_port_id: "toy4-c4-ab1-s2i2-p2"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c4-ab1-s2i2-p4:toy4-c4-ab1-s1i2-p2"
+  src_port_id: "toy4-c4-ab1-s2i2-p4"
+  dst_port_id: "toy4-c4-ab1-s1i2-p2"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c4-ab1-s1i2-p2:toy4-c4-ab1-s2i2-p4"
+  src_port_id: "toy4-c4-ab1-s1i2-p2"
+  dst_port_id: "toy4-c4-ab1-s2i2-p4"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c4-ab1-s2i2-p6:toy4-c4-ab1-s1i3-p2"
+  src_port_id: "toy4-c4-ab1-s2i2-p6"
+  dst_port_id: "toy4-c4-ab1-s1i3-p2"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c4-ab1-s1i3-p2:toy4-c4-ab1-s2i2-p6"
+  src_port_id: "toy4-c4-ab1-s1i3-p2"
+  dst_port_id: "toy4-c4-ab1-s2i2-p6"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c4-ab1-s2i2-p8:toy4-c4-ab1-s1i4-p2"
+  src_port_id: "toy4-c4-ab1-s2i2-p8"
+  dst_port_id: "toy4-c4-ab1-s1i4-p2"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c4-ab1-s1i4-p2:toy4-c4-ab1-s2i2-p8"
+  src_port_id: "toy4-c4-ab1-s1i4-p2"
+  dst_port_id: "toy4-c4-ab1-s2i2-p8"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c4-ab1-s2i3-p2:toy4-c4-ab1-s1i1-p3"
+  src_port_id: "toy4-c4-ab1-s2i3-p2"
+  dst_port_id: "toy4-c4-ab1-s1i1-p3"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c4-ab1-s1i1-p3:toy4-c4-ab1-s2i3-p2"
+  src_port_id: "toy4-c4-ab1-s1i1-p3"
+  dst_port_id: "toy4-c4-ab1-s2i3-p2"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c4-ab1-s2i3-p4:toy4-c4-ab1-s1i2-p3"
+  src_port_id: "toy4-c4-ab1-s2i3-p4"
+  dst_port_id: "toy4-c4-ab1-s1i2-p3"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c4-ab1-s1i2-p3:toy4-c4-ab1-s2i3-p4"
+  src_port_id: "toy4-c4-ab1-s1i2-p3"
+  dst_port_id: "toy4-c4-ab1-s2i3-p4"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c4-ab1-s2i3-p6:toy4-c4-ab1-s1i3-p3"
+  src_port_id: "toy4-c4-ab1-s2i3-p6"
+  dst_port_id: "toy4-c4-ab1-s1i3-p3"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c4-ab1-s1i3-p3:toy4-c4-ab1-s2i3-p6"
+  src_port_id: "toy4-c4-ab1-s1i3-p3"
+  dst_port_id: "toy4-c4-ab1-s2i3-p6"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c4-ab1-s2i3-p8:toy4-c4-ab1-s1i4-p3"
+  src_port_id: "toy4-c4-ab1-s2i3-p8"
+  dst_port_id: "toy4-c4-ab1-s1i4-p3"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c4-ab1-s1i4-p3:toy4-c4-ab1-s2i3-p8"
+  src_port_id: "toy4-c4-ab1-s1i4-p3"
+  dst_port_id: "toy4-c4-ab1-s2i3-p8"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c4-ab1-s2i4-p2:toy4-c4-ab1-s1i1-p4"
+  src_port_id: "toy4-c4-ab1-s2i4-p2"
+  dst_port_id: "toy4-c4-ab1-s1i1-p4"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c4-ab1-s1i1-p4:toy4-c4-ab1-s2i4-p2"
+  src_port_id: "toy4-c4-ab1-s1i1-p4"
+  dst_port_id: "toy4-c4-ab1-s2i4-p2"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c4-ab1-s2i4-p4:toy4-c4-ab1-s1i2-p4"
+  src_port_id: "toy4-c4-ab1-s2i4-p4"
+  dst_port_id: "toy4-c4-ab1-s1i2-p4"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c4-ab1-s1i2-p4:toy4-c4-ab1-s2i4-p4"
+  src_port_id: "toy4-c4-ab1-s1i2-p4"
+  dst_port_id: "toy4-c4-ab1-s2i4-p4"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c4-ab1-s2i4-p6:toy4-c4-ab1-s1i3-p4"
+  src_port_id: "toy4-c4-ab1-s2i4-p6"
+  dst_port_id: "toy4-c4-ab1-s1i3-p4"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c4-ab1-s1i3-p4:toy4-c4-ab1-s2i4-p6"
+  src_port_id: "toy4-c4-ab1-s1i3-p4"
+  dst_port_id: "toy4-c4-ab1-s2i4-p6"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c4-ab1-s2i4-p8:toy4-c4-ab1-s1i4-p4"
+  src_port_id: "toy4-c4-ab1-s2i4-p8"
+  dst_port_id: "toy4-c4-ab1-s1i4-p4"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c4-ab1-s1i4-p4:toy4-c4-ab1-s2i4-p8"
+  src_port_id: "toy4-c4-ab1-s1i4-p4"
+  dst_port_id: "toy4-c4-ab1-s2i4-p8"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c5-ab1-s3i1-p2:toy4-c5-ab1-s2i1-p1"
+  src_port_id: "toy4-c5-ab1-s3i1-p2"
+  dst_port_id: "toy4-c5-ab1-s2i1-p1"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c5-ab1-s2i1-p1:toy4-c5-ab1-s3i1-p2"
+  src_port_id: "toy4-c5-ab1-s2i1-p1"
+  dst_port_id: "toy4-c5-ab1-s3i1-p2"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c5-ab1-s3i1-p4:toy4-c5-ab1-s2i2-p1"
+  src_port_id: "toy4-c5-ab1-s3i1-p4"
+  dst_port_id: "toy4-c5-ab1-s2i2-p1"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c5-ab1-s2i2-p1:toy4-c5-ab1-s3i1-p4"
+  src_port_id: "toy4-c5-ab1-s2i2-p1"
+  dst_port_id: "toy4-c5-ab1-s3i1-p4"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c5-ab1-s3i1-p6:toy4-c5-ab1-s2i3-p1"
+  src_port_id: "toy4-c5-ab1-s3i1-p6"
+  dst_port_id: "toy4-c5-ab1-s2i3-p1"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c5-ab1-s2i3-p1:toy4-c5-ab1-s3i1-p6"
+  src_port_id: "toy4-c5-ab1-s2i3-p1"
+  dst_port_id: "toy4-c5-ab1-s3i1-p6"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c5-ab1-s3i1-p8:toy4-c5-ab1-s2i4-p1"
+  src_port_id: "toy4-c5-ab1-s3i1-p8"
+  dst_port_id: "toy4-c5-ab1-s2i4-p1"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c5-ab1-s2i4-p1:toy4-c5-ab1-s3i1-p8"
+  src_port_id: "toy4-c5-ab1-s2i4-p1"
+  dst_port_id: "toy4-c5-ab1-s3i1-p8"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c5-ab1-s3i2-p2:toy4-c5-ab1-s2i1-p3"
+  src_port_id: "toy4-c5-ab1-s3i2-p2"
+  dst_port_id: "toy4-c5-ab1-s2i1-p3"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c5-ab1-s2i1-p3:toy4-c5-ab1-s3i2-p2"
+  src_port_id: "toy4-c5-ab1-s2i1-p3"
+  dst_port_id: "toy4-c5-ab1-s3i2-p2"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c5-ab1-s3i2-p4:toy4-c5-ab1-s2i2-p3"
+  src_port_id: "toy4-c5-ab1-s3i2-p4"
+  dst_port_id: "toy4-c5-ab1-s2i2-p3"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c5-ab1-s2i2-p3:toy4-c5-ab1-s3i2-p4"
+  src_port_id: "toy4-c5-ab1-s2i2-p3"
+  dst_port_id: "toy4-c5-ab1-s3i2-p4"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c5-ab1-s3i2-p6:toy4-c5-ab1-s2i3-p3"
+  src_port_id: "toy4-c5-ab1-s3i2-p6"
+  dst_port_id: "toy4-c5-ab1-s2i3-p3"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c5-ab1-s2i3-p3:toy4-c5-ab1-s3i2-p6"
+  src_port_id: "toy4-c5-ab1-s2i3-p3"
+  dst_port_id: "toy4-c5-ab1-s3i2-p6"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c5-ab1-s3i2-p8:toy4-c5-ab1-s2i4-p3"
+  src_port_id: "toy4-c5-ab1-s3i2-p8"
+  dst_port_id: "toy4-c5-ab1-s2i4-p3"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c5-ab1-s2i4-p3:toy4-c5-ab1-s3i2-p8"
+  src_port_id: "toy4-c5-ab1-s2i4-p3"
+  dst_port_id: "toy4-c5-ab1-s3i2-p8"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c5-ab1-s3i3-p2:toy4-c5-ab1-s2i1-p5"
+  src_port_id: "toy4-c5-ab1-s3i3-p2"
+  dst_port_id: "toy4-c5-ab1-s2i1-p5"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c5-ab1-s2i1-p5:toy4-c5-ab1-s3i3-p2"
+  src_port_id: "toy4-c5-ab1-s2i1-p5"
+  dst_port_id: "toy4-c5-ab1-s3i3-p2"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c5-ab1-s3i3-p4:toy4-c5-ab1-s2i2-p5"
+  src_port_id: "toy4-c5-ab1-s3i3-p4"
+  dst_port_id: "toy4-c5-ab1-s2i2-p5"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c5-ab1-s2i2-p5:toy4-c5-ab1-s3i3-p4"
+  src_port_id: "toy4-c5-ab1-s2i2-p5"
+  dst_port_id: "toy4-c5-ab1-s3i3-p4"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c5-ab1-s3i3-p6:toy4-c5-ab1-s2i3-p5"
+  src_port_id: "toy4-c5-ab1-s3i3-p6"
+  dst_port_id: "toy4-c5-ab1-s2i3-p5"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c5-ab1-s2i3-p5:toy4-c5-ab1-s3i3-p6"
+  src_port_id: "toy4-c5-ab1-s2i3-p5"
+  dst_port_id: "toy4-c5-ab1-s3i3-p6"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c5-ab1-s3i3-p8:toy4-c5-ab1-s2i4-p5"
+  src_port_id: "toy4-c5-ab1-s3i3-p8"
+  dst_port_id: "toy4-c5-ab1-s2i4-p5"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c5-ab1-s2i4-p5:toy4-c5-ab1-s3i3-p8"
+  src_port_id: "toy4-c5-ab1-s2i4-p5"
+  dst_port_id: "toy4-c5-ab1-s3i3-p8"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c5-ab1-s3i4-p2:toy4-c5-ab1-s2i1-p7"
+  src_port_id: "toy4-c5-ab1-s3i4-p2"
+  dst_port_id: "toy4-c5-ab1-s2i1-p7"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c5-ab1-s2i1-p7:toy4-c5-ab1-s3i4-p2"
+  src_port_id: "toy4-c5-ab1-s2i1-p7"
+  dst_port_id: "toy4-c5-ab1-s3i4-p2"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c5-ab1-s3i4-p4:toy4-c5-ab1-s2i2-p7"
+  src_port_id: "toy4-c5-ab1-s3i4-p4"
+  dst_port_id: "toy4-c5-ab1-s2i2-p7"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c5-ab1-s2i2-p7:toy4-c5-ab1-s3i4-p4"
+  src_port_id: "toy4-c5-ab1-s2i2-p7"
+  dst_port_id: "toy4-c5-ab1-s3i4-p4"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c5-ab1-s3i4-p6:toy4-c5-ab1-s2i3-p7"
+  src_port_id: "toy4-c5-ab1-s3i4-p6"
+  dst_port_id: "toy4-c5-ab1-s2i3-p7"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c5-ab1-s2i3-p7:toy4-c5-ab1-s3i4-p6"
+  src_port_id: "toy4-c5-ab1-s2i3-p7"
+  dst_port_id: "toy4-c5-ab1-s3i4-p6"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c5-ab1-s3i4-p8:toy4-c5-ab1-s2i4-p7"
+  src_port_id: "toy4-c5-ab1-s3i4-p8"
+  dst_port_id: "toy4-c5-ab1-s2i4-p7"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c5-ab1-s2i4-p7:toy4-c5-ab1-s3i4-p8"
+  src_port_id: "toy4-c5-ab1-s2i4-p7"
+  dst_port_id: "toy4-c5-ab1-s3i4-p8"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c5-ab1-s2i1-p2:toy4-c5-ab1-s1i1-p1"
+  src_port_id: "toy4-c5-ab1-s2i1-p2"
+  dst_port_id: "toy4-c5-ab1-s1i1-p1"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c5-ab1-s1i1-p1:toy4-c5-ab1-s2i1-p2"
+  src_port_id: "toy4-c5-ab1-s1i1-p1"
+  dst_port_id: "toy4-c5-ab1-s2i1-p2"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c5-ab1-s2i1-p4:toy4-c5-ab1-s1i2-p1"
+  src_port_id: "toy4-c5-ab1-s2i1-p4"
+  dst_port_id: "toy4-c5-ab1-s1i2-p1"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c5-ab1-s1i2-p1:toy4-c5-ab1-s2i1-p4"
+  src_port_id: "toy4-c5-ab1-s1i2-p1"
+  dst_port_id: "toy4-c5-ab1-s2i1-p4"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c5-ab1-s2i1-p6:toy4-c5-ab1-s1i3-p1"
+  src_port_id: "toy4-c5-ab1-s2i1-p6"
+  dst_port_id: "toy4-c5-ab1-s1i3-p1"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c5-ab1-s1i3-p1:toy4-c5-ab1-s2i1-p6"
+  src_port_id: "toy4-c5-ab1-s1i3-p1"
+  dst_port_id: "toy4-c5-ab1-s2i1-p6"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c5-ab1-s2i1-p8:toy4-c5-ab1-s1i4-p1"
+  src_port_id: "toy4-c5-ab1-s2i1-p8"
+  dst_port_id: "toy4-c5-ab1-s1i4-p1"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c5-ab1-s1i4-p1:toy4-c5-ab1-s2i1-p8"
+  src_port_id: "toy4-c5-ab1-s1i4-p1"
+  dst_port_id: "toy4-c5-ab1-s2i1-p8"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c5-ab1-s2i2-p2:toy4-c5-ab1-s1i1-p2"
+  src_port_id: "toy4-c5-ab1-s2i2-p2"
+  dst_port_id: "toy4-c5-ab1-s1i1-p2"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c5-ab1-s1i1-p2:toy4-c5-ab1-s2i2-p2"
+  src_port_id: "toy4-c5-ab1-s1i1-p2"
+  dst_port_id: "toy4-c5-ab1-s2i2-p2"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c5-ab1-s2i2-p4:toy4-c5-ab1-s1i2-p2"
+  src_port_id: "toy4-c5-ab1-s2i2-p4"
+  dst_port_id: "toy4-c5-ab1-s1i2-p2"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c5-ab1-s1i2-p2:toy4-c5-ab1-s2i2-p4"
+  src_port_id: "toy4-c5-ab1-s1i2-p2"
+  dst_port_id: "toy4-c5-ab1-s2i2-p4"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c5-ab1-s2i2-p6:toy4-c5-ab1-s1i3-p2"
+  src_port_id: "toy4-c5-ab1-s2i2-p6"
+  dst_port_id: "toy4-c5-ab1-s1i3-p2"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c5-ab1-s1i3-p2:toy4-c5-ab1-s2i2-p6"
+  src_port_id: "toy4-c5-ab1-s1i3-p2"
+  dst_port_id: "toy4-c5-ab1-s2i2-p6"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c5-ab1-s2i2-p8:toy4-c5-ab1-s1i4-p2"
+  src_port_id: "toy4-c5-ab1-s2i2-p8"
+  dst_port_id: "toy4-c5-ab1-s1i4-p2"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c5-ab1-s1i4-p2:toy4-c5-ab1-s2i2-p8"
+  src_port_id: "toy4-c5-ab1-s1i4-p2"
+  dst_port_id: "toy4-c5-ab1-s2i2-p8"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c5-ab1-s2i3-p2:toy4-c5-ab1-s1i1-p3"
+  src_port_id: "toy4-c5-ab1-s2i3-p2"
+  dst_port_id: "toy4-c5-ab1-s1i1-p3"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c5-ab1-s1i1-p3:toy4-c5-ab1-s2i3-p2"
+  src_port_id: "toy4-c5-ab1-s1i1-p3"
+  dst_port_id: "toy4-c5-ab1-s2i3-p2"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c5-ab1-s2i3-p4:toy4-c5-ab1-s1i2-p3"
+  src_port_id: "toy4-c5-ab1-s2i3-p4"
+  dst_port_id: "toy4-c5-ab1-s1i2-p3"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c5-ab1-s1i2-p3:toy4-c5-ab1-s2i3-p4"
+  src_port_id: "toy4-c5-ab1-s1i2-p3"
+  dst_port_id: "toy4-c5-ab1-s2i3-p4"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c5-ab1-s2i3-p6:toy4-c5-ab1-s1i3-p3"
+  src_port_id: "toy4-c5-ab1-s2i3-p6"
+  dst_port_id: "toy4-c5-ab1-s1i3-p3"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c5-ab1-s1i3-p3:toy4-c5-ab1-s2i3-p6"
+  src_port_id: "toy4-c5-ab1-s1i3-p3"
+  dst_port_id: "toy4-c5-ab1-s2i3-p6"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c5-ab1-s2i3-p8:toy4-c5-ab1-s1i4-p3"
+  src_port_id: "toy4-c5-ab1-s2i3-p8"
+  dst_port_id: "toy4-c5-ab1-s1i4-p3"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c5-ab1-s1i4-p3:toy4-c5-ab1-s2i3-p8"
+  src_port_id: "toy4-c5-ab1-s1i4-p3"
+  dst_port_id: "toy4-c5-ab1-s2i3-p8"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c5-ab1-s2i4-p2:toy4-c5-ab1-s1i1-p4"
+  src_port_id: "toy4-c5-ab1-s2i4-p2"
+  dst_port_id: "toy4-c5-ab1-s1i1-p4"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c5-ab1-s1i1-p4:toy4-c5-ab1-s2i4-p2"
+  src_port_id: "toy4-c5-ab1-s1i1-p4"
+  dst_port_id: "toy4-c5-ab1-s2i4-p2"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c5-ab1-s2i4-p4:toy4-c5-ab1-s1i2-p4"
+  src_port_id: "toy4-c5-ab1-s2i4-p4"
+  dst_port_id: "toy4-c5-ab1-s1i2-p4"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c5-ab1-s1i2-p4:toy4-c5-ab1-s2i4-p4"
+  src_port_id: "toy4-c5-ab1-s1i2-p4"
+  dst_port_id: "toy4-c5-ab1-s2i4-p4"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c5-ab1-s2i4-p6:toy4-c5-ab1-s1i3-p4"
+  src_port_id: "toy4-c5-ab1-s2i4-p6"
+  dst_port_id: "toy4-c5-ab1-s1i3-p4"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c5-ab1-s1i3-p4:toy4-c5-ab1-s2i4-p6"
+  src_port_id: "toy4-c5-ab1-s1i3-p4"
+  dst_port_id: "toy4-c5-ab1-s2i4-p6"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c5-ab1-s2i4-p8:toy4-c5-ab1-s1i4-p4"
+  src_port_id: "toy4-c5-ab1-s2i4-p8"
+  dst_port_id: "toy4-c5-ab1-s1i4-p4"
+  link_speed_mbps: 40000
+}
+links {
+  name: "toy4-c5-ab1-s1i4-p4:toy4-c5-ab1-s2i4-p8"
+  src_port_id: "toy4-c5-ab1-s1i4-p4"
+  dst_port_id: "toy4-c5-ab1-s2i4-p8"
+  link_speed_mbps: 40000
+}
