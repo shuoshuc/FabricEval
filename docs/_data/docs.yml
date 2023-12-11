@@ -3,6 +3,11 @@
   - home
   - quick-start
 
+- title: End-to-end
+  docs:
+  - steps
+  - flags
+
 - title: Topology
   docs:
   - cheatsheet
