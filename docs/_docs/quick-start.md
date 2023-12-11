@@ -3,7 +3,7 @@ title: Quick start
 permalink: /docs/quick-start/
 ---
 
-Now let's get the source code of FabricEval from GitHub:
+Let's get the source code of FabricEval from GitHub:
 ```bash
 $ git clone https://github.com/shuoshuc/FabricEval.git
 $ cd FabricEval
@@ -17,8 +17,8 @@ $ bazel run //e2e:run -- $(pwd)
 
 The command takes less than a minute to complete on a 16-core machine.
 We can also see the output of each step in stdout. After the run returns, we
-should find a folder named `google_new`, with a set of csv files. This contains
-all the metrics collected.
+should find a folder named `google_new` in the top level of the repo,
+with a set of csv files. This contains all the metrics collected.
 
 For example, `google_new/LU.csv` is a file containing the utilization of all links
 in the network. For each link, an ideal utilization given by the TE solution (if no precision loss)
