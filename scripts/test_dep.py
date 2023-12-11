@@ -15,6 +15,7 @@ import scipy as sp
 def str2tup(string):
     return tuple(map(int, string.split('.')))
 
+
 def test_dep():
     if sys.version_info.major < 3 or sys.version_info.minor < 8:
         print("ERROR: python version below 3.8")
@@ -28,28 +29,35 @@ def test_dep():
     if gp.gurobi.version() < (9, 5, 0):
         print("ERROR: GurobiPy version below 9.5.0")
         return
-    gurobi_ver = str(subprocess.run(['gurobi_cl', '--version'], capture_output=True).stdout)
+    gurobi_ver = str(
+        subprocess.run(['gurobi_cl', '--version'], capture_output=True).stdout)
     m = re.search(r"version (.+)\.(.+)\.(.+) build", gurobi_ver)
     if (int(m[1]), int(m[2]), int(m[3])) < (9, 5, 0):
         print("ERROR: Gurobi version below 9.5.0")
         return
-    gurobi_license = str(subprocess.run(['gurobi_cl', '--license'], capture_output=True).stdout)
-    if 'expired' in gurobi_license:
-        print("ERROR: Gurobi license expired")
+    gurobi_license = str(
+        subprocess.run(['gurobi_cl', '--license'], capture_output=True).stdout)
+    if 'Error' in gurobi_license:
+        print("ERROR: no valid Gurobi license")
         return
-    git_ver = str(subprocess.run(['git', '--version'], capture_output=True).stdout)
+    git_ver = str(
+        subprocess.run(['git', '--version'], capture_output=True).stdout)
     if 'git version' not in git_ver:
         print("ERROR: could not find git")
         return
-    gitlfs_ver = str(subprocess.run(['git', 'lfs', '--version'], capture_output=True).stdout)
+    gitlfs_ver = str(
+        subprocess.run(['git', 'lfs', '--version'],
+                       capture_output=True).stdout)
     if 'git-lfs' not in gitlfs_ver:
         print("ERROR: could not find git lfs")
         return
-    bazel_ver = str(subprocess.run(['bazel', '--version'], capture_output=True).stdout)
+    bazel_ver = str(
+        subprocess.run(['bazel', '--version'], capture_output=True).stdout)
     if 'bazel' not in bazel_ver:
         print("ERROR: could not find bazel")
         return
     print("All dependencies are met.")
+
 
 if __name__ == "__main__":
     test_dep()
