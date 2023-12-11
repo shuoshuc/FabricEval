@@ -3,6 +3,7 @@
 # Tests whether all dependencies are met.
 # $ python3 test_dep.py
 
+import re
 import subprocess
 import sys
 
@@ -25,6 +26,11 @@ def test_dep():
         print("ERROR: scipy version below 1.8.0")
         return
     if gp.gurobi.version() < (9, 5, 0):
+        print("ERROR: GurobiPy version below 9.5.0")
+        return
+    gurobi_ver = str(subprocess.run(['gurobi_cl', '--version'], capture_output=True).stdout)
+    m = re.search(r"version (.+)\.(.+)\.(.+) build", gurobi_ver)
+    if (int(m[1]), int(m[2]), int(m[3])) < (9, 5, 0):
         print("ERROR: Gurobi version below 9.5.0")
         return
     gurobi_license = str(subprocess.run(['gurobi_cl', '--license'], capture_output=True).stdout)
