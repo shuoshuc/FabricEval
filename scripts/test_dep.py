@@ -45,12 +45,6 @@ def test_dep():
     if 'git version' not in git_ver:
         print("ERROR: could not find git")
         return
-    gitlfs_ver = str(
-        subprocess.run(['git', 'lfs', '--version'],
-                       capture_output=True).stdout)
-    if 'git-lfs' not in gitlfs_ver:
-        print("ERROR: could not find git lfs")
-        return
     bazel_ver = str(
         subprocess.run(['bazel', '--version'], capture_output=True).stdout)
     g = re.search(r"bazel (\d+)\.(\d+)\.(\d+)", bazel_ver)
