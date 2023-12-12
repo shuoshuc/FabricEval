@@ -623,12 +623,12 @@ class WCMPAllocation:
             for i, G in enumerate(groups):
                 self.path_div[(node, i + g_type * 10000, G.ideal_vol)][1] = \
                     np.count_nonzero(np.array(G.reduced_w))
-                # If using google_new, the diff between total volume is the
-                # pruned volume. If using carving, we need to first find the
-                # indices of pruned ports, then sum the corresponding weights to
-                # get the pruned volume.
+                # If using IGR, the diff between total volume is the pruned
+                # volume. If using DMIR, we need to first find the indices
+                # of pruned ports, then sum the corresponding weights to get
+                # the pruned volume.
                 pruned_vol = G.ideal_vol - sum(G.orig_w)
-                if FLAG.GR_ALGO == 'carving':
+                if FLAG.GR_ALGO == 'dmir':
                     reduced_zidx = np.flatnonzero(np.array(G.reduced_w) == 0)
                     pruned_vol = sum([G.orig_w[i] for i in \
                         np.setdiff1d(reduced_zidx,

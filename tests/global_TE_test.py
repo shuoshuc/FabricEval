@@ -11,7 +11,7 @@ from topology.topology import Topology, filterPathSetWithSeg
 from traffic.tmgen import tmgen
 from traffic.traffic import Traffic
 
-TOY2_PATH = 'tests/data/toy2.textproto'
+TOY2_PATH = 'tests/data/toy2_topo.textproto'
 TOY2_TRAFFIC_PATH = 'tests/data/toy2_traffic.textproto'
 
 C1AB1 = 'toy2-c1-ab1'

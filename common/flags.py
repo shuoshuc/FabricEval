@@ -53,8 +53,8 @@ PARALLELISM = os.cpu_count()
 GUROBI_TIMEOUT = 120
 
 # The algorithm to use for group reduction.
-# Must be one of eurosys[_mod]/google[_new]/carving/gurobi.
-GR_ALGO = 'google_new'
+# Must be one of eurosys[_mod]/google/igr/dmir/gurobi.
+GR_ALGO = 'dmir'
 
 # True to dump the original groups to a csv file.
 DUMP_GROUPS = False

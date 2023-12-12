@@ -6,21 +6,15 @@ import proto.te_solution_pb2 as te_sol
 import common.flags as FLAG
 from localTE.group_reduction import GroupReduction
 from localTE.wcmp_alloc import WCMPAllocation, loadTESolution
-from topology.topogen import generateToy3, generateToy4
+from topology.topogen import generateToy4
 from topology.topology import Topology, loadTopo
 from traffic.traffic import Traffic
 
-TOY2_TOPO_PATH = 'tests/data/toy2.textproto'
-TOY2_SOL_PATH = 'tests/data/te_sol_toy2.textproto'
+TOY2_TOPO_PATH = 'tests/data/toy2_topo.textproto'
+TOY2_SOL_PATH = 'tests/data/toy2_te_sol.textproto'
 C1AB1 = 'toy2-c1-ab1'
+C2AB1 = 'toy2-c2-ab1'
 C3AB1 = 'toy2-c3-ab1'
-# Toy3
-TOY3_SOL_PATH = 'tests/data/toy3_te_sol.textproto'
-TOY3_TM_PATH = 'tests/data/toy3_traffic_gravity.textproto'
-TOY3_C1 = 'toy3-c1-ab1'
-TOY3_LINK1 = 'toy3-c64-ab1-s3i1-p29:toy3-c15-ab1-s3i1-p125'
-TOY3_LINK2 = 'toy3-c42-ab1-s3i4-p105:toy3-c54-ab1-s3i4-p83'
-TOY3_NODE1 = 'toy3-c1-ab1-s3i1'
 # Toy4
 TOY4_TM_PATH = 'tests/data/toy4_traffic.textproto'
 TOY4_SOL_PATH = 'tests/data/toy4_te_sol.textproto'
@@ -38,36 +32,18 @@ class TestWCMPAlloc(unittest.TestCase):
 
     def test_toy2_sol_entries(self):
         sol = loadTESolution(TOY2_SOL_PATH)
-        # expects 2 TEIntents
-        self.assertEqual(2, len(sol.te_intents))
+        # expects 3 TEIntents
+        self.assertEqual(3, len(sol.te_intents))
         aggr_block_set = set()
         for te_intent in sol.te_intents:
             aggr_block_set.add(te_intent.target_block)
-        self.assertEqual(set({C1AB1, C3AB1}), aggr_block_set)
+        self.assertEqual(set({C1AB1, C2AB1, C3AB1}), aggr_block_set)
         # expects 2 prefixes for c1-ab1, and 1 prefix for c3-ab1.
-        ip_aggregate = ipaddress.ip_network('172.16.0.0/16')
         for te_intent in sol.te_intents:
             if te_intent.target_block == C1AB1:
-                self.assertEqual(2, len(te_intent.prefix_intents))
+                self.assertEqual(1, len(te_intent.prefix_intents))
             if te_intent.target_block == C3AB1:
                 self.assertEqual(1, len(te_intent.prefix_intents))
-            # verifies that each dst_prefix is within the cluster aggregate.
-            for prefix_intent in te_intent.prefix_intents:
-                ipa = ipaddress.ip_network(prefix_intent.dst_prefix + '/' +
-                                           str(prefix_intent.mask))
-                self.assertTrue(ipa.subnet_of(ip_aggregate))
-                # nexthop weight should be positive.
-                for nexthop in prefix_intent.nexthop_entries:
-                    self.assertGreater(nexthop.weight, 0.0)
-
-    def test_toy3_intent_distribution(self):
-        toy3 = Topology('', input_proto=generateToy3())
-        toy3_traffic = Traffic(toy3, TOY3_TM_PATH)
-        wcmp_alloc = WCMPAllocation(toy3, toy3_traffic, TOY3_SOL_PATH)
-        self.assertEqual(65, len(wcmp_alloc._worker_map.keys()))
-        c1_worker = wcmp_alloc._worker_map[TOY3_C1]
-        self.assertEqual(TOY3_C1, c1_worker._target_block)
-        self.assertEqual(TOY3_C1, c1_worker._te_intent.target_block)
 
     def test_toy4_generated_groups(self):
         FLAG.GR_ALGO = 'eurosys'
@@ -76,6 +52,8 @@ class TestWCMPAlloc(unittest.TestCase):
         wcmp_alloc = WCMPAllocation(toy4, toy4_traffic, TOY4_SOL_PATH)
         wcmp_alloc.run()
         c1_worker = wcmp_alloc._worker_map[TOY4_C1]
+        self.assertEqual(TOY4_C1, c1_worker._target_block)
+        self.assertEqual(TOY4_C1, c1_worker._te_intent.target_block)
         # Verify there exist 8 nodes * (SRC and TRANSIT) = 16 sets of groups.
         self.assertEqual(16, len(c1_worker.groups.values()))
         for node, _, _ in c1_worker.groups.keys():

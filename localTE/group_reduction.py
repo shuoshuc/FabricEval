@@ -942,7 +942,7 @@ class GroupReduction:
         '''
         Invokes corresponding group reduction method based on `algorithm`.
 
-        algorithm: one of eurosys[_mod]/google[_new]/carving/gurobi.
+        algorithm: one of eurosys[_mod]/google/igr/dmir/gurobi.
         '''
         # When ECMP table size is infinite, no reduction is needed, we only do
         # simple integer rounding.
@@ -959,9 +959,9 @@ class GroupReduction:
             return self.table_fitting_ssmg()
         elif algorithm == 'google':
             return self.google_ssmg()
-        elif algorithm == 'google_new':
+        elif algorithm == 'igr':
             return self.google_ssmg()
-        elif algorithm == 'carving':
+        elif algorithm == 'dmir':
             return self.table_carving_ssmg()
         elif algorithm == 'gurobi':
             return self.solve_ssmg()

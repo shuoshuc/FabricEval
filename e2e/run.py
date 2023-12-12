@@ -34,9 +34,9 @@ if __name__ == "__main__":
         FLAG.EUROSYS_MOD = True
     elif FLAG.GR_ALGO == 'google':
         FLAG.IMPROVED_HEURISTIC = False
-    elif FLAG.GR_ALGO == 'google_new':
+    elif FLAG.GR_ALGO == 'igr':
         FLAG.IMPROVED_HEURISTIC = True
-    elif FLAG.GR_ALGO == 'carving':
+    elif FLAG.GR_ALGO == 'dmir':
         FLAG.IMPROVED_HEURISTIC = True
         # Use single process if invoking Gurobi. Gurobi is able to use all CPU
         # cores, no need to multi-process, which adds extra overhead.

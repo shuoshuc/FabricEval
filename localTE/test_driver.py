@@ -25,13 +25,13 @@ if __name__ == "__main__":
                 orig_groups = input_groups_gen(1, p, lb, ub, frac_digits)
                 print(f'Input: {orig_groups}')
 
-                for algo in ['eurosys', 'google_new', 'carving']:
+                for algo in ['eurosys', 'igr', 'dmir']:
                     # Initializes global flags before running the pipeline.
                     if algo == 'eurosys':
                         FLAG.EUROSYS_MOD = False
-                    elif algo == 'google_new':
+                    elif algo == 'igr':
                         FLAG.IMPROVED_HEURISTIC = True
-                    elif algo == 'carving':
+                    elif algo == 'dmir':
                         FLAG.IMPROVED_HEURISTIC = True
                     start = time.time_ns()
                     group_reduction = GroupReduction(orig_groups, 1, C)
@@ -53,13 +53,13 @@ if __name__ == "__main__":
                 orig_groups = input_groups_gen(g, 64, lb, ub, frac_digits)
                 print(f'Input: {orig_groups}')
 
-                for algo in ['eurosys', 'google_new', 'carving']:
+                for algo in ['eurosys', 'igr', 'dmir']:
                     # Initializes global flags before running the pipeline.
                     if algo == 'eurosys':
                         FLAG.EUROSYS_MOD = False
-                    elif algo == 'google_new':
+                    elif algo == 'igr':
                         FLAG.IMPROVED_HEURISTIC = True
-                    elif algo == 'carving':
+                    elif algo == 'dmir':
                         FLAG.IMPROVED_HEURISTIC = True
                     start = time.time_ns()
                     group_reduction = GroupReduction(orig_groups, 1, C)
