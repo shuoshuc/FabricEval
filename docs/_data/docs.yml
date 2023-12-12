@@ -10,9 +10,7 @@
 
 - title: Topology
   docs:
-  - cheatsheet
-  - font-awesome
-  - bootstrap
+  - naming
 
 - title: Traffic
   docs:
