@@ -14,15 +14,15 @@ from topology.topology import Topology, filterPathSetWithSeg, loadTopo
 from traffic.tmgen import tmgen
 from traffic.traffic import Traffic
 
-NETWORK = 'toy5'
+NETWORK = 'f1'
 
 TOY_TOPO = f'tests/data/{NETWORK}_topo.textproto'
-TOY_TM = f'tests/data/{NETWORK}_traffic_gravity.textproto'
+TOY_TM = f'tests/data/{NETWORK}_traffic.textproto'
 TOY_SOL = f'tests/data/{NETWORK}_te_sol.textproto'
 # True to load topo from the above file.
 LOAD_TOPO = False
 # True to load TM from the above file.
-LOAD_TM = True
+LOAD_TM = False
 # True to load TE solution from the above file.
 LOAD_SOL = False
 
@@ -64,7 +64,7 @@ if __name__ == "__main__":
     if not LOAD_TM:
         traffic_proto = tmgen(tor_level=True,
                               cluster_vector=np.array([1]*11 + [2.5]*11 + [5]*11),
-                              num_nodes=32,
+                              num_nodes=16,
                               model='gravity',
                               dist='exp',
                               netname=NETWORK)
