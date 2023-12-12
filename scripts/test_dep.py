@@ -31,7 +31,7 @@ def test_dep():
         return
     gurobi_ver = str(
         subprocess.run(['gurobi_cl', '--version'], capture_output=True).stdout)
-    m = re.search(r"version (.+)\.(.+)\.(.+) build", gurobi_ver)
+    m = re.search(r"version (\d+)\.(\d+)\.(\d+) build", gurobi_ver)
     if (int(m[1]), int(m[2]), int(m[3])) < (9, 5, 0):
         print("ERROR: Gurobi version below 9.5.0")
         return
@@ -53,8 +53,9 @@ def test_dep():
         return
     bazel_ver = str(
         subprocess.run(['bazel', '--version'], capture_output=True).stdout)
-    if 'bazel' not in bazel_ver:
-        print("ERROR: could not find bazel")
+    g = re.search(r"bazel (\d+)\.(\d+)\.(\d+)", bazel_ver)
+    if (int(g[1]), int(g[2]), int(g[3])) < (7, 0, 0):
+        print("ERROR: bazel version below 7.0.0")
         return
     print("All dependencies are met.")
 

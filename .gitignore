@@ -153,3 +153,5 @@ user.bazelrc
 *.csv
 # protobuf dumps.
 *.textproto
+# Bzlmod lock.
+MODULE.bazel.lock
