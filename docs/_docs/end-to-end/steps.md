@@ -26,7 +26,9 @@ minimizing maximum link utilization, i.e., to achieve load balancing.
 #### Step 4
 In step 4, the TE solution is passed in from the previous stage and prepared for
 group reduction. The LocalTE component installs the reduced groups into switches,
-where each switch is modeled by a `Node` class (see Topology section).
+where each switch is modeled by a `Node` class (see Topology section). It also
+updates the traffic load on each link according to the weight distributions in
+each reduced group.
 
 #### Final step(s)
 The final step(s) collect various metric from the network, including link utilization,
