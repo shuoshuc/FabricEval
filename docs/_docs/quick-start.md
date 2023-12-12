@@ -16,15 +16,15 @@ $ bazel run //e2e:run -- $(pwd)
 
 The command takes less than a minute to complete on a 16-core machine.
 We can also see the output of each step in stdout. After the run returns, we
-should find a folder named `dmir` in the top level of the repo,
+should find a folder named `igr` in the top level of the repo,
 with a set of csv files. This contains all the metrics collected.
 
-For example, `dmir/LU.csv` is a file containing the utilization of all links
+For example, `igr/LU.csv` is a file containing the utilization of all links
 in the network. For each link, an ideal utilization given by the TE solution (if no precision loss)
 and an actual utilization given by the TE implementation are logged.
 
-In addition, `dmir/node_ecmp.csv` contains the group/ECMP table usage of
-every switch, and `dmir/node_demand.csv` contains the admitted traffic demand volume
+In addition, `igr/node_ecmp.csv` contains the group/ECMP table usage of
+every switch, and `igr/node_demand.csv` contains the admitted traffic demand volume
 of each switch.
 
 ## Code structure
