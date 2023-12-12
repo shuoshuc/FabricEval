@@ -6,12 +6,11 @@ permalink: /docs/quick-start/
 Let's get the source code of FabricEval from GitHub:
 ```bash
 $ git clone https://github.com/shuoshuc/FabricEval.git
-$ cd FabricEval
-$ git lfs pull
 ```
 
 We can run the end-to-end FabricEval pipeline:
 ```bash
+$ cd FabricEval
 $ bazel run //e2e:run -- $(pwd)
 ```
 
