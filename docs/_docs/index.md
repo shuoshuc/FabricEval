@@ -6,7 +6,6 @@ redirect_from: /docs/index.html
 
 FabricEval has a few dependencies:
 - [Git](https://git-scm.com/)
-- [Git LFS](https://git-lfs.com/)
 - [Python 3.8+](https://www.python.org/downloads/)
 - [NumPy](https://numpy.org/)
 - [SciPy](https://scipy.org/)
