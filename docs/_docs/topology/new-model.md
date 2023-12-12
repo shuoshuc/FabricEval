@@ -1,6 +1,6 @@
 ---
-title: Interact with the topology
-permalink: /docs/interaction/
+title: Create a new model
+permalink: /docs/new-model/
 ---
 
 FabricEval supports interactive query and visualization of the network topology.
