@@ -9,6 +9,7 @@ There are many configurable parameters in FabricEval. Most are all defined in
 #### Local flags in `e2e/run.py`
 `NETWORK`: This local flag specifies the network name to be used
 in evaluation. Available values are (detailed spec in `topology/topogen.py`):
+
 | name | size   | topology   |
 |------|--------|------------|
 | toy3 | large  | spine-free |
