@@ -11,6 +11,8 @@
 - title: Topology
   docs:
   - naming
+  - model
+  - interaction
 
 - title: Traffic
   docs:
