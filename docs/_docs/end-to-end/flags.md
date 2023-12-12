@@ -3,8 +3,8 @@ title: Flags
 permalink: /docs/flags/
 ---
 
-There are many configurable parameters in FabricEval. They are all defined in
-`common/flags.py`. We group them by the steps.
+There are many configurable parameters in FabricEval. Most are all defined in
+`common/flags.py`, some are defined locally to a file. We go through each of them.
 
 #### Local flags in `e2e/run.py`
 `NETWORK`: This local flag specifies the network name to be used
