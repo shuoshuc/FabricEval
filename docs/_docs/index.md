@@ -9,7 +9,7 @@ FabricEval has a few dependencies:
 - [Python 3.8+](https://www.python.org/downloads/)
 - [NumPy](https://numpy.org/)
 - [SciPy](https://scipy.org/)
-- [Bazel](https://bazel.build/install)
+- [Bazel 7.0.0+](https://bazel.build/install)
 - [Gurobi 9.5+](https://www.gurobi.com/) (license required)
 
 We need to install the above packages in order to run FabricEval successfully.

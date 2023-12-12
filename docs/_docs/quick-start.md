@@ -27,7 +27,7 @@ In addition, `igr/node_ecmp.csv` contains the group/ECMP table usage of
 every switch, and `igr/node_demand.csv` contains the admitted traffic demand volume
 of each switch.
 
-## Code structure
+### Code structure
 As mentioned, FabricEval has multiple modules. Below is the structure:
 * **common/**: common helper functions and flags.
 * **e2e/**: pipeline implementation of the entire framework.
