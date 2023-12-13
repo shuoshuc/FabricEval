@@ -16,7 +16,7 @@ switch level TE solution. LocalTE will be introduced in the next section.
 Assuming a network as a graph G = (V, E), the aggregation block level TE
 formulation (pseudo math) in GlobalTE is as follows:
 ```math
-minimize: max link utilization
+minimize: max link utilization util_max
 s.t. util(link) <= util_max, for any link in E,
 util(link) = sum(flows assigned on link) / capacity(link),
 sum(flows assigned on link) <= capacity(link),
