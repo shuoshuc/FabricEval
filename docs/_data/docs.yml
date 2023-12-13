@@ -17,9 +17,7 @@
 
 - title: Traffic
   docs:
-  - cheatsheet
-  - font-awesome
-  - bootstrap
+  - tm
 
 - title: GlobalTE
   docs:
