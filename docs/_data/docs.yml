@@ -21,9 +21,8 @@
 
 - title: GlobalTE
   docs:
-  - cheatsheet
-  - font-awesome
-  - bootstrap
+  - formulation
+  - te-solution
 
 - title: LocalTE
   docs:
