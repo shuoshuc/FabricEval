@@ -33,3 +33,7 @@ in the number of links).
 Users can build a new topology starting from copying the existing topology and
 then make modifications on top of it. Another low level approach to construct/modify
 a topology is to directly edit the protobuf file.
+
+The fabrics provided by `topogen` such as "toy3", "toy5", "toy6", "f1", are constructed
+closely following Google's Jupiter fabrics in terms of size, connectivity,
+heterogeneity etc.
