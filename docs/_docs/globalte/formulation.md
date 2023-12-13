@@ -13,9 +13,14 @@ for each demand is grouped together by clusters. LocalTE takes the snippet of TE
 solution for a cluster and further converts that solution into detailed physical
 switch level TE solution. LocalTE will be introduced in the next section.
 
-Assuming a network as a graph $G = (V, E)$, the aggregation block level TE
-formulation in GlobalTE is as follows:
+Assuming a network as a graph G = (V, E), the aggregation block level TE
+formulation (pseudo math) in GlobalTE is as follows:
 ```math
-minimize u_{max}
-s.t. u(x, y) \le u_{max}, \forall (x, y) \in E
+minimize: max link utilization
+s.t. util(link) <= util_max, for any link in E,
+util(link) = sum(flows assigned on link) / capacity(link),
+sum(flows assigned on link) <= capacity(link),
+sum(flows for demand i) = demand i,
+flows for a demand must use at least S% of available paths,
+flow size >= 0
 ```
