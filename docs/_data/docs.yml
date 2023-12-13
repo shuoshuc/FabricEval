@@ -26,9 +26,8 @@
 
 - title: LocalTE
   docs:
-  - cheatsheet
-  - font-awesome
-  - bootstrap
+  - te-impl
+  - group-reduction
 
 - title: Metrics
   docs:
