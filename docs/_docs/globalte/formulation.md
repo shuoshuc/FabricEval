@@ -24,3 +24,7 @@ sum(flows for demand i) = demand i,
 flows for a demand must use at least S% of available paths,
 flow size >= 0
 ```
+
+Detailed GurobiPy-based formulation can be found in `solve()` in `globalTE/global_te.py`.
+Users should find it low effort to change the formulation or write their own
+since everything is based on Python.
