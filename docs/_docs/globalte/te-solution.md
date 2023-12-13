@@ -4,3 +4,63 @@ permalink: /docs/te-solution/
 ---
 
 The generated TE solution is represented in protobuf format.
+
+```protobuf
+message PrefixIntent {
+    enum PrefixType {
+      UNKNOWN = 0; // Unknown as the default forces explicitly set type.
+      SRC = 1; // The PrefixIntent is programmed at the source node.
+      TRANSIT = 2; // The PrefixIntent is programmed at the transit node.
+    }
+
+    message NexthopEntry {
+        // Unique name identifier for nexthop (physical) port.
+        string nexthop_port = 1;
+        // Weight fraction of traffic to be distributed on this port.
+        double weight = 2;
+    }
+
+    // An ipv4 prefix of the destination.
+    string dst_prefix = 1;
+    // Net mask in slash notation.
+    uint32 mask = 2;
+    // (optional) FQDN of dst entity. If PrefixIntent is for aggregation blocks,
+    // there is only one PrefixIntent per dst AggrBlock, and the dst_prefix may
+    // not be set, in which case, dst_name should be set to the name of the dst
+    // AggrBlock. For ToR-level PrefixIntent, dst_name may not be set.
+    string dst_name = 3;
+    // Type of this PrefixIntent.
+    PrefixType type = 4;
+    // Nexthop entries used to reach the destination prefix.
+    // Note: all weights must normalize and sum to 1.
+    repeated NexthopEntry nexthop_entries = 5;
+}
+
+message TEIntent {
+    // Unique name identifier for the originating aggregation block.
+    string target_block = 1;
+    // TE traffic distribution intents for each destination prefix.
+    repeated PrefixIntent prefix_intents = 2;
+}
+
+message TESolution {
+    enum SolutionType {
+      LEVEL_UNKNOWN = 0; // Unknown as the default forces explicitly set type.
+      LEVEL_TOR = 1; // ToR-level solution.
+      LEVEL_AGGR_BLOCK = 2; // Aggregation-block-level solution.
+    }
+    // TE solution type could be ToR-level or AggrBlock-level, depending on the
+    // corresponding traffic demand type.
+    SolutionType type = 1;
+    // Traffic engineering intents grouped by target nodes.
+    repeated TEIntent te_intents = 2;
+}
+```
+
+A `TESolution` contains multiple `TEIntent`, where each `TEIntent` contains all
+the detailed TE solution info for a cluster. In the `TEIntent`, there are
+`PrefixIntent`, which is the intent of traffic placement for each destination
+address prefix. A `PrefixIntent` is the minimal unit of traffic split, it indicates
+the prefix type (e.g., SRC or TRANSIT) and a list of `NexthopEntry`. The `NexthopEntry`
+is a simple data structure of the port name and the amount traffic to be placed
+on it. Once it is converted to a group, it can be consumed by each switch.
