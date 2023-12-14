@@ -11,6 +11,7 @@ FabricEval has a few dependencies:
 - [SciPy](https://scipy.org/)
 - [Bazel 7.0.0+](https://bazel.build/install)
 - [Gurobi 9.5+](https://www.gurobi.com/) (license required)
+- [Neo4j](https://pypi.org/project/neo4j/)
 
 We need to install the above packages in order to run FabricEval successfully.
 Please follow the installation instructions of each package and make sure they

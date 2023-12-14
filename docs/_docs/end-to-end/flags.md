@@ -68,3 +68,8 @@ algorithms might enforce a per-group limit.
 \{eurosys, eurosys_mod, google, igr, dmir, gurobi\}.
 
 `DUMP_GROUPS`: True to dump groups from switches to a csv file.
+
+`ENABLE_GRAPHDB`: True to enable FabricEval to connect to a backend graph database
+and construct a topology graph for interaction with the network topology.
+
+`GRAPHDB_URI`: URI of the backend graph database.
