@@ -489,10 +489,14 @@ class Topology:
                                 dst_port_obj.port_speed),
                             src_port_obj.dcn_facing and dst_port_obj.dcn_facing)
             self._links[link.name] = link_obj
+            self._graphdb.addLink(link.name, link_obj.link_speed,
+                                  link_obj.dcn_facing)
             src_port_obj.setOrigLink(link_obj)
             dst_port_obj.setTermLink(link_obj)
             src_ag_block = self.findAggrBlockOfPort(link.src_port_id)
             dst_ag_block = self.findAggrBlockOfPort(link.dst_port_id)
+            self._graphdb.connectLinkToPorts(link.name, link.src_port_id,
+                                             link.dst_port_id)
             # Non-DCN links cannot belong to a path.
             if link_obj.dcn_facing and src_ag_block and dst_ag_block:
                 ag_block_link_map.setdefault((src_ag_block, dst_ag_block),
@@ -517,6 +521,10 @@ class Topology:
                 path_obj.addMember(l)
                 l.setParent(path_obj)
                 path_obj.available_capacity += l.link_speed
+            self._graphdb.addPath(path.name, path_obj.available_capacity)
+            self._graphdb.connectPathToAggrBlocks(path.name,
+                                                  path.src_aggr_block,
+                                                  path.dst_aggr_block)
             # If there is link failure, available_capacity could be less than
             # theoretical capacity.
             if FLAG.P_LINK_FAILURE == 0 and \

@@ -81,6 +81,28 @@ class GraphDB:
                                   f"dcn_facing: '{dcn_facing}', "
                                   f"host_facing: '{host_facing}'}})")
 
+    def addLink(self, name, speed, dcn):
+        '''
+        Adds a link.
+        '''
+        if self._noop:
+            return
+        with self.driver.session(database="neo4j") as session:
+            session.execute_write(self._run_trans,
+                                  f"CREATE (:Link:Phy {{name: '{name}', "
+                                  f"speed: '{speed}', dcn_link: '{dcn}'}})")
+
+    def addPath(self, name, capacity):
+        '''
+        Adds a path.
+        '''
+        if self._noop:
+            return
+        with self.driver.session(database="neo4j") as session:
+            session.execute_write(self._run_trans,
+                                  f"CREATE (:Path:Aggr {{name: '{name}', "
+                                  f"capacity: '{capacity}'}})")
+
     def connectAggrBlockToCluster(self, aggrblock, cluster):
         '''
         Connects an aggregation block to its parent cluster.
@@ -127,6 +149,34 @@ class GraphDB:
             long_query = (f"MATCH (t:Switch {{name: '{switch}'}}), "
                           f"(c:Cluster {{name: '{cluster}'}}) "
                           f"CREATE (t)-[:MEMBER_OF]->(c)-[:PARENT_OF]->(t)")
+            session.execute_write(self._run_trans, long_query)
+
+    def connectLinkToPorts(self, link, src, dst):
+        '''
+        Connects a link to a src and dst port.
+        '''
+        if self._noop:
+            return
+        with self.driver.session(database="neo4j") as session:
+            long_query = (f"MATCH (l:Link {{name: '{link}'}}), "
+                          f"(src:Port {{name: '{src}'}}), "
+                          f"(dst:Port {{name: '{dst}'}}) "
+                          f"CREATE (src)-[:SRC_OF]->(l)<-[:DST_OF]-(dst), "
+                          f"(src)<-[:ORIGINATE_FROM]-(l)-[:TERMINATE_AT]->(dst)")
+            session.execute_write(self._run_trans, long_query)
+
+    def connectPathToAggrBlocks(self, path, src, dst):
+        '''
+        Connects a path to a src and dst AggrBlock.
+        '''
+        if self._noop:
+            return
+        with self.driver.session(database="neo4j") as session:
+            long_query = (f"MATCH (path:Path {{name: '{path}'}}), "
+                          f"(src:AggrBlock {{name: '{src}'}}), "
+                          f"(dst:AggrBlock {{name: '{dst}'}}) "
+                          f"CREATE (src)-[:SRC_OF]->(path)<-[:DST_OF]-(dst), "
+                          f"(src)<-[:ORIGINATE_FROM]-(path)-[:TERMINATE_AT]->(dst)")
             session.execute_write(self._run_trans, long_query)
 
     @staticmethod
