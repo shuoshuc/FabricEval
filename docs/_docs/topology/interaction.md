@@ -31,4 +31,4 @@ The query returns a graph of 8 switches and 1 aggregation block, with the relati
 plotted as arrows. We can see that this aggregation block contains 8 member switches,
 4 of stage 2 and 4 of stage 3.
 
-![screenshot](/assets/img/neo4j.png)
+![screenshot](/FabricEval/assets/img/neo4j.png)
