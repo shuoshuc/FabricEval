@@ -8,6 +8,7 @@ import subprocess
 import sys
 
 import gurobipy as gp
+import neo4j as n4j
 import numpy as np
 import scipy as sp
 
@@ -25,6 +26,9 @@ def test_dep():
         return
     if str2tup(sp.__version__) < (1, 8, 0):
         print("ERROR: scipy version below 1.8.0")
+        return
+    if str2tup(n4j.__version__) < (5, 0, 0):
+        print("ERROR: Neo4j version below 5.0.0")
         return
     if gp.gurobi.version() < (9, 5, 0):
         print("ERROR: GurobiPy version below 9.5.0")
