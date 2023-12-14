@@ -44,7 +44,7 @@ class GraphDB:
             return
         with self.driver.session(database="neo4j") as session:
             session.execute_write(self._run_trans,
-                                  f"CREATE (:Cluster:Abstract {{name: {name}}})")
+                                  f"CREATE (:Cluster:Abstract {{name: '{name}'}})")
 
     def addAggrBlock(self, name):
         '''
@@ -54,7 +54,7 @@ class GraphDB:
             return
         with self.driver.session(database="neo4j") as session:
             session.execute_write(self._run_trans,
-                                  f"CREATE (:AggrBlock:Aggr {{name: {name}}})")
+                                  f"CREATE (:AggrBlock:Aggr {{name: '{name}'}})")
 
     def addSwitch(self, name, stage, index, ecmp_limit):
         '''
@@ -64,9 +64,9 @@ class GraphDB:
             return
         with self.driver.session(database="neo4j") as session:
             session.execute_write(self._run_trans,
-                                  f"CREATE (:Switch:Phy {{name: {name}, "
-                                  f"stage: {stage}, index: {index}, "
-                                  f"table: {ecmp_limit}}})")
+                                  f"CREATE (:Switch:Phy {{name: '{name}', "
+                                  f"stage: '{stage}', index: '{index}', "
+                                  f"table: '{ecmp_limit}'}})")
 
     def addPort(self, name, index, speed, dcn_facing, host_facing):
         '''
@@ -76,10 +76,10 @@ class GraphDB:
             return
         with self.driver.session(database="neo4j") as session:
             session.execute_write(self._run_trans,
-                                  f"CREATE (:Port:Phy {{name: {name}, "
-                                  f"index: {index}, speed: {speed}, "
-                                  f"dcn_facing: {dcn_facing}, "
-                                  f"host_facing: {host_facing}}})")
+                                  f"CREATE (:Port:Phy {{name: '{name}', "
+                                  f"index: '{index}', speed: '{speed}', "
+                                  f"dcn_facing: '{dcn_facing}', "
+                                  f"host_facing: '{host_facing}'}})")
 
     def connectAggrBlockToCluster(self, aggrblock, cluster):
         '''
@@ -88,8 +88,8 @@ class GraphDB:
         if self._noop:
             return
         with self.driver.session(database="neo4j") as session:
-            long_query = (f"MATCH (ab:AggrBlock {{name: {aggrblock}}}), "
-                          f"(c:Cluster {{name: {cluster}}}) "
+            long_query = (f"MATCH (ab:AggrBlock {{name: '{aggrblock}'}}), "
+                          f"(c:Cluster {{name: '{cluster}'}}) "
                           f"CREATE (ab)-[:MEMBER_OF]->(c)-[:PARENT_OF]->(ab)")
             session.execute_write(self._run_trans, long_query)
 
@@ -100,8 +100,8 @@ class GraphDB:
         if self._noop:
             return
         with self.driver.session(database="neo4j") as session:
-            long_query = (f"MATCH (ab:AggrBlock {{name: {aggrblock}}}), "
-                          f"(s:Switch {{name: {switch}}}) "
+            long_query = (f"MATCH (ab:AggrBlock {{name: '{aggrblock}'}}), "
+                          f"(s:Switch {{name: '{switch}'}}) "
                           f"CREATE (s)-[:MEMBER_OF]->(ab)-[:PARENT_OF]->(s)")
             session.execute_write(self._run_trans, long_query)
 
@@ -112,8 +112,8 @@ class GraphDB:
         if self._noop:
             return
         with self.driver.session(database="neo4j") as session:
-            long_query = (f"MATCH (p:Port {{name: {port}}}), "
-                          f"(s:Switch {{name: {switch}}}) "
+            long_query = (f"MATCH (p:Port {{name: '{port}'}}), "
+                          f"(s:Switch {{name: '{switch}'}}) "
                           f"CREATE (p)-[:MEMBER_OF]->(s)-[:PARENT_OF]->(p)")
             session.execute_write(self._run_trans, long_query)
 
@@ -124,8 +124,8 @@ class GraphDB:
         if self._noop:
             return
         with self.driver.session(database="neo4j") as session:
-            long_query = (f"MATCH (t:Switch {{name: {switch}}}), "
-                          f"(c:Cluster {{name: {cluster}}}) "
+            long_query = (f"MATCH (t:Switch {{name: '{switch}'}}), "
+                          f"(c:Cluster {{name: '{cluster}'}}) "
                           f"CREATE (t)-[:MEMBER_OF]->(c)-[:PARENT_OF]->(t)")
             session.execute_write(self._run_trans, long_query)
 
