@@ -27,3 +27,12 @@ py_library(
         "//common:flags",
     ],
 )
+
+py_library(
+    name = 'graph_db',
+    srcs = ['graph_db.py'],
+    deps = [
+        "//common:common",
+        "//common:flags",
+    ],
+)
