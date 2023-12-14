@@ -6,6 +6,7 @@ py_library(
     deps = [
         "//proto:topology_proto",
         "//proto:te_solution_proto",
+        "//topology:graph_db",
     ],
 )
 

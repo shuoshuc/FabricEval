@@ -5,9 +5,9 @@ import numpy as np
 import proto.te_solution_pb2 as te_sol
 import proto.topology_pb2 as topo
 from google.protobuf import text_format
-from graph_db import GraphDB
 
 import common.flags as FLAG
+from topology.graph_db import GraphDB
 
 
 def loadTopo(filepath):
@@ -434,7 +434,8 @@ class Topology:
                                         host_facing=port.host_facing,
                                         index=port.index)
                         self._ports[port.name] = port_obj
-                        self._graphdb.addPort(port.name, port.index, port.speed,
+                        self._graphdb.addPort(port.name, port.index,
+                                              port.port_speed_mbps,
                                               port.dcn_facing, port.host_facing)
                         node_obj.addMember(port_obj)
                         port_obj.setParent(node_obj)
@@ -468,7 +469,8 @@ class Topology:
                                     host_facing=port.host_facing,
                                     index=port.index)
                     self._ports[port.name] = port_obj
-                    self._graphdb.addPort(port.name, port.index, port.speed,
+                    self._graphdb.addPort(port.name, port.index,
+                                          port.port_speed_mbps,
                                           port.dcn_facing, port.host_facing)
                     tor_obj.addMember(port_obj)
                     port_obj.setParent(tor_obj)
