@@ -5,6 +5,7 @@ import numpy as np
 import proto.te_solution_pb2 as te_sol
 import proto.topology_pb2 as topo
 from google.protobuf import text_format
+from graph_db import GraphDB
 
 import common.flags as FLAG
 
@@ -396,6 +397,10 @@ class Topology:
         self._ports = {}
         self._paths = {}
         self._links = {}
+        # Connects to the backend DB and constructs topology graph.
+        self._graphdb = GraphDB(FLAG.GRAPHDB_URI, "", "")
+        # Comment the line below if no need to clear the database.
+        self._graphdb.nuke()
         # A map from (src_ag_block, dst_ag_block) pair to link.
         ag_block_link_map = {}
         # parse input topology and populate this topology.
@@ -403,26 +408,37 @@ class Topology:
         for cluster in proto_net.clusters:
             cluster_obj = Cluster(cluster.name)
             self._clusters[cluster.name] = cluster_obj
+            self._graphdb.addCluster(cluster.name)
             for ag_block in cluster.aggr_blocks:
                 ag_block_obj = AggregationBlock(ag_block.name)
                 self._aggr_blocks[ag_block.name] = ag_block_obj
+                self._graphdb.addAggrBlock(ag_block.name)
                 cluster_obj.addMember(ag_block_obj)
                 ag_block_obj.setParent(cluster_obj)
+                self._graphdb.connectAggrBlockToCluster(ag_block.name,
+                                                        cluster.name)
                 for node in ag_block.nodes:
                     node_obj = Node(node.name, node.stage, node.index,
                                     node.flow_limit, node.ecmp_limit,
                                     node.group_limit)
                     self._nodes[node.name] = node_obj
+                    self._graphdb.addSwitch(node.name, node.stage, node.index,
+                                            node.ecmp_limit)
                     ag_block_obj.addMember(node_obj)
                     node_obj.setParent(ag_block_obj, cluster_obj)
+                    self._graphdb.connectSwitchToAggrBlock(node.name,
+                                                           ag_block.name)
                     for port in node.ports:
                         port_obj = Port(port.name, speed=port.port_speed_mbps,
                                         dcn_facing=port.dcn_facing,
                                         host_facing=port.host_facing,
                                         index=port.index)
                         self._ports[port.name] = port_obj
+                        self._graphdb.addPort(port.name, port.index, port.speed,
+                                              port.dcn_facing, port.host_facing)
                         node_obj.addMember(port_obj)
                         port_obj.setParent(node_obj)
+                        self._graphdb.connectPortToSwitch(port.name, node.name)
             for tor in cluster.nodes:
                 if tor.stage != 1:
                     print('[ERROR] Topology parsing: ToR {} cannot be stage '
@@ -441,16 +457,22 @@ class Topology:
                                tor.ecmp_limit, tor.group_limit, host_prefix,
                                mgmt_prefix)
                 self._nodes[tor.name] = tor_obj
+                self._graphdb.addSwitch(tor.name, tor.stage, tor.index,
+                                        tor.ecmp_limit)
                 tor_obj.setParent(None, cluster_obj)
                 cluster_obj.addMemberToR(tor_obj)
+                self._graphdb.connectToRToCluster(tor.name, cluster.name)
                 for port in tor.ports:
                     port_obj = Port(port.name, speed=port.port_speed_mbps,
                                     dcn_facing=port.dcn_facing,
                                     host_facing=port.host_facing,
                                     index=port.index)
                     self._ports[port.name] = port_obj
+                    self._graphdb.addPort(port.name, port.index, port.speed,
+                                          port.dcn_facing, port.host_facing)
                     tor_obj.addMember(port_obj)
                     port_obj.setParent(tor_obj)
+                    self._graphdb.connectPortToSwitch(port.name, tor.name)
         for link in proto_net.links:
             if (link.src_port_id not in self._ports or
                 link.dst_port_id not in self._ports):
@@ -507,6 +529,9 @@ class Topology:
         # touched again during the full pipeline run.
         for node in self._nodes.values():
             node.installStaticGroups()
+
+        # Closes connection to backend DB.
+        self._graphdb.close()
 
     def serialize(self):
         '''

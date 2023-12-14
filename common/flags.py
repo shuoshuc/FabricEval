@@ -58,3 +58,9 @@ GR_ALGO = 'dmir'
 
 # True to dump the original groups to a csv file.
 DUMP_GROUPS = False
+
+# True to a backend graph database and constructs topology graph.
+ENABLE_GRAPHDB = False
+
+# URI of the backend graph database.
+GRAPHDB_URI = 'bolt://localhost:7687'
