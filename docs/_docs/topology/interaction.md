@@ -22,7 +22,7 @@ We recommend using a Docker instance, please read more about running Neo4j
 
 Next step is to invoke the normal FabricEval run and wait for it to complete.
 At this point, a populated topology should exist in Neo4j. We can go to the Neo4j
-web server for visual interaction. Just open a brower and visit "http://<neo4j instance ip>:7474".
+web server for visual interaction. Just open a brower and visit "http://\<neo4j instance ip\>:7474".
 If the docker instance has a username and password set, it will prompt.
 
 After getting in, we can start writing Cypher queries to retrieve useful information.
